@@ -1,0 +1,64 @@
+.reach > span {
+  min-width: 72px;
+  flex: none;
+}
+
+.reach strong {
+  white-space: nowrap;
+  word-break: keep-all;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.post-reactions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.post-reactions span {
+  overflow: hidden;
+  padding: 7px 8px;
+  border-radius: 10px;
+  background: #f7f9fb;
+  color: #7d899b;
+  font-size: 10px;
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.post-reactions b {
+  color: #374151;
+  font-weight: 700;
+}
+
+.comment-reactions {
+  display: flex;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.comment-reactions button {
+  flex: 1;
+  padding: 7px 5px;
+  border: 1px solid #dde2e9;
+  border-radius: 12px;
+  background: #fff;
+  color: #647084;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.comment-reactions button.selected {
+  border-color: #20e7b4;
+  background: #eafff9;
+  color: #087a61;
+}
+
+.comment-reactions b {
+  font-weight: 800;
+}
