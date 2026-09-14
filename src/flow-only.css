@@ -62,9 +62,22 @@
 .login-screen {
   display: flex;
   flex-direction: column;
+  position: relative;
+  isolation: isolate;
   overflow: hidden;
   overscroll-behavior: none;
   padding-bottom: 44px;
+}
+
+.login-screen > .eyebrow,
+.login-screen > .hero,
+.login-screen > .start-card {
+  position: relative;
+  z-index: 1;
+}
+
+.login-screen > .eyebrow {
+  font-size: 16px;
 }
 
 .login-screen .hero {
@@ -77,13 +90,41 @@
 }
 
 .login-screen .start-card {
-  margin-top: 24px;
+  margin-top: auto;
 }
 
-.login-screen .illustration {
-  flex: 1;
-  min-height: 260px;
-  margin-bottom: 0;
+.login-screen .login-background {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin: 0;
+  border-radius: 0;
+  pointer-events: none;
+}
+
+.login-screen .login-background .badge.red {
+  top: 40%;
+  left: 24px;
+}
+
+.login-screen .login-background .badge.chat {
+  top: auto;
+  right: 24px;
+  bottom: 32%;
+  left: auto;
+}
+
+.login-screen .login-background .mint-dot {
+  top: 36%;
+  right: 28px;
+}
+
+.login-screen .login-background .question-dot {
+  bottom: 28%;
+  left: 28px;
 }
 
 .blue,
