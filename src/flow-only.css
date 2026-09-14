@@ -60,12 +60,19 @@
 }
 
 .login-screen {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   overscroll-behavior: none;
+  padding-bottom: 44px;
 }
 
 .login-screen .start-card h3 + .kakao {
   margin-top: 16px;
+}
+
+.login-screen .start-card {
+  margin-top: auto;
 }
 
 .blue,
