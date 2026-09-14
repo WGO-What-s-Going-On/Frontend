@@ -59,6 +59,11 @@
   font-weight: 600;
 }
 
+.login-screen {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
 .blue,
 .red,
 .badge.red,

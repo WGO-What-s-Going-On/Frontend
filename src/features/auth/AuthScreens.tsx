@@ -4,7 +4,7 @@ import { useApp } from '../../context/AppContext'
 
 export function LoginScreen() {
   const { go } = useApp()
-  return <AppShell nav={false}>
+  return <AppShell nav={false} contentClassName="login-screen">
     <p className="eyebrow blue">What’s Going On?</p><h1 className="hero">지금 여기,<br/>무슨 일이야?</h1>
     <div className="illustration"><span className="badge red">화재 제보</span><b className="mint-dot">!</b><b className="question-dot">?</b><span className="badge chat">150m 현장 토크</span></div>
     <p className="muted intro-copy">주변에서 지금 일어나는 일을 가까운 사람에게 바로 묻고 확인하세요.</p>

@@ -17,12 +17,12 @@ function activeTab(screen: Screen) {
   return screen
 }
 
-export function AppShell({ children, nav = true }: { children: React.ReactNode; nav?: boolean }) {
+export function AppShell({ children, nav = true, contentClassName = '' }: { children: React.ReactNode; nav?: boolean; contentClassName?: string }) {
   const { screen, go, toast } = useApp()
   const active = activeTab(screen)
   return <main className="phone">
     <div className="status-bar"><strong>9:41</strong><span className="prototype-label">흐름 검증용</span></div>
-    <section className="screen">{children}</section>
+    <section className={`screen ${contentClassName}`.trim()}>{children}</section>
     {nav && <nav className="bottom-nav">{tabs.map(({ screen: target, label, icon: Icon }) => <button key={target} className={active === target ? 'active' : ''} onClick={() => go(target)}><Icon size={22}/><span>{label}</span></button>)}</nav>}
     {toast && <div className="toast" role="status">{toast}</div>}
     <div className="home-indicator"/>
