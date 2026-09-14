@@ -64,6 +64,10 @@
   overscroll-behavior: none;
 }
 
+.login-screen .start-card h3 + .kakao {
+  margin-top: 16px;
+}
+
 .blue,
 .red,
 .badge.red,

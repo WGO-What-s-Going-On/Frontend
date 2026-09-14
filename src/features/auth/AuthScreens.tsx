@@ -7,8 +7,8 @@ export function LoginScreen() {
   return <AppShell nav={false} contentClassName="login-screen">
     <p className="eyebrow blue">What’s Going On?</p><h1 className="hero">지금 여기,<br/>무슨 일이야?</h1>
     <div className="illustration"><span className="badge red">화재 제보</span><b className="mint-dot">!</b><b className="question-dot">?</b><span className="badge chat">150m 현장 토크</span></div>
-    <p className="muted intro-copy">주변에서 지금 일어나는 일을 가까운 사람에게 바로 묻고 확인하세요.</p>
-    <div className="start-card"><h3>간편하게 시작하기</h3><p>닉네임과 위치 권한만 있으면 바로 사용할 수 있어요.</p><button className="kakao" onClick={() => go('intro')}>카카오로 계속하기</button><small>위치는 참여 가능 여부 판단에만 사용</small></div>
+    <p className="muted intro-copy">주변에서 일어나는 일을 묻거나 확인하세요.</p>
+    <div className="start-card"><h3>간편하게 시작하기</h3><button className="kakao" onClick={() => go('intro')}>카카오로 계속하기</button></div>
   </AppShell>
 }
 
