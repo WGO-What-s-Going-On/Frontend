@@ -1,0 +1,204 @@
+:root {
+  color: #111;
+  background: #e5e5e5;
+}
+
+.app-bg {
+  background: #e5e5e5;
+}
+
+.phone,
+.screen,
+.bottom-nav,
+.start-card,
+.post-card,
+.comment,
+.verified,
+.topic,
+.live-card,
+.reach,
+.peek,
+.notice-box,
+.attachment,
+.empty-state,
+.report-card,
+.alert,
+.alert.highlight,
+.alert.unread,
+.dialog,
+.context-menu,
+.search-box,
+.search-input,
+.field,
+.photo,
+.menu,
+.menu-group,
+.menu-group button,
+.permission-row,
+.prototype-control,
+.toggle-row,
+.setting-row,
+.file-field,
+.metrics,
+.category,
+.red-border,
+.blue-border {
+  color: #111;
+  border-color: #cfcfcf;
+  background: #fff;
+  box-shadow: none;
+}
+
+.phone {
+  filter: grayscale(1);
+}
+
+.prototype-label {
+  color: #666;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.blue,
+.red,
+.badge.red,
+.badge.blue,
+.badge.yellow,
+.red-border,
+.blue-border,
+.live,
+.done,
+.text-button,
+.danger-text,
+.reply-link,
+.text-link {
+  color: #333!important;
+}
+
+.illustration,
+.range-card,
+.map,
+.segment,
+.replying,
+.post-reactions span,
+.post-reactions.interactive button,
+.comment-reactions button,
+.chips span,
+.chips button {
+  color: #222;
+  border-color: #d4d4d4;
+  background: #f3f3f3;
+  box-shadow: none;
+}
+
+.mint,
+.kakao,
+.primary,
+.mini-primary,
+.comment-input button,
+.mint-dot,
+.question-dot {
+  color: #fff;
+  border-color: #222;
+  background: #222;
+  box-shadow: none;
+}
+
+.primary:disabled,
+.comment-input button:disabled {
+  color: #777;
+  border-color: #ddd;
+  background: #ddd;
+}
+
+.range,
+.verified,
+.post-reactions.interactive button.selected,
+.comment-reactions button.selected {
+  color: #111;
+  border-color: #111;
+  background: #eee;
+}
+
+.range i,
+.radius b,
+.alert i {
+  background: #111;
+}
+
+.radius {
+  border-color: #555;
+  background: rgba(0, 0, 0, .05);
+}
+
+.map-pin.fire,
+.map-pin.outage {
+  color: #fff;
+  background: #333;
+}
+
+.road-v,
+.road-h {
+  background: #d8d8d8;
+}
+
+.chips button.selected,
+.chips .selected,
+.chips button.dark,
+.chips .dark,
+.segment .active,
+.primary-button,
+.danger-button,
+.toast {
+  color: #fff!important;
+  border-color: #111!important;
+  background: #111!important;
+}
+
+.badge,
+.pill,
+.topic span,
+.alert > b {
+  color: #222;
+  background: #ededed;
+}
+
+.muted,
+.start-card p,
+.start-card small,
+.step p,
+.reach p,
+.peek p,
+.post-card small,
+.comment small,
+.keyword small,
+.topic p,
+.profile p,
+.metrics small,
+.alert small,
+.notice-box p,
+.empty-state p,
+.report-card p,
+.live-card p,
+.live-card small,
+.counter,
+.board-meta {
+  color: #666!important;
+}
+
+.live-card {
+  border: 1px solid #222;
+}
+
+.dialog-backdrop {
+  background: rgba(0, 0, 0, .45);
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid #111;
+  outline-offset: 2px;
+}

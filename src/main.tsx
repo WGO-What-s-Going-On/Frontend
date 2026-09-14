@@ -5,6 +5,7 @@ import { AppProvider } from './context/AppContext'
 import './styles.css'
 import './reach-fix.css'
 import './prototype.css'
+import './flow-only.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><AppProvider><App /></AppProvider></React.StrictMode>,
