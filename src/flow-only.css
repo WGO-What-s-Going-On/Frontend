@@ -67,12 +67,23 @@
   padding-bottom: 44px;
 }
 
+.login-screen .hero {
+  font-size: 28px;
+  white-space: nowrap;
+}
+
 .login-screen .start-card h3 + .kakao {
   margin-top: 16px;
 }
 
 .login-screen .start-card {
-  margin-top: auto;
+  margin-top: 24px;
+}
+
+.login-screen .illustration {
+  flex: 1;
+  min-height: 260px;
+  margin-bottom: 0;
 }
 
 .blue,
