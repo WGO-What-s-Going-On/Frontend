@@ -59,6 +59,11 @@
   font-weight: 600;
 }
 
+.login-shell,
+.login-shell .status-bar {
+  background: #f3f3f3;
+}
+
 .login-screen {
   display: flex;
   flex-direction: column;
@@ -77,10 +82,12 @@
 }
 
 .login-screen > .eyebrow {
-  font-size: 16px;
+  margin: 0 0 2px;
+  font-size: 19px;
 }
 
 .login-screen .hero {
+  margin-top: 0;
   font-size: 28px;
   white-space: nowrap;
 }
@@ -105,26 +112,79 @@
   pointer-events: none;
 }
 
-.login-screen .login-background .badge.red {
-  top: 40%;
-  left: 24px;
+.signal-animation {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform: translateY(18px);
 }
 
-.login-screen .login-background .badge.chat {
-  top: auto;
-  right: 24px;
-  bottom: 32%;
-  left: auto;
+.signal-ring,
+.signal-core {
+  position: absolute;
+  border-radius: 50%;
 }
 
-.login-screen .login-background .mint-dot {
-  top: 36%;
-  right: 28px;
+.signal-ring {
+  width: 76px;
+  height: 76px;
+  border: 1px solid #777;
+  opacity: 0;
+  animation: signal-pulse 3.6s ease-out infinite;
 }
 
-.login-screen .login-background .question-dot {
-  bottom: 28%;
-  left: 28px;
+.signal-ring-two {
+  animation-delay: 1.2s;
+}
+
+.signal-ring-three {
+  animation-delay: 2.4s;
+}
+
+.signal-core {
+  width: 74px;
+  height: 74px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #222;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .16);
+  animation: signal-float 2.8s ease-in-out infinite;
+}
+
+@keyframes signal-pulse {
+  0% {
+    opacity: .55;
+    transform: scale(.8);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+@keyframes signal-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signal-ring,
+  .signal-core {
+    animation: none;
+  }
+
+  .signal-ring-one {
+    opacity: .25;
+    transform: scale(2.2);
+  }
 }
 
 .blue,
