@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { MapPin } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { useApp } from '../../context/AppContext'
@@ -21,13 +20,20 @@ export function LoginScreen() {
 
 export function IntroScreen() {
   const { go, setInRange } = useApp()
-  const [locationAllowed, setLocationAllowed] = useState(false)
-  const start = () => { setInRange(locationAllowed); go(locationAllowed ? 'home' : 'outside') }
-  return <AppShell nav={false}>
+  const allowLocation = () => { setInRange(true); go('home') }
+  const browseWithoutLocation = () => { setInRange(false); go('home') }
+  return <AppShell nav={false} contentClassName="permission-screen">
     <div className="row"><span className="pill mint">왓츠고잉온</span><span className="eyebrow blue">What’s Going On?</span></div>
-    <h1>내 주변 150m,<br/>실시간 소통의 시작</h1><p className="muted">위치 권한을 허용하면 현장 게시판에 참여할 수 있습니다.</p>
-    <div className="range-card"><span className="badge red">현장 상황</span><div className="range"><i/></div><span className="badge chat right">질문과 답변</span></div>
-    <label className="permission-row"><input type="checkbox" checked={locationAllowed} onChange={(event) => setLocationAllowed(event.target.checked)}/><span><strong>위치 권한 허용</strong><small>현재 위치는 150m 참여 판정에만 사용됩니다.</small></span></label>
-    <button className="primary" onClick={start}>{locationAllowed ? '위치 확인 후 시작' : '열람 모드로 시작'}</button>
+    <h1 className="permission-title">내 주변 150m에서<br/>지금 일어나는 일을 확인해요</h1>
+    <p className="muted permission-copy">위치를 확인하면 가까운 게시글을 보고<br/>현장 대화에 참여할 수 있어요</p>
+    <div className="permission-visual" aria-hidden="true">
+      <div className="permission-radius"><span className="nearby-dot dot-one"/><span className="nearby-dot dot-two"/><span className="nearby-dot dot-three"/><b><MapPin size={28} strokeWidth={1.8}/></b></div>
+      <small>내 위치 기준 150m</small>
+    </div>
+    <div className="permission-actions">
+      <button className="primary" onClick={allowLocation}>위치 권한 허용하기</button>
+      <button className="secondary-button" onClick={browseWithoutLocation}>권한 없이 둘러보기</button>
+      <p>권한 없이도 게시글을 볼 수 있지만 참여는 제한됩니다</p>
+    </div>
   </AppShell>
 }
