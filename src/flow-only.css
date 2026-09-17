@@ -965,7 +965,9 @@ select:focus-visible,
 .board-detail-screen .comment {
   margin: 10px 0;
   padding: 14px;
-  border-radius: 15px;
+  border-radius: 18px;
+  transition: background-color .2s ease, border-color .2s ease, transform .2s ease;
+  animation: comment-appear .24s ease-out both;
 }
 
 .board-detail-screen .read-comment {
@@ -974,8 +976,13 @@ select:focus-visible,
 }
 
 .board-detail-screen .unread-comment {
-  border-color: #d3d3d3;
+  border-color: #dedede;
   background: #fff;
+}
+
+@keyframes comment-appear {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .comment-head {
@@ -1025,6 +1032,15 @@ select:focus-visible,
   border: 0;
   border-radius: 8px;
   background: transparent;
+  transition: background-color .18s ease, transform .18s ease;
+}
+
+.comment-icon-button:hover {
+  background: rgba(0, 0, 0, .05);
+}
+
+.comment-icon-button:active {
+  transform: scale(.92);
 }
 
 .board-detail-screen .comment > p {
@@ -1032,6 +1048,40 @@ select:focus-visible,
   color: #333;
   font-size: 13px;
   line-height: 1.55;
+}
+
+.comment-replies {
+  display: grid;
+  gap: 8px;
+  position: relative;
+  margin: 14px -2px -2px 12px;
+  padding: 12px 0 0 17px;
+  border-top: 1px solid rgba(0, 0, 0, .08);
+}
+
+.comment-replies::before {
+  content: '';
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  top: 27px;
+  left: 0;
+  border-bottom: 1.5px solid #999;
+  border-left: 1.5px solid #999;
+  border-radius: 0 0 0 3px;
+}
+
+.board-detail-screen .comment-replies .reply-comment {
+  margin: 0;
+  padding: 12px;
+  border-color: #ddd;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .72);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, .035);
+}
+
+.board-detail-screen .comment-replies .reply-comment.read-comment {
+  background: #e2e2e2;
 }
 
 .comment-image-placeholder {
@@ -1110,12 +1160,37 @@ select:focus-visible,
   background: #fff;
   font-size: 12px;
   font-weight: 700;
+  transition: background-color .18s ease, transform .18s ease;
+}
+
+.comments-more:active {
+  transform: scale(.985);
 }
 
 .detail-comment-input {
   margin-top: 20px;
   padding: 14px 0 0;
   border-top: 1px solid #e2e2e2;
+}
+
+.replying {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 14px 0 -12px;
+  padding: 10px 13px;
+  border: 1px solid #ddd;
+  border-radius: 13px;
+  font-size: 11px;
+  animation: comment-appear .2s ease-out both;
+}
+
+.replying button {
+  padding: 3px 7px;
+  border: 0;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .comment-composer-row {
