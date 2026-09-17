@@ -236,59 +236,19 @@
 }
 
 .ux-board-header {
-  align-items: flex-end;
-  margin-bottom: 16px;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
 .ux-board-header h1 {
   margin: 0;
 }
 
-.ux-board-header p {
-  margin: 4px 0 0;
-  color: #777;
-  font-size: 11px;
-}
-
-.ux-board-header label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0;
-  color: #777;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.ux-board-header select {
-  padding: 8px 26px 8px 10px;
-  color: #222;
-  border: 1px solid #d4d4d4;
-  border-radius: 12px;
-  background: #fff;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-.ux-search {
-  width: 100%;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 9px;
-  padding: 13px 14px;
-  text-align: left;
-  color: #666;
-  border: 1px solid #d4d4d4;
-  border-radius: 15px;
-  background: #f7f7f7;
-  font-size: 12px;
-}
-
 .ux-category-filters {
   display: flex;
+  align-items: center;
   gap: 8px;
-  margin: 14px -18px 16px;
+  margin: 0 -18px 16px;
   padding: 0 18px;
   overflow-x: auto;
   scrollbar-width: none;
@@ -313,6 +273,22 @@
   color: #fff;
   border-color: #222;
   background: #222;
+}
+
+.ux-category-filters .ux-sort-filter {
+  flex: none;
+  margin: 0;
+}
+
+.ux-sort-filter select {
+  min-height: 35px;
+  padding: 8px 27px 8px 11px;
+  color: #333;
+  border: 1px solid #d5d5d5;
+  border-radius: 18px;
+  background: #f3f3f3;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .ux-board-list {
