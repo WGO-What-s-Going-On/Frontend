@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { ArrowLeft, Camera, ChevronDown, ChevronRight, ChevronUp, Eye, MapPin, MoreHorizontal, Search, Send, X } from 'lucide-react'
+import { ArrowLeft, Camera, Check, ChevronDown, ChevronRight, ChevronUp, Eye, MapPin, MoreHorizontal, Search, Send, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
@@ -39,13 +39,17 @@ export function SearchScreen() {
 }
 
 function CommentItem({ comment, onReply }: { comment: Comment; onReply: (comment: Comment) => void }) {
-  const { user, reactToComment, deleteComment, reportTarget, blockUser } = useApp()
+  const { user, reactToComment, deleteComment, markCommentRead, reportTarget, blockUser } = useApp()
   const [menu, setMenu] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [photoOpen, setPhotoOpen] = useState(false)
   const reactions: CommentReaction[] = ['도움돼요', '맞아요', '정보가 달라요']
+  const toggleCollapsed = () => {
+    if (!collapsed && !comment.read) markCommentRead(comment.id)
+    setCollapsed((value) => !value)
+  }
   return <div className={`comment ${comment.read ? 'read-comment' : 'unread-comment'} ${comment.parentId ? 'reply-comment' : ''}`}>
-    <div className="comment-head"><div><strong>{comment.authorName}</strong><small>{comment.createdAt}{comment.verified ? ' · 현장 인증' : ''}</small></div><div><button className="comment-icon-button" onClick={() => setCollapsed(!collapsed)} aria-label={collapsed ? '댓글 펼치기' : '댓글 접기'}>{collapsed ? <ChevronDown size={18}/> : <ChevronUp size={18}/>}</button><button className="comment-icon-button" onClick={() => setMenu(!menu)} aria-label="댓글 메뉴"><MoreHorizontal size={18}/></button></div></div>
+    <div className="comment-head"><div><strong>{comment.authorName}</strong><small>{comment.createdAt}{comment.verified ? ' · 현장 인증' : ''}{comment.read && <span className="comment-read-status"><Check size={11}/>읽음</span>}</small></div><div><button className="comment-icon-button" onClick={toggleCollapsed} aria-label={collapsed ? '댓글 펼치기' : comment.read ? '댓글 접기' : '댓글 접기 및 읽음 표시'}>{collapsed ? <ChevronDown size={18}/> : <ChevronUp size={18}/>}</button><button className="comment-icon-button" onClick={() => setMenu(!menu)} aria-label="댓글 메뉴"><MoreHorizontal size={18}/></button></div></div>
     {!collapsed && <>{comment.body && <p>{comment.body}</p>}{comment.imagePlaceholder && <div className="comment-image-placeholder">[이미지]</div>}{comment.imageUrl && <button className="comment-photo" onClick={() => setPhotoOpen(true)} aria-label="댓글 사진 크게 보기"><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></button>}<div className="comment-reactions">{reactions.map((reaction) => <button key={reaction} className={comment.reactedByMe === reaction ? 'selected' : ''} onClick={() => reactToComment(comment.id, reaction)}>{reaction} <b>{comment.reactions[reaction]}</b></button>)}</div><button className="reply-link" onClick={() => onReply(comment)}>답글</button></>}
     {menu && <div className="context-menu">{comment.authorId === user.id ? <button onClick={() => deleteComment(comment.id)}>댓글 삭제</button> : <><button onClick={() => { reportTarget('댓글', comment.id, '부정확하거나 부적절한 정보'); setMenu(false) }}>댓글 신고</button><button onClick={() => { blockUser(comment.authorId); setMenu(false) }}>사용자 차단</button></>}</div>}
     {photoOpen && comment.imageUrl && <div className="comment-photo-modal" role="dialog" aria-label="현장 사진 보기" onClick={() => setPhotoOpen(false)}><button aria-label="사진 닫기"><X size={22}/></button><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></div>}

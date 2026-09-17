@@ -31,7 +31,7 @@ export const initialBoards: Board[] = [
 export const initialComments: Comment[] = [
   {
     id: 'comment-1', boardId: 'fire', authorId: 'user-3', authorName: '익명탐정',
-    body: '오늘 GV 이벤트가 있어서 줄이 생긴 것 같아요.', createdAt: '2분 전', verified: false, read: true,
+    body: '오늘 GV 이벤트가 있어서 줄이 생긴 것 같아요.', createdAt: '2분 전', verified: false, read: false,
     reactions: { '도움돼요': 12, '맞아요': 5, '정보가 달라요': 1 },
   },
   {
@@ -41,12 +41,12 @@ export const initialComments: Comment[] = [
   },
   {
     id: 'outage-comment-1', boardId: 'outage', authorId: 'user-5', authorName: '101동 주민',
-    body: '101동부터 104동까지 모두 정전된 것 같아요.', createdAt: '28분 전', verified: true, read: true,
+    body: '101동부터 104동까지 모두 정전된 것 같아요.', createdAt: '28분 전', verified: true, read: false,
     reactions: { '도움돼요': 9, '맞아요': 14, '정보가 달라요': 0 }, imagePlaceholder: true,
   },
   {
     id: 'outage-comment-2', boardId: 'outage', authorId: 'user-6', authorName: '현장지킴이',
-    body: '관리사무소에서 복구 업체가 이동 중이라고 안내했습니다.', createdAt: '24분 전', verified: true, read: true,
+    body: '관리사무소에서 복구 업체가 이동 중이라고 안내했습니다.', createdAt: '24분 전', verified: true, read: false,
     reactions: { '도움돼요': 18, '맞아요': 7, '정보가 달라요': 0 },
   },
   {
@@ -56,7 +56,7 @@ export const initialComments: Comment[] = [
   },
   {
     id: 'outage-comment-4', boardId: 'outage', authorId: 'user-8', authorName: '103동 주민',
-    body: '엘리베이터는 운행이 중단돼서 계단을 이용하고 있어요.', createdAt: '15분 전', verified: true, read: true,
+    body: '엘리베이터는 운행이 중단돼서 계단을 이용하고 있어요.', createdAt: '15분 전', verified: true, read: false,
     reactions: { '도움돼요': 12, '맞아요': 8, '정보가 달라요': 0 },
   },
   {
@@ -66,7 +66,7 @@ export const initialComments: Comment[] = [
   },
   {
     id: 'outage-comment-6', boardId: 'outage', authorId: 'user-10', authorName: '현장확인자',
-    body: '현재 일부 동부터 조명이 다시 들어오고 있습니다.', createdAt: '3분 전', verified: true, read: true,
+    body: '현재 일부 동부터 조명이 다시 들어오고 있습니다.', createdAt: '3분 전', verified: true, read: false,
     reactions: { '도움돼요': 21, '맞아요': 11, '정보가 달라요': 0 },
   },
 ]

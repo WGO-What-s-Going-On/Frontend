@@ -26,6 +26,7 @@ interface AppContextValue {
   reactToBoard: (id: string, reaction: PostReaction) => void
   addComment: (body: string, parentId?: string, imageUrl?: string) => void
   deleteComment: (id: string) => void
+  markCommentRead: (id: string) => void
   reactToComment: (id: string, reaction: CommentReaction) => void
   updateUser: (input: Pick<User, 'nickname' | 'bio'>) => void
   markNoticeRead: (id: string) => void
@@ -87,6 +88,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast(parentId ? '답글을 등록했습니다.' : '댓글을 등록했습니다.')
   }
   const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
+  const markCommentRead = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, read: true } : comment))
   const reactToComment = (id: string, reaction: CommentReaction) => setComments((items) => items.map((comment) => {
     if (comment.id !== id) return comment
     const previous = comment.reactedByMe
@@ -108,7 +110,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), detailOrigin, inRange, blockedUsers, toast,
-    go, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, reactToComment,
+    go, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment,
     updateUser, markNoticeRead, markAllNoticesRead, reportTarget, blockUser, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, detailOrigin, inRange, blockedUsers, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
