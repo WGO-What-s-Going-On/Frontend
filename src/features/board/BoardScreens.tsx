@@ -11,19 +11,18 @@ import type { Category, Comment, CommentReaction } from '../../types/domain'
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
 export function BoardListScreen() {
-  const { boards, go, openBoard } = useApp()
+  const { boards, comments, go, openBoard } = useApp()
   const [sort, setSort] = useState<'거리순' | '최신순' | '활성순'>('거리순')
   const [category, setCategory] = useState<Category | '전체'>('전체')
   const visibleBoards = useMemo(() => {
     const filtered = boards.filter((board) => board.status !== '숨김' && (category === '전체' || board.category === category))
     return [...filtered].sort((a, b) => sort === '거리순' ? a.distance - b.distance : sort === '활성순' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
   }, [boards, category, sort])
-  return <AppShell>
-    <header><h1>실시간 게시판</h1><button className="mini-primary" onClick={() => go('category')}>새 글</button></header>
-    <button className="search-box" onClick={() => go('search')}><Search size={18}/> 장소, 사건, 도움 요청 검색</button>
-    <div className="chips">{(['전체', ...categories] as const).map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => setCategory(item)}>{item}</button>)}</div>
-    <div className="chips sort">{(['거리순', '최신순', '활성순'] as const).map((item) => <button key={item} className={sort === item ? 'dark' : ''} onClick={() => setSort(item)}>{item}</button>)}</div>
-    <div className="post-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="필터 초기화" onAction={() => setCategory('전체')}/>}</div>
+  return <AppShell contentClassName="ux-board-screen">
+    <header className="ux-board-header"><div><h1>게시판</h1><p>내 주변 소식 {visibleBoards.length}개</p></div><label>정렬<select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)}><option>거리순</option><option>최신순</option><option>활성순</option></select></label></header>
+    <button className="ux-search" onClick={() => go('search')}><Search size={20}/><span>장소, 사건, 도움 요청 검색</span><ChevronRight size={18}/></button>
+    <div className="ux-category-filters">{(['전체', ...categories] as const).map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => setCategory(item)}>{item}</button>)}</div>
+    <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setCategory('전체')}/>}</div>
   </AppShell>
 }
 
