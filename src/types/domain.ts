@@ -1,5 +1,5 @@
 export type Screen =
-  | 'login' | 'intro' | 'home' | 'board' | 'search' | 'detail'
+  | 'login' | 'home' | 'board' | 'search' | 'detail'
   | 'category' | 'create' | 'edit' | 'my' | 'activity' | 'alerts'
   | 'profile-edit' | 'settings' | 'outside' | 'admin'
 
