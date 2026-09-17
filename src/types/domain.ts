@@ -28,7 +28,6 @@ export interface Board {
   views: number
   reactions: Record<PostReaction, number>
   reactedByMe?: PostReaction
-  hasPoll?: boolean
   imageName?: string
 }
 
@@ -38,6 +37,7 @@ export interface Comment {
   authorId: string
   authorName: string
   body: string
+  imageUrl?: string
   createdAt: string
   verified: boolean
   parentId?: string

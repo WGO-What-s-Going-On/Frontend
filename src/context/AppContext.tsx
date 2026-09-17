@@ -2,7 +2,7 @@ import { createContext, useContext, useMemo, useState } from 'react'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Report, Screen, User } from '../types/domain'
 
-interface BoardInput { category: Category; title: string; body: string; hasPoll: boolean; imageName?: string }
+interface BoardInput { category: Category; title: string; body: string; imageName?: string }
 
 interface AppContextValue {
   screen: Screen
@@ -24,7 +24,7 @@ interface AppContextValue {
   deleteBoard: (id: string) => void
   finishBoard: (id: string) => void
   reactToBoard: (id: string, reaction: PostReaction) => void
-  addComment: (body: string, parentId?: string) => void
+  addComment: (body: string, parentId?: string, imageUrl?: string) => void
   deleteComment: (id: string) => void
   reactToComment: (id: string, reaction: CommentReaction) => void
   updateUser: (input: Pick<User, 'nickname' | 'bio'>) => void
@@ -82,8 +82,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (previous !== reaction) reactions[reaction] += 1
     return { ...board, reactions, reactedByMe: previous === reaction ? undefined : reaction }
   }))
-  const addComment = (body: string, parentId?: string) => {
-    setComments((items) => [...items, { id: `comment-${Date.now()}`, boardId: currentBoardId, authorId: user.id, authorName: user.nickname, body, createdAt: '방금 전', verified: inRange, parentId, reactions: { '도움돼요': 0, '맞아요': 0, '정보가 달라요': 0 } }])
+  const addComment = (body: string, parentId?: string, imageUrl?: string) => {
+    setComments((items) => [...items, { id: `comment-${Date.now()}`, boardId: currentBoardId, authorId: user.id, authorName: user.nickname, body, imageUrl, createdAt: '방금 전', verified: inRange, parentId, reactions: { '도움돼요': 0, '맞아요': 0, '정보가 달라요': 0 } }])
     showToast(parentId ? '답글을 등록했습니다.' : '댓글을 등록했습니다.')
   }
   const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
