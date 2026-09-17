@@ -13,7 +13,6 @@
 .start-card,
 .post-card,
 .comment,
-.verified,
 .topic,
 .live-card,
 .reach,
@@ -240,7 +239,6 @@
 }
 
 .range,
-.verified,
 .post-reactions.interactive button.selected,
 .comment-reactions button.selected {
   color: #111;
@@ -970,6 +968,16 @@ select:focus-visible,
   border-radius: 15px;
 }
 
+.board-detail-screen .read-comment {
+  border-color: #333;
+  background: #e9e9e9;
+}
+
+.board-detail-screen .unread-comment {
+  border-color: #d3d3d3;
+  background: #fff;
+}
+
 .comment-head {
   display: flex;
   align-items: center;
@@ -1013,6 +1021,19 @@ select:focus-visible,
   color: #333;
   font-size: 13px;
   line-height: 1.55;
+}
+
+.comment-image-placeholder {
+  height: 92px;
+  display: grid;
+  place-items: center;
+  margin-top: 12px;
+  color: #666;
+  border: 1px dashed #aaa;
+  border-radius: 13px;
+  background: rgba(255, 255, 255, .55);
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .comment-photo {

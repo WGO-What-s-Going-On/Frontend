@@ -38,6 +38,8 @@ export interface Comment {
   authorName: string
   body: string
   imageUrl?: string
+  imagePlaceholder?: boolean
+  read?: boolean
   createdAt: string
   verified: boolean
   parentId?: string
