@@ -154,18 +154,14 @@
 }
 
 .quick-field {
-  margin: 18px 0 0!important;
+  display: block;
+  margin: 24px 0 0!important;
 }
 
 .quick-field > span {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 5px;
   font-size: 12px;
-}
-
-.quick-field small {
-  color: #888;
-  font-weight: 500;
 }
 
 .quick-field input,
