@@ -330,3 +330,493 @@ select:focus-visible,
   outline: 2px solid #111;
   outline-offset: 2px;
 }
+
+/* 지도 중심 메인 화면 */
+.map-shell,
+.map-shell .status-bar {
+  background: #e9e9e5;
+}
+
+.map-screen {
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+}
+
+.map-screen .map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background:
+    linear-gradient(32deg, transparent 48%, rgba(255, 255, 255, .32) 49%, rgba(255, 255, 255, .32) 51%, transparent 52%),
+    #e9e9e5;
+}
+
+.map-water {
+  position: absolute;
+  z-index: 0;
+  width: 190px;
+  height: 330px;
+  right: -112px;
+  bottom: 42px;
+  transform: rotate(12deg);
+  border: 1px solid #c7c7c3;
+  border-radius: 48% 0 0 54%;
+  background: #dadad6;
+}
+
+.map-road {
+  position: absolute;
+  z-index: 2;
+  display: block;
+  border: 8px solid #f8f8f6;
+  background: #d1d1cd;
+  box-shadow: 0 0 0 1px #d7d7d2;
+}
+
+.road-main {
+  width: 42px;
+  height: 120%;
+  top: -10%;
+  left: 46%;
+  transform: rotate(8deg);
+}
+
+.road-cross {
+  width: 130%;
+  height: 40px;
+  top: 48%;
+  left: -15%;
+  transform: rotate(-5deg);
+}
+
+.road-diagonal {
+  width: 38px;
+  height: 115%;
+  top: -11%;
+  left: 76%;
+  transform: rotate(46deg);
+}
+
+.road-small-one {
+  width: 105%;
+  height: 22px;
+  top: 28%;
+  left: -8%;
+  transform: rotate(8deg);
+  border-width: 5px;
+}
+
+.road-small-two {
+  width: 22px;
+  height: 70%;
+  top: 25%;
+  left: 21%;
+  transform: rotate(-17deg);
+  border-width: 5px;
+}
+
+.map-block,
+.map-park {
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  color: #777;
+  border: 1px solid #d0d0cc;
+  border-radius: 8px;
+  background: #dededa;
+  font-size: 10px;
+}
+
+.block-one {
+  width: 116px;
+  height: 96px;
+  top: 18%;
+  left: 5%;
+  transform: rotate(7deg);
+}
+
+.block-two {
+  width: 92px;
+  height: 112px;
+  top: 23%;
+  right: 4%;
+  transform: rotate(-8deg);
+}
+
+.block-three {
+  width: 128px;
+  height: 82px;
+  right: 3%;
+  bottom: 23%;
+  transform: rotate(5deg);
+}
+
+.block-four {
+  width: 92px;
+  height: 112px;
+  bottom: 17%;
+  left: 5%;
+  transform: rotate(-6deg);
+}
+
+.map-park {
+  width: 104px;
+  height: 82px;
+  top: 58%;
+  left: 27%;
+  border-radius: 42% 58% 45% 55%;
+  background: #d5d5d0;
+}
+
+.map-label {
+  position: absolute;
+  z-index: 3;
+  padding: 3px 6px;
+  color: #555;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, .76);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.label-station {
+  top: 44%;
+  left: 51%;
+}
+
+.label-road {
+  top: 51%;
+  left: 8%;
+  transform: rotate(-5deg);
+}
+
+.map-screen .radius {
+  width: 218px;
+  height: 218px;
+  z-index: 3;
+  top: 54%;
+  bottom: auto;
+  left: 53%;
+  translate: -50% -50%;
+  border: 1px dashed #333;
+  background: rgba(255, 255, 255, .24);
+}
+
+.map-screen .radius b {
+  width: 16px;
+  height: 16px;
+  border: 4px solid #fff;
+  background: #111;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .22);
+}
+
+.map-screen .radius small {
+  right: 8px;
+  bottom: 12px;
+  left: auto;
+  padding: 5px 8px;
+  color: #fff;
+  border-radius: 10px;
+  background: #222;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.map-screen .map-pin {
+  z-index: 4;
+  max-width: 132px;
+  padding: 10px 14px;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 18px;
+  background: #333;
+  box-shadow: 0 5px 14px rgba(0, 0, 0, .2);
+  font-size: 12px;
+}
+
+.map-screen .map-pin::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  transform: translateX(-50%) rotate(45deg);
+  border-right: 2px solid #fff;
+  border-bottom: 2px solid #fff;
+  background: #333;
+}
+
+.map-screen .map-pin.active {
+  transform: translateY(-3px);
+  background: #111;
+}
+
+.map-screen .marker-0 {
+  top: 34%;
+  left: 8%;
+}
+
+.map-screen .marker-1 {
+  top: 29%;
+  right: 7%;
+  left: auto;
+}
+
+.map-screen .marker-2 {
+  top: 64%;
+  right: 8%;
+  left: auto;
+}
+
+.map-top-overlay {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  right: 0;
+  left: 0;
+  padding: 18px 20px 30px;
+  background: linear-gradient(#f7f7f5 0%, rgba(247, 247, 245, .94) 67%, rgba(247, 247, 245, 0) 100%);
+}
+
+.map-top-overlay header {
+  margin-bottom: 14px;
+}
+
+.map-top-overlay h1 {
+  margin: 0;
+}
+
+.map-search {
+  width: 48px;
+  height: 48px;
+  color: #111;
+  border-color: #c9c9c6;
+  background: rgba(255, 255, 255, .88);
+}
+
+.map-filters {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding: 2px 0;
+  scrollbar-width: none;
+}
+
+.map-filters::-webkit-scrollbar {
+  display: none;
+}
+
+.map-filters button {
+  flex: none;
+  padding: 10px 15px;
+  color: #222;
+  border: 1px solid #c9c9c6;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, .9);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.map-filters button.selected {
+  color: #fff;
+  border-color: #111;
+  background: #111;
+}
+
+.participant-card {
+  position: absolute;
+  z-index: 5;
+  bottom: 109px;
+  left: 18px;
+  min-width: 130px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 15px;
+  text-align: left;
+  border: 1px solid #c9c9c6;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+}
+
+.participant-card small {
+  color: #555;
+  font-size: 11px;
+}
+
+.participant-card strong {
+  white-space: nowrap;
+  font-size: 20px;
+}
+
+.map-bottom-sheet {
+  position: absolute;
+  z-index: 7;
+  right: 10px;
+  bottom: 101px;
+  left: 10px;
+  padding: 14px 16px 16px;
+  border: 1px solid #c8c8c5;
+  border-radius: 26px 26px 18px 18px;
+  background: #fff;
+  box-shadow: 0 -10px 36px rgba(0, 0, 0, .18);
+  animation: sheet-up .28s ease-out both;
+}
+
+.sheet-handle {
+  width: 64px;
+  height: 18px;
+  display: block;
+  margin: -8px auto 3px;
+  border: 0;
+  background: transparent;
+}
+
+.sheet-handle span {
+  width: 42px;
+  height: 4px;
+  display: block;
+  margin: auto;
+  border-radius: 3px;
+  background: #c6c6c3;
+}
+
+.sheet-close {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: #222;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .9);
+}
+
+.incident-preview {
+  height: 92px;
+  position: relative;
+  margin-bottom: 12px;
+  overflow: hidden;
+  border-radius: 15px;
+  background: #d8d8d5;
+}
+
+.preview-building {
+  position: absolute;
+  bottom: 30px;
+  background: #aaa;
+}
+
+.preview-building-one {
+  width: 74px;
+  height: 48px;
+  left: 18px;
+}
+
+.preview-building-two {
+  width: 96px;
+  height: 61px;
+  right: 20px;
+}
+
+.preview-road {
+  width: 120%;
+  height: 36px;
+  position: absolute;
+  right: -10%;
+  bottom: 2px;
+  transform: rotate(-3deg);
+  border-top: 2px solid #f5f5f3;
+  background: #777;
+}
+
+.preview-marker {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 27px 0 auto;
+  margin: auto;
+  color: #fff;
+  border-radius: 50%;
+  background: #222;
+  box-shadow: 0 5px 12px rgba(0, 0, 0, .2);
+}
+
+.sheet-category {
+  color: #666;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.map-bottom-sheet h2 {
+  margin: 4px 0 5px;
+  padding-right: 24px;
+  font-size: 17px;
+}
+
+.map-bottom-sheet p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  color: #555;
+  font-size: 12px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.sheet-meta {
+  display: flex;
+  gap: 15px;
+  margin: 10px 0;
+  color: #666;
+  font-size: 11px;
+}
+
+.sheet-meta span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sheet-detail {
+  width: 100%;
+  padding: 11px;
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  background: #222;
+  font-weight: 800;
+}
+
+@keyframes sheet-up {
+  from {
+    opacity: 0;
+    transform: translateY(110%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-bottom-sheet {
+    animation: none;
+  }
+}
