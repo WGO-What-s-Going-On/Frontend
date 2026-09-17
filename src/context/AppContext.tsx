@@ -12,6 +12,7 @@ interface AppContextValue {
   notices: Notice[]
   reports: Report[]
   currentBoard?: Board
+  detailOrigin: Screen
   inRange: boolean
   blockedUsers: string[]
   toast: string
@@ -45,6 +46,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [notices, setNotices] = useState(initialNotices)
   const [reports, setReports] = useState<Report[]>([])
   const [currentBoardId, setCurrentBoardId] = useState('fire')
+  const [detailOrigin, setDetailOrigin] = useState<Screen>('board')
   const [inRange, setInRange] = useState(true)
   const [blockedUsers, setBlockedUsers] = useState<string[]>([])
   const [toast, setToast] = useState('')
@@ -54,7 +56,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     window.setTimeout(() => setToast(''), 1800)
   }
   const go = (next: Screen) => { setScreen(next); window.scrollTo({ top: 0, behavior: 'smooth' }) }
-  const openBoard = (id: string) => { setCurrentBoardId(id); go(inRange ? 'detail' : 'outside') }
+  const openBoard = (id: string) => { setCurrentBoardId(id); setDetailOrigin(screen); go(inRange ? 'detail' : 'outside') }
   const createBoard = (input: BoardInput) => {
     const id = `board-${Date.now()}`
     setBoards((items) => [{
@@ -105,10 +107,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, toast,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), detailOrigin, inRange, blockedUsers, toast,
     go, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, reactToComment,
     updateUser, markNoticeRead, markAllNoticesRead, reportTarget, blockUser, resolveReport, showToast,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, toast])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, detailOrigin, inRange, blockedUsers, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

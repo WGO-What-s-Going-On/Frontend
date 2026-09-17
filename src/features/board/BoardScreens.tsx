@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Camera, ChevronRight, Search, Send, X } from 'lucide-react'
+import { ArrowLeft, Camera, ChevronRight, Eye, MapPin, MoreHorizontal, Search, Send, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
@@ -53,21 +53,32 @@ function CommentItem({ comment, onReply }: { comment: Comment; onReply: (comment
 }
 
 export function BoardDetailScreen() {
-  const { currentBoard: board, comments, user, go, inRange, reactToBoard, addComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
+  const { currentBoard: board, detailOrigin, comments, user, go, inRange, reactToBoard, addComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
   const [body, setBody] = useState('')
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
   const [menu, setMenu] = useState(false)
+  const [pollChoice, setPollChoice] = useState<'yes' | 'no' | null>(null)
   const [confirm, setConfirm] = useState<'delete' | 'finish' | null>(null)
   if (!board) return null
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))
   const submit = () => { if (!body.trim()) return; addComment(body.trim(), replyTo?.id); setBody(''); setReplyTo(null) }
-  return <AppShell>
-    <BackHeader title={board.title} onBack={() => go('board')} action={<button className="plain-button" onClick={() => setMenu(!menu)}>더보기</button>}/>
-    {menu && <div className="context-menu top-menu">{board.authorId === user.id ? <><button onClick={() => go('edit')}>게시글 수정</button><button onClick={() => setConfirm('finish')}>게시판 종료</button><button onClick={() => setConfirm('delete')}>게시글 삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>게시글 신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>작성자 차단</button></>}</div>}
-    <article className="topic"><div className="row"><span className="badge">{board.category}</span><small>{board.status} · 조회 {board.views}</small></div><h2>{board.title}</h2><p>{board.body}</p>{board.imageName && <div className="attachment">첨부 이미지: {board.imageName}</div>}{board.hasPoll && <div className="poll"><strong>현재도 같은 상황인가요?</strong><button>그렇다</button><button>아니다</button></div>}<PostReactions board={board} interactive={inRange && board.status === '실시간'} onReact={(reaction) => reactToBoard(board.id, reaction)}/></article>
+  return <AppShell nav={false} contentClassName="board-detail-screen">
+    <header className="detail-nav"><button className="icon" onClick={() => go(detailOrigin)} aria-label="뒤로 가기"><ArrowLeft size={22}/></button><button className="icon" onClick={() => setMenu(!menu)} aria-label="게시글 메뉴"><MoreHorizontal size={24}/></button></header>
+    {menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => go('edit')}>게시글 수정</button><button onClick={() => setConfirm('finish')}>게시판 종료</button><button onClick={() => setConfirm('delete')}>게시글 삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>게시글 신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>작성자 차단</button></>}</div>}
+    <article className="detail-article">
+      <div className="detail-status"><span className="badge">{board.category}</span><span className={board.status === '실시간' ? 'status-live' : 'status-ended'}>{board.status}</span></div>
+      <h1>{board.title}</h1>
+      <div className="detail-author"><strong>{board.authorName}</strong><span>{board.createdAt}</span></div>
+      <div className="detail-meta"><span><MapPin size={15}/>{board.distance}m</span><span><Eye size={15}/>조회 {board.views}</span></div>
+      <p className="detail-body">{board.body}</p>
+      {board.imageName && <div className="attachment">첨부 이미지: {board.imageName}</div>}
+      {board.hasPoll && <div className="detail-poll"><strong>현재도 같은 상황인가요?</strong><p>현재 현장 상황을 알려주세요</p><div><button className={pollChoice === 'yes' ? 'selected' : ''} aria-pressed={pollChoice === 'yes'} onClick={() => setPollChoice('yes')}>지금도 그래요</button><button className={pollChoice === 'no' ? 'selected' : ''} aria-pressed={pollChoice === 'no'} onClick={() => setPollChoice('no')}>아니에요</button></div>{pollChoice && <small>응답이 반영되었습니다</small>}</div>}
+    </article>
+    <section className="detail-reactions"><h3>이 글에 공감하기</h3><p>현장 상황에 맞는 반응을 선택해주세요</p><PostReactions board={board} interactive={inRange && board.status === '실시간'} onReact={(reaction) => reactToBoard(board.id, reaction)}/></section>
     {!inRange && <div className="notice-box"><strong>150m 밖에서는 열람만 가능합니다.</strong></div>}
-    <section className="comments-section"><h3>댓글 {boardComments.length}</h3>{boardComments.map((comment) => <CommentItem key={comment.id} comment={comment} onReply={setReplyTo}/>)}</section>
-    {inRange && board.status === '실시간' && <><button className="photo"><Camera/> 현장 사진 확인 / 제보하기</button>{replyTo && <div className="replying"><span>{replyTo.authorName}님에게 답글 작성 중</span><button onClick={() => setReplyTo(null)}>취소</button></div>}<div className="comment-input"><input value={body} onChange={(event) => setBody(event.target.value)} placeholder={replyTo ? '답글 남기기' : '현장 댓글 남기기'}/><button onClick={submit} disabled={!body.trim()}><Send size={20}/></button></div></>}
+    {inRange && board.status === '실시간' && <button className="detail-photo"><Camera size={22}/><span><strong>현장 사진</strong><small>사진을 확인하거나 현재 상황을 제보해 주세요</small></span><ChevronRight size={20}/></button>}
+    <section className="comments-section"><div className="comments-heading"><h3>현장 댓글</h3><span>{boardComments.length}</span></div>{boardComments.length ? boardComments.map((comment) => <CommentItem key={comment.id} comment={comment} onReply={setReplyTo}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong><p>가장 먼저 현장 상황을 알려주세요</p></div>}</section>
+    {inRange && board.status === '실시간' && <>{replyTo && <div className="replying"><span>{replyTo.authorName}님에게 답글 작성 중</span><button onClick={() => setReplyTo(null)}>취소</button></div>}<div className="comment-input detail-comment-input"><input value={body} onChange={(event) => setBody(event.target.value)} placeholder={replyTo ? '답글을 입력하세요' : '현장 댓글을 남겨주세요'}/><button onClick={submit} disabled={!body.trim()} aria-label="댓글 등록"><Send size={20}/></button></div></>}
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="목업에서는 즉시 목록에서 제거됩니다." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
     {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description="종료 후에는 새 댓글과 반응을 작성할 수 없습니다." confirmLabel="종료" onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>} 
   </AppShell>
