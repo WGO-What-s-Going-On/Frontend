@@ -492,3 +492,30 @@
   color: #666;
   font-size: 9px;
 }
+
+.activity-filters {
+  gap: 5px;
+}
+
+.activity-filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 8px;
+  font-size: 10px;
+}
+
+.activity-filters button span {
+  min-width: 17px;
+  padding: 2px 5px;
+  color: #666;
+  border-radius: 9px;
+  background: #e5e5e5;
+  font-size: 9px;
+  line-height: 1.2;
+}
+
+.activity-filters button.selected span {
+  color: #222;
+  background: #fff;
+}

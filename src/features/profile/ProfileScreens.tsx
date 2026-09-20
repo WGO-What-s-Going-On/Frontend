@@ -11,15 +11,21 @@ export function ProfileScreen() {
   const { user, boards, comments, go } = useApp()
   const postCount = boards.filter((board) => board.authorId === user.id).length
   const commentCount = comments.filter((comment) => comment.authorId === user.id).length
-  return <AppShell><header><h1>마이페이지</h1><button className="text-button" onClick={() => go('profile-edit')}>프로필 수정</button></header><div className="profile"><b>{user.nickname.slice(0, 1)}</b><div><h3>{user.nickname} 님 {user.age}</h3><p>{user.bio}</p></div></div><TitleProgressCard postCount={postCount} commentCount={commentCount}/><div className="metrics"><span><strong>{postCount}</strong><small>작성한 글</small></span><span><strong>{commentCount}</strong><small>작성한 댓글</small></span><span><strong>{boards.filter((board) => board.reactedByMe).length}</strong><small>공감한 글</small></span></div><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정 및 운영</h4><div className="menu-group"><button onClick={() => go('settings')}>계정관리 / 앱 설정 <ChevronRight/></button><button onClick={() => go('admin')}>프로토타입 관리자 화면 <ChevronRight/></button></div></AppShell>
+  return <AppShell><header><h1>마이페이지</h1><button className="text-button" onClick={() => go('profile-edit')}>프로필 수정</button></header><div className="profile"><b>{user.nickname.slice(0, 1)}</b><div><h3>{user.nickname} 님 {user.age}</h3><p>{user.bio}</p></div></div><TitleProgressCard postCount={postCount} commentCount={commentCount}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정 및 운영</h4><div className="menu-group"><button onClick={() => go('settings')}>계정관리 / 앱 설정 <ChevronRight/></button><button onClick={() => go('admin')}>프로토타입 관리자 화면 <ChevronRight/></button></div></AppShell>
 }
 
 export function ActivityScreen() {
   const { boards, comments, user, recentBoardIds, openBoard, go } = useApp()
   const [filter, setFilter] = useState<'최근 본' | '댓글 단' | '공감한' | '내가 작성한'>('최근 본')
   const participatingIds = new Set(comments.filter((comment) => comment.authorId === user.id).map((comment) => comment.boardId))
+  const filters = [
+    { label: '최근 본', count: recentBoardIds.length },
+    { label: '댓글 단', count: participatingIds.size },
+    { label: '공감한', count: boards.filter((board) => board.reactedByMe).length },
+    { label: '내가 작성한', count: boards.filter((board) => board.authorId === user.id).length },
+  ] as const
   const filtered = useMemo(() => filter === '최근 본' ? recentBoardIds.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] }) : boards.filter((board) => filter === '댓글 단' && participatingIds.has(board.id) || filter === '공감한' && board.reactedByMe || filter === '내가 작성한' && board.authorId === user.id), [boards, filter, user.id, comments, recentBoardIds])
-  return <AppShell><BackHeader title="최근 활동 내역" onBack={() => go('my')}/><div className="chips">{(['최근 본', '댓글 단', '공감한', '내가 작성한'] as const).map((item) => <button key={item} className={filter === item ? 'selected' : ''} onClick={() => setFilter(item)}>{item}</button>)}</div><div className="post-list compact">{filtered.map((board) => <BoardCard key={board.id} board={board} showBody onOpen={() => openBoard(board.id)}/>)}</div></AppShell>
+  return <AppShell><BackHeader title="최근 활동 내역" onBack={() => go('my')}/><div className="chips activity-filters">{filters.map((item) => <button key={item.label} className={filter === item.label ? 'selected' : ''} onClick={() => setFilter(item.label)}>{item.label}<span>{item.count}</span></button>)}</div><div className="post-list compact">{filtered.map((board) => <BoardCard key={board.id} board={board} showBody onOpen={() => openBoard(board.id)}/>)}</div></AppShell>
 }
 
 export function ProfileEditScreen() {
