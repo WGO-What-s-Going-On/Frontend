@@ -15,7 +15,8 @@ interface AppContextValue {
   detailOrigin: Screen
   inRange: boolean
   blockedUsers: string[]
-  subscribedBoardIds: string[]
+  mutedBoardIds: string[]
+  recentBoardIds: string[]
   toast: string
   go: (screen: Screen) => void
   openBoard: (id: string) => void
@@ -52,7 +53,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [detailOrigin, setDetailOrigin] = useState<Screen>('board')
   const [inRange, setInRange] = useState(true)
   const [blockedUsers, setBlockedUsers] = useState<string[]>([])
-  const [subscribedBoardIds, setSubscribedBoardIds] = useState<string[]>([])
+  const [mutedBoardIds, setMutedBoardIds] = useState<string[]>([])
+  const [recentBoardIds, setRecentBoardIds] = useState<string[]>([])
   const [toast, setToast] = useState('')
 
   const showToast = (message: string) => {
@@ -60,7 +62,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     window.setTimeout(() => setToast(''), 1800)
   }
   const go = (next: Screen) => { setScreen(next); window.scrollTo({ top: 0, behavior: 'smooth' }) }
-  const openBoard = (id: string) => { setCurrentBoardId(id); setDetailOrigin(screen); go(inRange ? 'detail' : 'outside') }
+  const openBoard = (id: string) => { setCurrentBoardId(id); setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)]); setDetailOrigin(screen); go(inRange ? 'detail' : 'outside') }
   const createBoard = (input: BoardInput) => {
     const id = `board-${Date.now()}`
     setBoards((items) => [{
@@ -105,7 +107,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
   const reportTarget = (targetType: Report['targetType'], targetId: string, reason: string) => { setReports((items) => [...items, { id: `report-${Date.now()}`, targetType, targetId, reason, status: '접수' }]); showToast('신고가 접수되었습니다.') }
   const blockUser = (userId: string) => { setBlockedUsers((items) => [...new Set([...items, userId])]); showToast('사용자를 차단했습니다.') }
-  const toggleBoardNotifications = (boardId: string) => setSubscribedBoardIds((items) => items.includes(boardId) ? items.filter((id) => id !== boardId) : [...items, boardId])
+  const toggleBoardNotifications = (boardId: string) => setMutedBoardIds((items) => items.includes(boardId) ? items.filter((id) => id !== boardId) : [...items, boardId])
   const resolveReport = (id: string, hideTarget: boolean) => {
     const report = reports.find((item) => item.id === id)
     if (hideTarget && report?.targetType === '게시글') setBoards((items) => items.map((board) => board.id === report.targetId ? { ...board, status: '숨김' } : board))
@@ -113,10 +115,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), detailOrigin, inRange, blockedUsers, subscribedBoardIds, toast,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), detailOrigin, inRange, blockedUsers, mutedBoardIds, recentBoardIds, toast,
     go, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment,
     updateUser, markNoticeRead, markAllNoticesRead, reportTarget, blockUser, toggleBoardNotifications, resolveReport, showToast,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, detailOrigin, inRange, blockedUsers, subscribedBoardIds, toast])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, detailOrigin, inRange, blockedUsers, mutedBoardIds, recentBoardIds, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

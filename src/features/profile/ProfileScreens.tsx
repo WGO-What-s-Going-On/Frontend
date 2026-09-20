@@ -12,11 +12,11 @@ export function ProfileScreen() {
 }
 
 export function ActivityScreen() {
-  const { boards, comments, user, openBoard, go } = useApp()
-  const [filter, setFilter] = useState<'전체' | '내가 만든' | '참여한' | '공감한'>('전체')
+  const { boards, comments, user, recentBoardIds, openBoard, go } = useApp()
+  const [filter, setFilter] = useState<'최근 본' | '댓글 단' | '공감한' | '내가 작성한'>('최근 본')
   const participatingIds = new Set(comments.filter((comment) => comment.authorId === user.id).map((comment) => comment.boardId))
-  const filtered = useMemo(() => boards.filter((board) => filter === '전체' || filter === '내가 만든' && board.authorId === user.id || filter === '참여한' && participatingIds.has(board.id) || filter === '공감한' && board.reactedByMe), [boards, filter, user.id, comments])
-  return <AppShell><BackHeader title="최근 활동 내역" onBack={() => go('my')}/><div className="chips">{(['전체', '내가 만든', '참여한', '공감한'] as const).map((item) => <button key={item} className={filter === item ? 'selected' : ''} onClick={() => setFilter(item)}>{item}</button>)}</div><div className="post-list compact">{filtered.map((board) => <BoardCard key={board.id} board={board} showBody onOpen={() => openBoard(board.id)}/>)}</div></AppShell>
+  const filtered = useMemo(() => filter === '최근 본' ? recentBoardIds.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] }) : boards.filter((board) => filter === '댓글 단' && participatingIds.has(board.id) || filter === '공감한' && board.reactedByMe || filter === '내가 작성한' && board.authorId === user.id), [boards, filter, user.id, comments, recentBoardIds])
+  return <AppShell><BackHeader title="최근 활동 내역" onBack={() => go('my')}/><div className="chips">{(['최근 본', '댓글 단', '공감한', '내가 작성한'] as const).map((item) => <button key={item} className={filter === item ? 'selected' : ''} onClick={() => setFilter(item)}>{item}</button>)}</div><div className="post-list compact">{filtered.map((board) => <BoardCard key={board.id} board={board} showBody onOpen={() => openBoard(board.id)}/>)}</div></AppShell>
 }
 
 export function ProfileEditScreen() {

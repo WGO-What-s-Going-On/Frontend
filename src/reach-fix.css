@@ -19,7 +19,10 @@
   margin-top: 12px;
 }
 
-.post-reactions span {
+.post-reactions > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   overflow: hidden;
   padding: 7px 8px;
   border-radius: 10px;
@@ -31,7 +34,7 @@
   text-overflow: ellipsis;
 }
 
-.post-reactions b {
+.post-reactions > span b {
   color: #374151;
   font-weight: 700;
 }

@@ -359,9 +359,8 @@
   background: transparent;
 }
 
-.ux-board-alert.selected {
-  color: #fff;
-  background: #222;
+.ux-board-alert.muted {
+  color: #222;
 }
 
 .ux-board-card h3 {

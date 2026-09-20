@@ -207,7 +207,7 @@
 .map,
 .segment,
 .replying,
-.post-reactions span,
+.post-reactions > span,
 .post-reactions.interactive button,
 .comment-reactions button,
 .chips span,
@@ -900,7 +900,7 @@ select:focus-visible,
 }
 
 .detail-reactions {
-  padding: 22px 0;
+  padding: 14px 0;
   border-bottom: 1px solid #dedede;
 }
 
@@ -909,15 +909,32 @@ select:focus-visible,
 }
 
 .detail-reactions .post-reactions {
-  gap: 8px;
-  margin-top: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 9px;
 }
 
 .detail-reactions .post-reactions.interactive button {
-  min-height: 45px;
-  padding: 10px 8px;
-  border-radius: 13px;
-  font-size: 11px;
+  min-width: 0;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 7px 4px;
+  border-radius: 11px;
+  font-size: 9px;
+}
+
+.detail-reactions .post-reactions button b {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.detail-reactions .post-reactions button span {
+  font-size: 9px;
+  font-weight: 800;
 }
 
 .comments-section {
