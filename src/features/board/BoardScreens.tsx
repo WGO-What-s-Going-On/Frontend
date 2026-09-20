@@ -11,7 +11,7 @@ import type { Category, Comment, CommentReaction } from '../../types/domain'
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
 export function BoardListScreen() {
-  const { boards, comments, go, openBoard } = useApp()
+  const { boards, comments, go, openBoard, subscribedBoardIds, toggleBoardNotifications } = useApp()
   const [sort, setSort] = useState<'거리순' | '최신순' | '활성순'>('거리순')
   const [category, setCategory] = useState<Category | '전체'>('전체')
   const visibleBoards = useMemo(() => {
@@ -21,7 +21,7 @@ export function BoardListScreen() {
   return <AppShell contentClassName="ux-board-screen">
     <header className="ux-board-header"><h1>게시판</h1><button className="icon map-search" onClick={() => go('search')} aria-label="검색"><Search size={26}/></button></header>
     <div className="ux-category-filters"><label className="ux-sort-filter" aria-label="게시글 정렬"><select value={sort} onChange={(event) => setSort(event.target.value as typeof sort)}><option>거리순</option><option>최신순</option><option>활성순</option></select></label>{(['전체', '긴급 사고', '도움 요청', '동네 소식'] as const).map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => setCategory(item)}>{item}</button>)}</div>
-    <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setCategory('전체')}/>}</div>
+    <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsEnabled={subscribedBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setCategory('전체')}/>}</div>
   </AppShell>
 }
 

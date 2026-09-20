@@ -50,7 +50,6 @@ export function MapScreen() {
       <header><h1>내 주변 지도</h1><button className="icon map-search" onClick={() => go('search')} aria-label="검색"><Search size={26}/></button></header>
       <div className="map-filters">{filters.map((item) => <button key={item} className={filter === item ? 'selected' : ''} onClick={() => selectFilter(item)}>{item}</button>)}</div>
     </div>
-    <button className="participant-card" onClick={() => go('board')}><small>내 주변 참여인원</small><strong>38명</strong></button>
     {selectedBoard && <IncidentBottomSheet board={selectedBoard} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
   </AppShell>
 }
