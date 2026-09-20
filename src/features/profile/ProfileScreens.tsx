@@ -5,10 +5,13 @@ import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { useApp } from '../../context/AppContext'
+import { TitleProgressCard } from './TitleProgressCard'
 
 export function ProfileScreen() {
   const { user, boards, comments, go } = useApp()
-  return <AppShell><header><h1>마이페이지</h1><button className="text-button" onClick={() => go('profile-edit')}>프로필 수정</button></header><div className="profile"><b>{user.nickname.slice(0, 1)}</b><div><h3>{user.nickname} 님 {user.age}</h3><p>{user.bio}</p></div></div><div className="metrics"><span><strong>{boards.filter((board) => board.authorId === user.id).length}</strong><small>작성한 글</small></span><span><strong>{comments.filter((comment) => comment.authorId === user.id).length}</strong><small>작성한 댓글</small></span><span><strong>{boards.filter((board) => board.reactedByMe).length}</strong><small>공감한 글</small></span></div><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정 및 운영</h4><div className="menu-group"><button onClick={() => go('settings')}>계정관리 / 앱 설정 <ChevronRight/></button><button onClick={() => go('admin')}>프로토타입 관리자 화면 <ChevronRight/></button></div></AppShell>
+  const postCount = boards.filter((board) => board.authorId === user.id).length
+  const commentCount = comments.filter((comment) => comment.authorId === user.id).length
+  return <AppShell><header><h1>마이페이지</h1><button className="text-button" onClick={() => go('profile-edit')}>프로필 수정</button></header><div className="profile"><b>{user.nickname.slice(0, 1)}</b><div><h3>{user.nickname} 님 {user.age}</h3><p>{user.bio}</p></div></div><TitleProgressCard postCount={postCount} commentCount={commentCount}/><div className="metrics"><span><strong>{postCount}</strong><small>작성한 글</small></span><span><strong>{commentCount}</strong><small>작성한 댓글</small></span><span><strong>{boards.filter((board) => board.reactedByMe).length}</strong><small>공감한 글</small></span></div><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정 및 운영</h4><div className="menu-group"><button onClick={() => go('settings')}>계정관리 / 앱 설정 <ChevronRight/></button><button onClick={() => go('admin')}>프로토타입 관리자 화면 <ChevronRight/></button></div></AppShell>
 }
 
 export function ActivityScreen() {
