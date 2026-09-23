@@ -988,6 +988,10 @@ select:focus-visible,
   animation: comment-appear .24s ease-out both;
 }
 
+.board-detail-screen .comment.comment-menu-open {
+  z-index: 20;
+}
+
 .board-detail-screen .read-comment {
   border-color: #333;
   background: #e9e9e9;
