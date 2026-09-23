@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Camera, Check, ChevronDown, ChevronRight, ChevronUp, Eye, MapPin, MoreHorizontal, Search, Send, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
@@ -13,26 +14,37 @@ type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
 
 export function BoardListScreen() {
   const { boards, comments, go, openBoard, mutedBoardIds, toggleBoardNotifications } = useApp()
-  const [sort, setSort] = useState<BoardSort>('거리')
-  const [category, setCategory] = useState<Category | '전체'>('전체')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const sortOptions: BoardSort[] = ['거리', '최신', '활발', '참여 가능']
+  const categoryOptions: (Category | '전체')[] = ['전체', '긴급 사고', '도움 요청', '동네 소식']
+  const sortValue = searchParams.get('sort') as BoardSort | null
+  const categoryValue = searchParams.get('category') as Category | '전체' | null
+  const sort = sortValue && sortOptions.includes(sortValue) ? sortValue : '거리'
+  const category = categoryValue && categoryOptions.includes(categoryValue) ? categoryValue : '전체'
+  const updateFilter = (key: 'sort' | 'category', value: string) => {
+    const next = new URLSearchParams(searchParams)
+    if (value === (key === 'sort' ? '거리' : '전체')) next.delete(key)
+    else next.set(key, value)
+    setSearchParams(next)
+  }
   const visibleBoards = useMemo(() => {
     const filtered = boards.filter((board) => board.status !== '숨김' && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= 150 && board.status === '실시간'))
     return [...filtered].sort((a, b) => sort === '거리' || sort === '참여 가능' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
   }, [boards, category, sort])
   return <AppShell contentClassName="ux-board-screen">
     <header className="ux-board-header"><h1>게시판</h1><button className="icon map-search" onClick={() => go('search')} aria-label="검색"><Search size={26}/></button></header>
-    <div className="ux-category-filters"><label className="ux-sort-filter" aria-label="게시글 정렬"><select value={sort} onChange={(event) => setSort(event.target.value as BoardSort)}><option>거리</option><option>최신</option><option>활발</option><option>참여 가능</option></select></label>{(['전체', '긴급 사고', '도움 요청', '동네 소식'] as const).map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => setCategory(item)}>{item}</button>)}</div>
-    <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={mutedBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setCategory('전체')}/>}</div>
+    <div className="ux-category-filters"><label className="ux-sort-filter" aria-label="게시글 정렬"><select value={sort} onChange={(event) => updateFilter('sort', event.target.value)}><option>거리</option><option>최신</option><option>활발</option><option>참여 가능</option></select></label>{categoryOptions.map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => updateFilter('category', item)}>{item}</button>)}</div>
+    <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={mutedBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => updateFilter('category', '전체')}/>}</div>
   </AppShell>
 }
 
 export function SearchScreen() {
-  const { boards, go, openBoard } = useApp()
+  const { boards, back, openBoard } = useApp()
   const [query, setQuery] = useState('')
   const [scope, setScope] = useState<'150m 안' | '근처 요약' | '전체 핀'>('150m 안')
   const results = boards.filter((board) => board.status !== '숨김' && (!query || `${board.title} ${board.body} ${board.category}`.includes(query)))
   return <AppShell>
-    <div className="search-input"><Search size={19}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="장소, 사건, 질문 검색" autoFocus/><button onClick={() => query ? setQuery('') : go('board')}><X size={18}/></button></div>
+    <div className="search-input"><Search size={19}/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="장소, 사건, 질문 검색" autoFocus/><button onClick={() => query ? setQuery('') : back('board')}><X size={18}/></button></div>
     <h4>열람 범위</h4><div className="segment">{(['150m 안', '근처 요약', '전체 핀'] as const).map((item) => <button key={item} className={scope === item ? 'active' : ''} onClick={() => setScope(item)}>{item}</button>)}</div>
     <h4>검색 결과 <small>{results.length}</small></h4><div className="post-list">{results.map((board) => <BoardCard key={board.id} board={board} onOpen={() => openBoard(board.id)}/>)}</div>
   </AppShell>
@@ -57,7 +69,7 @@ function CommentItem({ comment, replies = [], onReply, isReply = false }: { comm
 }
 
 export function BoardDetailScreen() {
-  const { currentBoard: board, detailOrigin, comments, user, go, inRange, reactToBoard, addComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
+  const { currentBoard: board, back, comments, user, go, inRange, reactToBoard, addComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
   const [body, setBody] = useState('')
   const [commentImageUrl, setCommentImageUrl] = useState('')
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
@@ -73,7 +85,7 @@ export function BoardDetailScreen() {
   const shownComments = rootComments.slice(0, visibleComments)
   const remainingComments = rootComments.length - shownComments.length
   return <AppShell nav={false} contentClassName="board-detail-screen">
-    <header className="detail-nav"><button className="icon" onClick={() => go(detailOrigin)} aria-label="뒤로 가기"><ArrowLeft size={22}/></button><button className="icon" onClick={() => setMenu(!menu)} aria-label="게시글 메뉴"><MoreHorizontal size={24}/></button></header>
+    <header className="detail-nav"><button className="icon" onClick={() => back('board')} aria-label="뒤로 가기"><ArrowLeft size={22}/></button><button className="icon" onClick={() => setMenu(!menu)} aria-label="게시글 메뉴"><MoreHorizontal size={24}/></button></header>
     {menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => go('edit')}>게시글 수정</button><button onClick={() => setConfirm('finish')}>게시판 종료</button><button onClick={() => setConfirm('delete')}>게시글 삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>게시글 신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>작성자 차단</button></>}</div>}
     <article className="detail-article">
       <h1>{board.title}</h1>

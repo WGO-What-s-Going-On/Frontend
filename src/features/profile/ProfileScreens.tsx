@@ -36,9 +36,7 @@ export function ProfileEditScreen() {
 }
 
 export function SettingsScreen() {
-  const { blockedUsers, go, showToast } = useApp()
-  const [nearbyAlert, setNearbyAlert] = useState(true)
-  const [replyAlert, setReplyAlert] = useState(true)
+  const { blockedUsers, go, showToast, notificationSettings, updateNotificationSettings } = useApp()
   const [withdraw, setWithdraw] = useState(false)
-  return <AppShell><BackHeader title="계정관리 / 앱 설정" onBack={() => go('my')}/><h4>알림 설정</h4><label className="setting-row"><span>주변 새 게시판 알림</span><input type="checkbox" checked={nearbyAlert} onChange={(event) => setNearbyAlert(event.target.checked)}/></label><label className="setting-row"><span>댓글과 답글 알림</span><input type="checkbox" checked={replyAlert} onChange={(event) => setReplyAlert(event.target.checked)}/></label><h4>차단 사용자</h4><div className="notice-box">차단한 사용자 {blockedUsers.length}명</div><h4>계정</h4><button className="menu" onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="danger-text" onClick={() => setWithdraw(true)}>회원 탈퇴</button>{withdraw && <ConfirmDialog title="정말 탈퇴할까요?" description="프로토타입에서는 로그인 화면으로 이동합니다." confirmLabel="탈퇴" danger onClose={() => setWithdraw(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>}</AppShell>
+  return <AppShell><BackHeader title="계정관리 / 앱 설정" onBack={() => go('my')}/><h4>알림 설정</h4><label className="setting-row"><span>주변 새 게시판 알림</span><input type="checkbox" checked={notificationSettings.nearby} onChange={(event) => updateNotificationSettings({ ...notificationSettings, nearby: event.target.checked })}/></label><label className="setting-row"><span>댓글과 답글 알림</span><input type="checkbox" checked={notificationSettings.replies} onChange={(event) => updateNotificationSettings({ ...notificationSettings, replies: event.target.checked })}/></label><h4>차단 사용자</h4><div className="notice-box">차단한 사용자 {blockedUsers.length}명</div><h4>계정</h4><button className="menu" onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="danger-text" onClick={() => setWithdraw(true)}>회원 탈퇴</button>{withdraw && <ConfirmDialog title="정말 탈퇴할까요?" description="프로토타입에서는 로그인 화면으로 이동합니다." confirmLabel="탈퇴" danger onClose={() => setWithdraw(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>}</AppShell>
 }
