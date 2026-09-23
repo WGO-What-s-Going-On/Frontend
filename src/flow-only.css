@@ -980,6 +980,7 @@ select:focus-visible,
 }
 
 .board-detail-screen .comment {
+  position: relative;
   margin: 10px 0;
   padding: 14px;
   border-radius: 18px;
@@ -1058,6 +1059,51 @@ select:focus-visible,
 
 .comment-icon-button:active {
   transform: scale(.92);
+}
+
+.comment-context-menu {
+  position: absolute;
+  z-index: 12;
+  top: 48px;
+  right: 12px;
+  width: 126px;
+  margin: 0;
+  padding: 5px;
+  border-color: #d2d2d2;
+  border-radius: 11px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .14);
+}
+
+.comment-context-menu button {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 11px;
+}
+
+.comment-context-menu button:hover,
+.comment-context-menu button:focus-visible {
+  background: #f0f0f0;
+  outline: none;
+}
+
+.comment-report-menu {
+  width: 154px;
+}
+
+.comment-report-menu > strong {
+  padding: 7px 10px 5px;
+  color: #666;
+  font-size: 10px;
+}
+
+.comment-report-menu .comment-report-back {
+  margin-top: 3px;
+  color: #777;
+  border-top: 1px solid #e5e5e5;
+  border-radius: 0 0 7px 7px;
 }
 
 .board-detail-screen .comment > p {
