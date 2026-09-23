@@ -280,19 +280,41 @@
 }
 
 .ux-category-filters .ux-sort-filter {
+  position: relative;
   flex: none;
   margin: 0;
 }
 
+.ux-category-filters .ux-sort-filter::after {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid #555;
+  border-bottom: 1.5px solid #555;
+  content: '';
+  pointer-events: none;
+  transform: translateY(-65%) rotate(45deg);
+}
+
 .ux-sort-filter select {
+  width: 88px;
   min-height: 35px;
-  padding: 8px 27px 8px 11px;
+  padding: 8px 28px 8px 13px;
+  appearance: none;
   color: #333;
   border: 1px solid #d5d5d5;
   border-radius: 18px;
-  background: #f3f3f3;
+  background: #f5f5f5;
   font-size: 11px;
   font-weight: 700;
+  outline: none;
+}
+
+.ux-sort-filter select:focus-visible {
+  border-color: #555;
+  box-shadow: 0 0 0 2px #00000012;
 }
 
 .ux-board-list {
