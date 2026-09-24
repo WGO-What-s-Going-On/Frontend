@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Bell, BellOff, Camera, ChevronDown, ChevronRight, ChevronUp, Eye, MoreHorizontal, Search, Send, X } from 'lucide-react'
+import { ArrowLeft, Bell, BellOff, Camera, ChevronDown, ChevronRight, ChevronUp, MoreHorizontal, Search, Send, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
 import { participationOf, PARTICIPATION_RADIUS, StatusLine } from '../../components/ui/BoardStatus'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
-import { CategoryChips, SortChips, applyBoardFilters, CATEGORY_OPTIONS, SORT_OPTIONS, type BoardSort, type CategoryFilter } from '../../components/ui/FilterBar'
+import { CategoryChips, applyBoardFilters, CATEGORY_OPTIONS, SORT_OPTIONS, type BoardSort, type CategoryFilter } from '../../components/ui/FilterBar'
 import { ReportSheet } from '../../components/ui/ReportSheet'
 import { SituationPulse } from '../../components/ui/SituationPulse'
 import { useApp } from '../../context/AppContext'
@@ -16,7 +16,7 @@ import type { Category, Comment, CommentReaction } from '../../types/domain'
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
 export function BoardListScreen() {
-  const { boards, comments, go, openBoard, inRange, mutedBoardIds, toggleBoardNotifications } = useApp()
+  const { boards, comments, go, openBoard, inRange } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
   const sortValue = searchParams.get('sort') as BoardSort | null
   const categoryValue = searchParams.get('category') as CategoryFilter | null
@@ -33,9 +33,10 @@ export function BoardListScreen() {
   const visibleBoards = useMemo(() => applyBoardFilters(boards, { category, sort, joinableOnly, inRange }), [boards, category, sort, joinableOnly, inRange])
   return <AppShell contentClassName="ux-board-screen">
     <header className="ux-board-header"><h1>게시판</h1><button className="icon map-search" onClick={() => go('search')} aria-label="검색"><Search size={26}/></button></header>
-    <div className="ux-filter-stack">
+    <div className="ux-filter-row">
+      <select className="sort-select" aria-label="정렬" value={sort} onChange={(event) => updateFilter('sort', event.target.value)}>{SORT_OPTIONS.map((item) => <option key={item} value={item}>{item}순</option>)}</select>
       <CategoryChips value={category} onChange={(next) => updateFilter('category', next)}/>
-      <SortChips value={sort} onChange={(next) => updateFilter('sort', next)} joinableOnly={joinableOnly} onJoinableOnly={(next) => updateFilter('joinable', next ? '1' : '0')}/>
+      <button className={`joinable-chip ${joinableOnly ? 'selected' : ''}`} aria-pressed={joinableOnly} onClick={() => updateFilter('joinable', joinableOnly ? '0' : '1')}>참여 가능만</button>
     </div>
     <div className="ux-board-list">{visibleBoards.length
       ? visibleBoards.map((board) => <BoardCard
@@ -43,11 +44,9 @@ export function BoardListScreen() {
           board={board}
           inRange={inRange}
           commentCount={comments.filter((comment) => comment.boardId === board.id).length}
-          notificationsMuted={mutedBoardIds.includes(board.id)}
-          onToggleNotifications={() => toggleBoardNotifications(board.id)}
           onOpen={() => openBoard(board.id)}
         />)
-      : <EmptyState title="조건에 맞는 게시판이 없어요" description={joinableOnly ? '참여 가능만 끄면 주변의 다른 상황도 볼 수 있어요.' : '카테고리를 바꿔보세요.'} action={joinableOnly ? '참여 가능만 끄기' : '전체 보기'} onAction={() => updateFilter(joinableOnly ? 'joinable' : 'category', joinableOnly ? '0' : '전체')}/>}
+      : <EmptyState title="조건에 맞는 게시판이 없어요" action={joinableOnly ? '참여 가능만 끄기' : '전체 보기'} onAction={() => updateFilter(joinableOnly ? 'joinable' : 'category', joinableOnly ? '0' : '전체')}/>}
     </div>
   </AppShell>
 }
@@ -66,7 +65,7 @@ export function SearchScreen() {
     <h4>검색 결과 <small>{results.length}</small></h4>
     <div className="post-list">{results.length
       ? results.map((board) => <BoardCard key={board.id} board={board} inRange={inRange} commentCount={comments.filter((comment) => comment.boardId === board.id).length} onOpen={() => openBoard(board.id)}/>)
-      : <EmptyState title={query ? `'${query}' 결과가 없어요` : '검색 결과가 없어요'} description={scope === '150m 안' ? '범위를 전체로 넓혀 다시 찾아볼 수 있어요.' : undefined} action={scope === '150m 안' ? '전체에서 찾기' : undefined} onAction={scope === '150m 안' ? () => setScope('전체') : undefined}/>}
+      : <EmptyState title={query ? `'${query}' 결과가 없어요` : '검색 결과가 없어요'} action={scope === '150m 안' ? '전체에서 찾기' : undefined} onAction={scope === '150m 안' ? () => setScope('전체') : undefined}/>}
     </div>
   </AppShell>
 }
@@ -192,22 +191,19 @@ export function BoardDetailScreen() {
     </div>}
 
     <article className="detail-article">
-      <span className="detail-category">{board.category}</span>
       <h1>{board.title}</h1>
-      <StatusLine board={board} inRange={inRange}/>
-      <div className="detail-author"><strong>{board.authorName}</strong><span>{board.createdAt}</span><span className="detail-views"><Eye size={14}/>{board.views}</span></div>
+      <div className="detail-author"><strong>{board.authorName}</strong><span>{board.createdAt}</span><StatusLine board={board} inRange={inRange}/></div>
       <p className="detail-body">{board.body}</p>
       {board.imageName && <div className="attachment">첨부 이미지: {board.imageName}</div>}
     </article>
 
     <SituationPulse board={board} interactive={canJoin} onReact={(reaction) => reactToBoard(board.id, reaction)}/>
-    {!canJoin && <p className="join-hint">{board.status === '종료됨' ? '종료된 게시판이에요. 기록은 계속 볼 수 있어요.' : '150m 밖이라 읽기만 가능해요. 가까이 가면 참여할 수 있어요.'}</p>}
 
     <section className="comments-section">
       <div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>
       {rootComments.length
         ? shownComments.map((comment) => <div key={comment.id}>
-            {comment.id === firstUnreadId && <div className="unread-divider"><span>여기부터 새 댓글 {newRootCount}개</span></div>}
+            {comment.id === firstUnreadId && <div className="unread-divider"><span>새 댓글 {newRootCount}</span></div>}
             <CommentItem
               comment={comment}
               replies={boardComments.filter((reply) => reply.parentId === comment.id)}
@@ -219,11 +215,12 @@ export function BoardDetailScreen() {
               wasUnread={unreadIds.includes(comment.id)}
             />
           </div>)
-        : <EmptyState title="아직 댓글이 없어요" description={canJoin ? '가장 먼저 상황을 알려주세요.' : undefined}/>}
+        : <EmptyState title="아직 댓글이 없어요"/>}
       {remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 5)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}
       {rootComments.length > 5 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(5)}>댓글 접기 <ChevronUp size={17}/></button>}
     </section>
 
+    {!canJoin && <p className="join-hint">{board.status === '종료됨' ? '종료된 게시판이라 댓글을 쓸 수 없어요' : '150m 밖이라 읽기만 가능해요'}</p>}
     {canJoin && <>
       {replyTo && <div className="replying"><span>{replyTo.authorName}님에게 답글 작성 중</span><button onClick={() => setReplyTo(null)}>취소</button></div>}
       <div className="detail-comment-input">
@@ -237,12 +234,12 @@ export function BoardDetailScreen() {
       </div>
     </>}
 
-    {commentAction?.kind === 'report' && <ReportSheet targetType="댓글" targetLabel={`${commentAction.comment.authorName}님의 댓글`} onClose={() => setCommentAction(null)} onSubmit={(reason) => { reportTarget('댓글', commentAction.comment.id, reason); setCommentAction(null) }}/>}
-    {commentAction?.kind === 'block' && <ConfirmDialog title={`${commentAction.comment.authorName}님을 차단할까요?`} description="차단하면 이 사용자의 댓글이 보이지 않습니다. 설정에서 다시 해제할 수 있어요." confirmLabel="차단" danger onClose={() => setCommentAction(null)} onConfirm={() => { blockUser(commentAction.comment.authorId); setCommentAction(null) }}/>}
-    {reporting && <ReportSheet targetType="게시글" targetLabel={board.title} onClose={() => setReporting(false)} onSubmit={(reason) => { reportTarget('게시글', board.id, reason); setReporting(false) }}/>}
-    {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="되돌릴 수 없어요. 댓글도 함께 사라집니다." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>}
-    {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description="종료 후에는 새 댓글과 반응을 받을 수 없어요. 기록은 계속 남습니다." confirmLabel="종료" onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>}
-    {confirm === 'block' && <ConfirmDialog title={`${board.authorName}님을 차단할까요?`} description="차단하면 이 사용자의 글과 댓글이 보이지 않습니다. 설정에서 다시 해제할 수 있어요." confirmLabel="차단" danger onClose={() => setConfirm(null)} onConfirm={() => { blockUser(board.authorId); setConfirm(null) }}/>}
+    {commentAction?.kind === 'report' && <ReportSheet targetType="댓글" onClose={() => setCommentAction(null)} onSubmit={(reason) => { reportTarget('댓글', commentAction.comment.id, reason); setCommentAction(null) }}/>}
+    {commentAction?.kind === 'block' && <ConfirmDialog title={`${commentAction.comment.authorName}님을 차단할까요?`} description="설정에서 해제할 수 있어요." confirmLabel="차단" danger onClose={() => setCommentAction(null)} onConfirm={() => { blockUser(commentAction.comment.authorId); setCommentAction(null) }}/>}
+    {reporting && <ReportSheet targetType="게시글" onClose={() => setReporting(false)} onSubmit={(reason) => { reportTarget('게시글', board.id, reason); setReporting(false) }}/>}
+    {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="댓글도 함께 사라집니다." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>}
+    {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description="새 댓글과 반응을 받을 수 없게 됩니다." confirmLabel="종료" onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>}
+    {confirm === 'block' && <ConfirmDialog title={`${board.authorName}님을 차단할까요?`} description="설정에서 해제할 수 있어요." confirmLabel="차단" danger onClose={() => setConfirm(null)} onConfirm={() => { blockUser(board.authorId); setConfirm(null) }}/>}
   </AppShell>
 }
 
@@ -258,7 +255,7 @@ function BoardForm({ mode }: { mode: 'create' | 'edit' }) {
   const [title, setTitle] = useState(mode === 'edit' ? currentBoard?.title || '' : '')
   const [body, setBody] = useState(mode === 'edit' ? currentBoard?.body || '' : '')
   const [imageName, setImageName] = useState(mode === 'edit' ? currentBoard?.imageName : undefined)
-  if (!inRange) return <AppShell><BackHeader title="게시판 작성" onBack={() => go('board')}/><EmptyState title="150m 밖에서는 게시판을 만들 수 없어요" description="참여 범위 안으로 들어가면 바로 쓸 수 있어요." action="지도로 돌아가기" onAction={() => go('home')}/></AppShell>
+  if (!inRange) return <AppShell><BackHeader title="게시판 작성" onBack={() => go('board')}/><EmptyState title="150m 밖에서는 게시판을 만들 수 없어요" action="지도로 돌아가기" onAction={() => go('home')}/></AppShell>
   const submit = () => {
     if (!title.trim() || !body.trim()) return
     if (mode === 'edit' && currentBoard) updateBoard(currentBoard.id, { title: title.trim(), body: body.trim(), category })

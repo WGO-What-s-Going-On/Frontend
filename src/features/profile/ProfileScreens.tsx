@@ -29,19 +29,12 @@ export function ActivityScreen() {
     ? recentBoardIds.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] })
     : boards.filter((board) => filter === '댓글 단' && participatingIds.has(board.id) || filter === '공감한' && board.reactedByMe || filter === '내가 작성한' && board.authorId === user.id),
     [boards, filter, user.id, comments, recentBoardIds])
-  // 기존에는 아무것도 없을 때 화면이 그냥 비어 있어 고장인지 빈 것인지 알 수 없었다.
-  const emptyCopy = {
-    '최근 본': '게시판을 열어보면 여기에 쌓여요.',
-    '댓글 단': '댓글을 남기면 여기에서 다시 찾을 수 있어요.',
-    '공감한': '공감을 누른 게시판이 여기에 모여요.',
-    '내가 작성한': '직접 만든 게시판이 여기에 모여요.',
-  }[filter]
   return <AppShell>
     <BackHeader title="최근 활동 내역" onBack={() => go('my')}/>
     <div className="chips activity-filters">{filters.map((item) => <button key={item.label} className={filter === item.label ? 'selected' : ''} onClick={() => setFilter(item.label)}>{item.label}<span>{item.count}</span></button>)}</div>
     <div className="post-list compact">{filtered.length
-      ? filtered.map((board) => <BoardCard key={board.id} board={board} inRange={inRange} showBody commentCount={comments.filter((comment) => comment.boardId === board.id).length} onOpen={() => openBoard(board.id)}/>)
-      : <EmptyState title={`'${filter}' 게시판이 없어요`} description={emptyCopy} action="지도에서 찾아보기" onAction={() => go('home')}/>}
+      ? filtered.map((board) => <BoardCard key={board.id} board={board} inRange={inRange} commentCount={comments.filter((comment) => comment.boardId === board.id).length} onOpen={() => openBoard(board.id)}/>)
+      : <EmptyState title={`'${filter}' 게시판이 없어요`} action="지도에서 찾아보기" onAction={() => go('home')}/>}
     </div>
   </AppShell>
 }
