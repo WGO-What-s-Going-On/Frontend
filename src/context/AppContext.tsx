@@ -21,7 +21,7 @@ interface PersistedMockState {
   notificationSettings: NotificationSettings
 }
 
-const STORAGE_KEY = 'wgo-mockup-state-v1'
+const STORAGE_KEY = 'wgo-mockup-state-v2'
 
 function readPersistedState(): Partial<PersistedMockState> {
   try {
@@ -48,7 +48,7 @@ interface AppContextValue {
   toast: string
   go: (screen: Screen) => void
   back: (fallback?: Screen) => void
-  openBoard: (id: string) => void
+  openBoard: (id: string, commentId?: string) => void
   setInRange: (value: boolean) => void
   createBoard: (input: BoardInput) => void
   updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category'>) => void
@@ -58,12 +58,14 @@ interface AppContextValue {
   addComment: (body: string, parentId?: string, imageUrl?: string) => void
   deleteComment: (id: string) => void
   markCommentRead: (id: string) => void
+  markCommentsRead: (ids: string[]) => void
   reactToComment: (id: string, reaction: CommentReaction) => void
   updateUser: (input: Pick<User, 'nickname' | 'bio'>) => void
   markNoticeRead: (id: string) => void
   markAllNoticesRead: () => void
   reportTarget: (targetType: Report['targetType'], targetId: string, reason: string) => void
   blockUser: (userId: string) => void
+  unblockUser: (userId: string) => void
   toggleBoardNotifications: (boardId: string) => void
   updateNotificationSettings: (settings: NotificationSettings) => void
   resolveReport: (id: string, hideTarget: boolean) => void
@@ -102,7 +104,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const go = (next: Screen) => navigate(pathForScreen(next, currentBoardId))
   const back = (fallback: Screen = 'board') => location.key === 'default' ? go(fallback) : navigate(-1)
-  const openBoard = (id: string) => { setCurrentBoardId(id); setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)]); navigate(pathForScreen(inRange ? 'detail' : 'outside', id)) }
+  // 알림에서 들어올 때 어느 댓글 때문에 왔는지 함께 넘긴다. 목적지가 글 맨 위가 아니라 그 댓글이 되도록.
+  const openBoard = (id: string, commentId?: string) => {
+    setCurrentBoardId(id)
+    setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)])
+    navigate(`${pathForScreen('detail', id)}${commentId ? `?comment=${encodeURIComponent(commentId)}` : ''}`)
+  }
   const createBoard = (input: BoardInput) => {
     const id = `board-${Date.now()}`
     setBoards((items) => [{
@@ -134,6 +141,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
   const markCommentRead = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, read: true } : comment))
+  // 바뀔 것이 없으면 같은 배열을 그대로 돌려준다. 새 배열을 만들면 컨텍스트가 갱신되며 호출부의 effect가 다시 돌아 무한 루프가 된다.
+  const markCommentsRead = (ids: string[]) => setComments((items) => items.some((comment) => ids.includes(comment.id) && !comment.read)
+    ? items.map((comment) => ids.includes(comment.id) ? { ...comment, read: true } : comment)
+    : items)
   const reactToComment = (id: string, reaction: CommentReaction) => setComments((items) => items.map((comment) => {
     if (comment.id !== id) return comment
     const previous = comment.reactedByMe
@@ -147,6 +158,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
   const reportTarget = (targetType: Report['targetType'], targetId: string, reason: string) => { setReports((items) => [...items, { id: `report-${Date.now()}`, targetType, targetId, reason, status: '접수' }]); showToast('신고가 접수되었습니다.') }
   const blockUser = (userId: string) => { setBlockedUsers((items) => [...new Set([...items, userId])]); showToast('사용자를 차단했습니다.') }
+  const unblockUser = (userId: string) => { setBlockedUsers((items) => items.filter((id) => id !== userId)); showToast('차단을 해제했습니다.') }
   const toggleBoardNotifications = (boardId: string) => setMutedBoardIds((items) => items.includes(boardId) ? items.filter((id) => id !== boardId) : [...items, boardId])
   const updateNotificationSettings = (settings: NotificationSettings) => setNotificationSettings(settings)
   const resolveReport = (id: string, hideTarget: boolean) => {
@@ -157,8 +169,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings, toast,
-    go, back, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment,
-    updateUser, markNoticeRead, markAllNoticesRead, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
+    go, back, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, markCommentsRead, reactToComment,
+    updateUser, markNoticeRead, markAllNoticesRead, reportTarget, blockUser, unblockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

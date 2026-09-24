@@ -30,6 +30,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>
         <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name)}/>
         <button className="quick-submit" onClick={submit} disabled={!body.trim()}>게시하기</button>
+        <button className="quick-detailed" onClick={() => { onClose(); go('category') }}>제목까지 직접 쓰기</button>
       </>}
     </section>
   </div>

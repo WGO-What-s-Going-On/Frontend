@@ -21,6 +21,18 @@ export const initialBoards: Board[] = [
     reactions: { '저도 궁금해요': 7, '지금도 그래요': 14, '도움 됐어요': 21, '이제 끝났어요': 2 },
   },
   {
+    id: 'market', authorId: 'user-11', authorName: '시장상인회', category: '동네 소식',
+    title: '야시장 오늘 저녁 7시부터 열려요', body: '먹거리 부스는 주차장 쪽에 모여 있습니다.',
+    distance: 320, createdAt: '40분 전', status: '실시간', views: 54,
+    reactions: { '저도 궁금해요': 9, '지금도 그래요': 6, '도움 됐어요': 11, '이제 끝났어요': 0 },
+  },
+  {
+    id: 'water', authorId: 'user-12', authorName: '관리사무소', category: '일상 불편',
+    title: '단수 복구 완료됐습니다', body: '오후 2시부로 수돗물 정상 공급 중입니다.',
+    distance: 60, createdAt: '3시간 전', status: '종료됨', views: 201,
+    reactions: { '저도 궁금해요': 4, '지금도 그래요': 2, '도움 됐어요': 37, '이제 끝났어요': 29 },
+  },
+  {
     id: 'outage', authorId: 'user-2', authorName: '현장지킴이', category: '일상 불편',
     title: '정전이야! 1시간 넘는데 복구 될까?', body: '혹시 아파트 전체 정전인가요? 상황 공유 부탁드려요.',
     distance: 140, createdAt: '30분 전', status: '실시간', views: 88,
@@ -69,11 +81,22 @@ export const initialComments: Comment[] = [
     body: '현재 일부 동부터 조명이 다시 들어오고 있습니다.', createdAt: '3분 전', verified: true, read: false,
     reactions: { '도움돼요': 21, '맞아요': 11, '정보가 달라요': 0 },
   },
+  {
+    id: 'market-comment-1', boardId: 'market', authorId: 'user-13', authorName: '근처 직장인',
+    body: '작년보다 부스가 늘었다고 하네요.', createdAt: '30분 전', verified: false, read: false,
+    reactions: { '도움돼요': 3, '맞아요': 2, '정보가 달라요': 0 },
+  },
+  {
+    id: 'water-comment-1', boardId: 'water', authorId: 'user-14', authorName: '102동 주민',
+    body: '저희 동도 물 잘 나옵니다.', createdAt: '2시간 전', verified: true, read: true,
+    reactions: { '도움돼요': 8, '맞아요': 12, '정보가 달라요': 0 },
+  },
 ]
 
 export const initialNotices: Notice[] = [
   { id: 'notice-1', type: 'nearby', text: '내 주변 150m 이내에 새 게시판이 생성되었어요.', createdAt: '3분 전', read: false, boardId: 'fire' },
-  { id: 'notice-2', type: 'reply', text: '회원님의 댓글에 답글이 달렸어요.', createdAt: '15분 전', read: false, boardId: 'fire' },
+  { id: 'notice-2', type: 'reply', text: '회원님의 댓글에 답글이 달렸어요.', createdAt: '15분 전', read: false, boardId: 'fire', commentId: 'comment-2' },
   { id: 'notice-3', type: 'reaction', text: '회원님의 댓글에 공감 3개가 달렸어요.', createdAt: '1시간 전', read: true, boardId: 'mask' },
   { id: 'notice-4', type: 'lifecycle', text: '정전 신고 게시판이 곧 종료됩니다.', createdAt: '2일 전', read: true, boardId: 'outage' },
+  { id: 'notice-5', type: 'reaction', text: '단수 복구 게시판이 종료되었어요.', createdAt: '3시간 전', read: false, boardId: 'water' },
 ]

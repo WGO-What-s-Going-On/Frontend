@@ -11,7 +11,7 @@ export function TitleProgressCard({ postCount, commentCount }: { postCount: numb
   const currentIndex = titleLevels.reduce((found, level, index) => activityCount >= level.minimum ? index : found, 0)
   const current = titleLevels[currentIndex]
   const next = titleLevels[currentIndex + 1]
-  const progress = next ? Math.min(100, (activityCount / next.minimum) * 100) : 100
+  const progress = next ? Math.min(100, Math.max(0, ((activityCount - current.minimum) / (next.minimum - current.minimum)) * 100)) : 100
   const remaining = next ? next.minimum - activityCount : 0
 
   return <section className="title-progress-card" aria-label="활동 칭호">

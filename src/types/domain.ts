@@ -54,6 +54,7 @@ export interface Notice {
   createdAt: string
   read: boolean
   boardId?: string
+  commentId?: string
 }
 
 export interface Report {
