@@ -11,7 +11,7 @@ export function ProfileScreen() {
   const { user, boards, comments, go } = useApp()
   const postCount = boards.filter((board) => board.authorId === user.id).length
   const commentCount = comments.filter((comment) => comment.authorId === user.id).length
-  return <AppShell><header><h1>마이페이지</h1><button className="text-button" onClick={() => go('profile-edit')}>프로필 수정</button></header><TitleProgressCard postCount={postCount} commentCount={commentCount}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정</h4><div className="menu-group"><button onClick={() => go('account-settings')}>계정관리 <ChevronRight/></button><button onClick={() => go('app-settings')}>앱 설정 <ChevronRight/></button></div></AppShell>
+  return <AppShell><header><h1>마이페이지</h1></header><TitleProgressCard postCount={postCount} commentCount={commentCount}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정</h4><div className="menu-group"><button onClick={() => go('profile-edit')}>프로필 수정 <ChevronRight/></button><button onClick={() => go('app-settings')}>앱 설정 <ChevronRight/></button><button onClick={() => go('account-settings')}>계정 관리 <ChevronRight/></button></div></AppShell>
 }
 
 export function ActivityScreen() {
@@ -38,7 +38,7 @@ export function ProfileEditScreen() {
 export function AccountSettingsScreen() {
   const { blockedUsers, go, showToast } = useApp()
   const [withdraw, setWithdraw] = useState(false)
-  return <AppShell><BackHeader title="계정관리" onBack={() => go('my')}/><h4>차단 사용자</h4><div className="notice-box">차단한 사용자 {blockedUsers.length}명</div><h4>계정</h4><button className="menu" onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="danger-text" onClick={() => setWithdraw(true)}>회원 탈퇴</button>{withdraw && <ConfirmDialog title="정말 탈퇴할까요?" description="프로토타입에서는 로그인 화면으로 이동합니다." confirmLabel="탈퇴" danger onClose={() => setWithdraw(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>}</AppShell>
+  return <AppShell><BackHeader title="계정 관리" onBack={() => go('my')}/><h4>차단 사용자</h4><div className="notice-box">차단한 사용자 {blockedUsers.length}명</div><h4>계정</h4><button className="menu" onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="danger-text" onClick={() => setWithdraw(true)}>회원 탈퇴</button>{withdraw && <ConfirmDialog title="정말 탈퇴할까요?" description="프로토타입에서는 로그인 화면으로 이동합니다." confirmLabel="탈퇴" danger onClose={() => setWithdraw(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>}</AppShell>
 }
 
 export function AppSettingsScreen() {
