@@ -3,8 +3,7 @@ import { LoginScreen } from './features/auth/AuthScreens'
 import { MapScreen, OutsideRangeScreen } from './features/map/MapScreens'
 import { BoardListScreen, SearchScreen, BoardDetailScreen, CategoryScreen, CreateBoardScreen, EditBoardScreen } from './features/board/BoardScreens'
 import { NotificationScreen } from './features/notifications/NotificationScreen'
-import { ProfileScreen, ActivityScreen, ProfileEditScreen, SettingsScreen } from './features/profile/ProfileScreens'
-import { AdminScreen } from './features/admin/AdminScreen'
+import { ProfileScreen, ActivityScreen, ProfileEditScreen, AccountSettingsScreen, AppSettingsScreen } from './features/profile/ProfileScreens'
 import type { Screen } from './types/domain'
 
 const screens: Record<Screen, React.ComponentType> = {
@@ -20,9 +19,9 @@ const screens: Record<Screen, React.ComponentType> = {
   activity: ActivityScreen,
   alerts: NotificationScreen,
   'profile-edit': ProfileEditScreen,
-  settings: SettingsScreen,
+  'account-settings': AccountSettingsScreen,
+  'app-settings': AppSettingsScreen,
   outside: OutsideRangeScreen,
-  admin: AdminScreen,
 }
 
 export default function App() {

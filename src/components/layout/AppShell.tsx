@@ -14,7 +14,7 @@ const tabs: { screen: Screen; label: string; icon: typeof Map }[] = [
 function activeTab(screen: Screen) {
   if (['search', 'detail', 'outside', 'edit'].includes(screen)) return 'board'
   if (screen === 'create') return 'category'
-  if (['activity', 'profile-edit', 'settings', 'admin'].includes(screen)) return 'my'
+  if (['activity', 'profile-edit', 'account-settings', 'app-settings'].includes(screen)) return 'my'
   return screen
 }
 
