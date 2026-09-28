@@ -894,7 +894,9 @@ select:focus-visible,
 }
 
 .detail-inline-reactions {
-  margin-top: 11px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #ededed;
 }
 
 .detail-inline-reactions .post-reactions {
@@ -913,7 +915,7 @@ select:focus-visible,
   gap: 4px;
   overflow: visible;
   padding: 5px 0;
-  color: #555;
+  color: #666;
   border: 0;
   border-radius: 0;
   background: transparent;
