@@ -18,7 +18,7 @@ function activeTab(screen: Screen) {
   return screen
 }
 
-export function AppShell({ children, nav = true, contentClassName = '', shellClassName = '' }: { children: React.ReactNode; nav?: boolean; contentClassName?: string; shellClassName?: string }) {
+export function AppShell({ children, nav = true, contentClassName = '', shellClassName = '', bottomContent }: { children: React.ReactNode; nav?: boolean; contentClassName?: string; shellClassName?: string; bottomContent?: React.ReactNode }) {
   const { screen, go, notices, toast } = useApp()
   const [composerOpen, setComposerOpen] = useState(false)
   const screenRef = useRef<HTMLElement>(null)
@@ -36,6 +36,7 @@ export function AppShell({ children, nav = true, contentClassName = '', shellCla
   return <main className={`phone ${shellClassName}`.trim()}>
     <div className="status-bar"><strong>9:41</strong><span className="prototype-label">흐름 검증용</span></div>
     <section ref={screenRef} className={`screen ${contentClassName}`.trim()}>{children}</section>
+    {bottomContent}
     {nav && <><nav className="bottom-nav ux-bottom-nav">{tabs.map(({ screen: target, label, icon: Icon }) => <button key={target} className={active === target ? 'active' : ''} onClick={() => go(target)}><span className="nav-icon-wrap"><Icon size={22}/>{target === 'alerts' && unreadNotices > 0 && <b>{unreadNotices}</b>}</span><span>{label}</span></button>)}</nav><button className="compose-fab" onClick={() => setComposerOpen(true)} aria-label="새 글 작성"><Plus size={23}/><span>작성</span></button></>}
     {composerOpen && <QuickCreateSheet onClose={() => setComposerOpen(false)}/>}
     {toast && <div className="toast" role="status">{toast}</div>}

@@ -822,7 +822,7 @@ select:focus-visible,
 /* 게시글 상세 화면 */
 .board-detail-screen {
   position: relative;
-  padding: 12px 20px 38px;
+  padding: 12px 20px 108px;
 }
 
 .detail-nav {
@@ -1256,16 +1256,21 @@ select:focus-visible,
 }
 
 .detail-comment-input {
-  margin-top: 20px;
-  padding: 14px 0 0;
+  position: absolute;
+  z-index: 7;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  padding: 8px 0 0;
   border-top: 1px solid #e2e2e2;
+  background: #fff;
 }
 
 .replying {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 14px 0 -12px;
+  margin: 0 0 8px;
   padding: 10px 13px;
   border: 1px solid #ddd;
   border-radius: 13px;
@@ -1283,42 +1288,42 @@ select:focus-visible,
 
 .comment-composer-row {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  grid-template-columns: 36px minmax(0, 1fr) 36px;
   align-items: center;
-  gap: 8px;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid #d5d5d5;
+  border-radius: 26px;
+  background: #f7f7f7;
 }
 
 .comment-composer-row input {
   min-width: 0;
-  padding: 13px 15px;
-  border: 1px solid #d5d5d5;
-  border-radius: 22px;
-  border-color: #d5d5d5;
-  background: #f7f7f7;
+  padding: 10px 4px;
+  border: 0;
+  outline: 0;
+  background: transparent;
 }
 
 .comment-photo-add,
 .comment-submit {
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   display: grid;
   place-items: center;
   padding: 0;
-  border: 1px solid #d4d4d4;
+  border: 0;
   border-radius: 50%;
-  background: #fff;
+  background: transparent;
 }
 
 .comment-submit {
-  color: #fff;
-  border-color: #222;
-  background: #222;
+  color: #222;
 }
 
 .comment-submit:disabled {
-  color: #888;
-  border-color: #ddd;
-  background: #ddd;
+  color: #aaa;
+  background: transparent;
 }
 
 .comment-file-input {
