@@ -13,12 +13,9 @@ export function TitleProgressCard({ postCount, commentCount }: { postCount: numb
   const currentIndex = titleLevels.reduce((found, level, index) => activityCount >= level.minimum ? index : found, 0)
   const current = titleLevels[currentIndex]
   const next = titleLevels[currentIndex + 1]
-  const progress = next ? Math.min(100, (activityCount / next.minimum) * 100) : 100
   const remaining = next ? next.minimum - activityCount : 0
 
   return <section className="title-progress-card" aria-label="활동 칭호">
-    <div className="title-progress-head"><div className="title-progress-identity"><span className="title-progress-avatar"><UserRound size={21}/></span><div><small>현재 칭호</small><h3>{current.name}</h3></div></div><strong>{activityCount}{next && <span>/{next.minimum}</span>}</strong></div>
-    <div className="title-progress-copy"><b>{next ? `${next.name}까지 ${remaining}회 남았어요` : '최고 칭호를 달성했어요'}</b></div>
-    <div className="title-progress-track" role="progressbar" aria-label={next ? `${next.name} 달성 진행률` : '최고 칭호 달성'} aria-valuenow={Math.round(progress)} aria-valuemin={0} aria-valuemax={100}><i style={{ width: `${progress}%` }}/></div>
+    <div className="title-progress-identity"><span className="title-progress-avatar"><UserRound size={21}/></span><div><small>현재 칭호</small><h3>{current.name}</h3><p>{next ? `${next.name}까지 ${remaining}회 남았어요` : '최고 칭호를 달성했어요'}</p></div></div>
   </section>
 }
