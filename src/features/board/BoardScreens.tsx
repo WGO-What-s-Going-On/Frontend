@@ -112,7 +112,7 @@ export function BoardDetailScreen() {
       <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span><span><MapPin size={12}/>{board.distance}m</span></div>
       <p className="detail-body">{board.body}</p>
       {board.imageName && <div className="attachment">첨부 이미지: {board.imageName}</div>}
-      <div className="detail-inline-reactions"><PostReactions board={board} interactive={inRange && board.status === '실시간'} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
+      <div className="detail-inline-reactions"><span className="detail-reaction-label">이 글에 반응</span><PostReactions board={board} interactive={inRange && board.status === '실시간'} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
     </article>
     {!inRange && <div className="notice-box"><strong>150m 밖에서는 열람만 가능합니다.</strong></div>}
     <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={setReplyTo}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong><p>가장 먼저 상황을 알려주세요</p></div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>댓글 목록 접기 <ChevronUp size={17}/></button>}</section>
