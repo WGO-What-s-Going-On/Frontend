@@ -60,10 +60,10 @@ export function SearchScreen() {
   </AppShell>
 }
 
-function CommentItem({ comment, replies = [], onReply, isReply = false, initiallyExpanded = false }: { comment: Comment; replies?: Comment[]; onReply: (comment: Comment) => void; isReply?: boolean; initiallyExpanded?: boolean }) {
+function CommentItem({ comment, replies = [], onReply, isReply = false }: { comment: Comment; replies?: Comment[]; onReply: (comment: Comment) => void; isReply?: boolean }) {
   const { user, reactToComment, deleteComment, markCommentRead, reportTarget, blockUser } = useApp()
   const [menu, setMenu] = useState<'actions' | 'report' | null>(null)
-  const [collapsed, setCollapsed] = useState(!initiallyExpanded)
+  const [collapsed, setCollapsed] = useState(true)
   const [photoOpen, setPhotoOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const reactions: CommentReaction[] = ['도움돼요', '맞아요', '정보가 달라요']
@@ -99,7 +99,7 @@ export function BoardDetailScreen() {
   const [commentImageUrl, setCommentImageUrl] = useState('')
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
   const [menu, setMenu] = useState(false)
-  const [visibleComments, setVisibleComments] = useState(2)
+  const [visibleComments, setVisibleComments] = useState(3)
   const [confirm, setConfirm] = useState<'delete' | 'finish' | null>(null)
   const commentFileRef = useRef<HTMLInputElement>(null)
   if (!board) return null
@@ -121,7 +121,7 @@ export function BoardDetailScreen() {
     </article>
     <section className="detail-reactions"><h3>공감</h3><PostReactions board={board} interactive={inRange && board.status === '실시간'} onReact={(reaction) => reactToBoard(board.id, reaction)}/></section>
     {!inRange && <div className="notice-box"><strong>150m 밖에서는 열람만 가능합니다.</strong></div>}
-    <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment, index) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={setReplyTo} initiallyExpanded={index < 2}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong><p>가장 먼저 상황을 알려주세요</p></div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 2 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(2)}>댓글 목록 접기 <ChevronUp size={17}/></button>}</section>
+    <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={setReplyTo}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong><p>가장 먼저 상황을 알려주세요</p></div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>댓글 목록 접기 <ChevronUp size={17}/></button>}</section>
     {inRange && board.status === '실시간' && <>{replyTo && <div className="replying"><span>{replyTo.authorName}님에게 답글 작성 중</span><button onClick={() => setReplyTo(null)}>취소</button></div>}<div className="detail-comment-input">{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => setCommentImageUrl('')} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><button className="comment-photo-add" onClick={() => commentFileRef.current?.click()} aria-label="댓글에 사진 첨부"><Camera size={20}/></button><input value={body} onChange={(event) => setBody(event.target.value)} placeholder={replyTo ? '답글을 입력하세요' : '댓글을 입력하세요'}/><button className="comment-submit" onClick={submit} disabled={!body.trim() && !commentImageUrl} aria-label="댓글 등록"><Send size={19}/></button></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => addPhoto(event.target.files?.[0])}/></div></>}
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="목업에서는 즉시 목록에서 제거됩니다." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
     {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description="종료 후에는 새 댓글과 반응을 작성할 수 없습니다." confirmLabel="종료" onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>} 
