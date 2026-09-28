@@ -849,96 +849,111 @@ select:focus-visible,
 }
 
 .detail-article {
-  padding-bottom: 22px;
+  padding-bottom: 14px;
   border-bottom: 1px solid #dedede;
 }
 
 .detail-article h1 {
-  margin: 14px 0 10px;
-  font-size: 25px;
-  line-height: 1.35;
-  word-break: keep-all;
-}
-
-.detail-author {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  color: #777;
-  font-size: 12px;
-}
-
-.detail-author strong {
-  color: #333;
-}
-
-.detail-author span::before {
-  content: '·';
-  margin-right: 7px;
-}
-
-.detail-meta {
-  display: flex;
-  gap: 15px;
-  margin-top: 14px;
-  color: #666;
-  font-size: 11px;
-}
-
-.detail-meta span {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.detail-body {
-  margin: 22px 0 0;
-  color: #333;
-  font-size: 15px;
-  line-height: 1.75;
-  white-space: pre-wrap;
-}
-
-.detail-reactions {
-  padding: 14px 0;
-  border-bottom: 1px solid #dedede;
-}
-
-.detail-reactions h3 {
-  font-size: 16px;
-}
-
-.detail-reactions .post-reactions {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 6px;
-  margin-top: 9px;
-}
-
-.detail-reactions .post-reactions.interactive button {
-  min-width: 0;
-  min-height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 7px 4px;
-  border-radius: 11px;
-  font-size: 9px;
-}
-
-.detail-reactions .post-reactions button b {
   overflow: hidden;
+  margin: 8px 0 7px;
+  font-size: 22px;
+  line-height: 1.3;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
-.detail-reactions .post-reactions button span {
-  font-size: 9px;
+.detail-byline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #777;
+  font-size: 11px;
+}
+
+.detail-byline strong {
+  color: #333;
+}
+
+.detail-byline span {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.detail-byline span::before {
+  content: '·';
+  margin-right: 4px;
+}
+
+.detail-body {
+  margin: 14px 0 0;
+  color: #333;
+  font-size: 14px;
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+.detail-inline-reactions {
+  margin-top: 11px;
+}
+
+.detail-inline-reactions .post-reactions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px 12px;
+  margin: 0;
+}
+
+.detail-inline-reactions .post-reactions.interactive button,
+.detail-inline-reactions .post-reactions > span {
+  min-width: 0;
+  min-height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  overflow: visible;
+  padding: 5px 0;
+  color: #555;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.detail-inline-reactions .post-reactions b {
+  overflow: hidden;
+  color: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.detail-inline-reactions .post-reactions button span,
+.detail-inline-reactions .post-reactions > span small {
+  color: #777;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.detail-inline-reactions .post-reactions.interactive button.selected {
+  color: #111;
+  border: 0;
+  background: transparent;
+}
+
+.detail-inline-reactions .post-reactions.interactive button.selected b {
   font-weight: 800;
 }
 
+.detail-inline-reactions .post-reactions.interactive button.selected b::after {
+  margin-left: 3px;
+  content: '✓';
+  font-size: 9px;
+}
+
 .comments-section {
-  margin-top: 22px;
+  margin-top: 14px;
 }
 
 .comments-heading {
