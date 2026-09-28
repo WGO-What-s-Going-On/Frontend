@@ -298,27 +298,26 @@
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 72px;
-  min-height: 32px;
-  padding: 7px 8px;
+  justify-content: flex-start;
+  width: 70px;
+  min-height: 35px;
+  padding: 9px 24px 9px 13px;
   color: #333;
   border: 1px solid #d5d5d5;
-  border-radius: 16px;
-  background: #f5f5f5;
+  border-radius: 18px;
+  background: #fff;
   font-size: 11px;
   font-weight: 700;
   outline: none;
 }
 
 .ux-sort-trigger span {
-  width: 100%;
-  text-align: center;
+  text-align: left;
 }
 
 .ux-sort-trigger svg {
   position: absolute;
-  right: 7px;
+  right: 9px;
 }
 
 .ux-sort-trigger:focus-visible {
@@ -331,27 +330,50 @@
   z-index: 20;
   top: calc(100% + 6px);
   left: 0;
-  width: 96px;
-  padding: 5px;
+  width: 82px;
+  padding: 4px;
   border: 1px solid #d5d5d5;
-  border-radius: 14px;
+  border-radius: 12px;
   background: #fff;
   box-shadow: 0 8px 20px #00000018;
 }
 
 .ux-sort-menu button {
   width: 100%;
-  padding: 8px;
+  padding: 6px 7px;
   color: #333;
   border: 0;
-  border-radius: 10px;
+  border-radius: 8px;
   background: transparent;
+  font-size: 10px;
+  line-height: 1.3;
   text-align: center;
 }
 
 .ux-sort-menu button.selected {
   color: #111;
   background: #ededed;
+}
+
+.ux-sort-menu button:focus-visible {
+  background: #f2f2f2;
+  outline: none;
+}
+
+@media (hover: hover) {
+  .ux-sort-trigger:hover,
+  .ux-category-filters button:hover:not(.selected) {
+    border-color: #bdbdbd;
+    background: #f4f4f4;
+  }
+
+  .ux-sort-menu button:hover {
+    background: #f2f2f2;
+  }
+
+  .ux-sort-menu button.selected:hover {
+    background: #e5e5e5;
+  }
 }
 
 .ux-board-list {
