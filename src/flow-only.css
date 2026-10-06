@@ -112,17 +112,19 @@
 }
 
 .nearby-animation {
-  width: 300px;
-  height: 300px;
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 132px;
+  right: 10px;
+  bottom: 150px;
+  left: 10px;
   overflow: hidden;
   border: 1px solid #d7d7d7;
-  border-radius: 30px;
-  background: #ececec;
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, .72) 0 28px, transparent 29px),
+    radial-gradient(circle at 82% 76%, rgba(255, 255, 255, .58) 0 38px, transparent 39px),
+    #ececec;
   box-shadow: 0 18px 45px rgba(0, 0, 0, .08);
-  transform: translate(-50%, -50%) translateY(18px);
 }
 
 .nearby-road {
@@ -137,7 +139,7 @@
 }
 
 .nearby-road-one {
-  width: 24px;
+  width: 28px;
   height: 130%;
   top: -15%;
   left: 31%;
@@ -152,7 +154,7 @@
 }
 
 .nearby-road-two {
-  width: 18px;
+  width: 22px;
   height: 120%;
   top: -10%;
   right: 18%;
@@ -161,8 +163,8 @@
 
 .nearby-road-three {
   width: 120%;
-  height: 22px;
-  top: 35%;
+  height: 26px;
+  top: 37%;
   left: -10%;
   transform: rotate(-7deg);
 }
@@ -176,22 +178,22 @@
 
 .nearby-road-four {
   width: 120%;
-  height: 16px;
+  height: 20px;
   right: -10%;
   bottom: 20%;
   transform: rotate(9deg);
 }
 
 .nearby-range {
-  width: 154px;
-  height: 154px;
+  width: 184px;
+  height: 184px;
   position: absolute;
-  top: 74px;
-  left: 73px;
+  top: calc(50% - 92px);
+  left: calc(50% - 92px);
   border: 1.5px solid #555;
   border-radius: 50%;
   background: rgba(255, 255, 255, .34);
-  animation: nearby-range-pulse 4.8s ease-in-out infinite;
+  animation: nearby-range-pulse 3.2s ease-in-out infinite;
 }
 
 .nearby-range::before,
@@ -203,15 +205,15 @@
   border: 1px solid #777;
   border-radius: inherit;
   opacity: 0;
-  animation: nearby-scan 4.8s ease-out infinite;
+  animation: nearby-scan 3.2s ease-out infinite;
 }
 
 .nearby-range::after {
-  animation-delay: .8s;
+  animation-delay: .45s;
 }
 
 .nearby-range > i {
-  animation-delay: 1.6s;
+  animation-delay: .9s;
 }
 
 .nearby-range small {
@@ -229,20 +231,20 @@
 }
 
 .nearby-location {
-  width: 54px;
-  height: 54px;
+  width: 62px;
+  height: 62px;
   display: grid;
   position: absolute;
   z-index: 3;
-  top: 124px;
-  left: 123px;
+  top: calc(50% - 31px);
+  left: calc(50% - 31px);
   place-items: center;
   color: #fff;
   border: 5px solid rgba(255, 255, 255, .88);
   border-radius: 50%;
   background: #222;
   box-shadow: 0 8px 20px rgba(0, 0, 0, .22);
-  animation: nearby-location-breathe 2.4s ease-in-out infinite;
+  animation: nearby-location-breathe 1.8s ease-in-out infinite;
 }
 
 .nearby-event {
@@ -259,7 +261,7 @@
   font-size: 9px;
   opacity: 0;
   transform: translateY(6px) scale(.9);
-  animation: nearby-event-pop 4.8s ease-in-out infinite;
+  animation: nearby-event-pop 3.2s ease-in-out infinite;
 }
 
 .nearby-event i {
@@ -277,15 +279,15 @@
 }
 
 .nearby-event-fire {
-  top: 67px;
-  right: 21px;
-  animation-delay: .65s;
+  top: 23%;
+  right: 6%;
+  animation-delay: .12s;
 }
 
 .nearby-event-help {
-  bottom: 48px;
-  left: 22px;
-  animation-delay: 1.35s;
+  bottom: 19%;
+  left: 7%;
+  animation-delay: .38s;
 }
 
 .nearby-alert {
@@ -295,7 +297,7 @@
   gap: 9px;
   position: absolute;
   z-index: 5;
-  top: 18px;
+  top: 6%;
   left: 50%;
   padding: 9px 12px;
   border: 1px solid #cecece;
@@ -304,7 +306,7 @@
   box-shadow: 0 9px 24px rgba(0, 0, 0, .14);
   opacity: 0;
   transform: translate(-50%, -8px);
-  animation: nearby-alert-in 4.8s ease-in-out infinite;
+  animation: nearby-alert-in 3.2s ease-in-out infinite;
 }
 
 .nearby-alert > span {
@@ -322,9 +324,9 @@
 }
 
 @keyframes nearby-scan {
-  0%, 18% { opacity: 0; transform: scale(.45); }
-  30% { opacity: .42; }
-  64%, 100% { opacity: 0; transform: scale(1.38); }
+  0%, 8% { opacity: 0; transform: scale(.45); }
+  18% { opacity: .42; }
+  58%, 100% { opacity: 0; transform: scale(1.38); }
 }
 
 @keyframes nearby-range-pulse {
@@ -338,13 +340,27 @@
 }
 
 @keyframes nearby-event-pop {
-  0%, 18%, 90%, 100% { opacity: 0; transform: translateY(6px) scale(.9); }
-  30%, 82% { opacity: 1; transform: translateY(0) scale(1); }
+  0%, 6%, 92%, 100% { opacity: 0; transform: translateY(6px) scale(.9); }
+  16%, 84% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes nearby-alert-in {
-  0%, 48%, 100% { opacity: 0; transform: translate(-50%, -8px); }
-  60%, 88% { opacity: 1; transform: translate(-50%, 0); }
+  0%, 24%, 100% { opacity: 0; transform: translate(-50%, -8px); }
+  34%, 90% { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@media (max-height: 720px) {
+  .nearby-animation {
+    top: 118px;
+    bottom: 136px;
+  }
+
+  .nearby-range {
+    width: 158px;
+    height: 158px;
+    top: calc(50% - 79px);
+    left: calc(50% - 79px);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
