@@ -1006,6 +1006,17 @@ select:focus-visible,
   border-radius: 0;
   background: #fff;
   animation: comment-appear .24s ease-out both;
+  transition: background-color .16s ease;
+}
+
+.board-detail-screen .comment-clickable {
+  cursor: pointer;
+}
+
+.board-detail-screen .comment-clickable:hover,
+.board-detail-screen .comment-clickable:focus-visible {
+  background: #fafafa;
+  outline: none;
 }
 
 .board-detail-screen .comment.comment-menu-open {
@@ -1056,39 +1067,6 @@ select:focus-visible,
   gap: 5px;
   color: #777;
   font-size: 10px;
-}
-
-.comment-head-actions {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 2px;
-}
-
-.comment-reply-button {
-  height: 28px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 0 6px;
-  color: #666;
-  border: 0;
-  border-radius: 7px;
-  background: transparent;
-  font-size: 10px;
-  font-weight: 700;
-  transition: color .18s ease, background-color .18s ease;
-}
-
-.comment-reply-button:hover,
-.comment-reply-button:focus-visible {
-  color: #111;
-  background: #f1f1f1;
-  outline: none;
-}
-
-.comment-reply-button:active {
-  transform: scale(.96);
 }
 
 .comment-icon-button {
@@ -1192,6 +1170,11 @@ select:focus-visible,
   border-bottom: 1px solid #e4e4e4;
   border-radius: 0;
   background: transparent;
+}
+
+.board-detail-screen .comment-replies .reply-comment:hover,
+.board-detail-screen .comment-replies .reply-comment:focus-visible {
+  background: #efefef;
 }
 
 .comment-image-placeholder {
