@@ -130,7 +130,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }))
   const addComment = (body: string, parentId?: string, imageUrl?: string) => {
     setComments((items) => [...items, { id: `comment-${Date.now()}`, boardId: currentBoardId, authorId: user.id, authorName: user.nickname, body, imageUrl, read: true, createdAt: '방금 전', verified: inRange, parentId, reactions: { '도움돼요': 0, '맞아요': 0, '정보가 달라요': 0 } }])
-    showToast(parentId ? '답글을 등록했습니다.' : '댓글을 등록했습니다.')
+    showToast('댓글을 등록했습니다.')
   }
   const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
   const markCommentRead = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, read: true } : comment))

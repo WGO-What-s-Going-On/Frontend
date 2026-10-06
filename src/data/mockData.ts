@@ -73,7 +73,7 @@ export const initialComments: Comment[] = [
 
 export const initialNotices: Notice[] = [
   { id: 'notice-1', type: 'nearby', text: '내 주변 150m 이내에 새 게시판이 생성되었어요.', createdAt: '3분 전', read: false, boardId: 'fire' },
-  { id: 'notice-2', type: 'reply', text: '회원님의 댓글에 답글이 달렸어요.', createdAt: '15분 전', read: false, boardId: 'fire' },
-  { id: 'notice-3', type: 'reaction', text: '회원님의 댓글에 공감 3개가 달렸어요.', createdAt: '1시간 전', read: true, boardId: 'mask' },
+  { id: 'notice-2', type: 'reply', text: '회원님의 댓글에 새 댓글이 달렸어요.', createdAt: '15분 전', read: false, boardId: 'fire' },
+  { id: 'notice-3', type: 'reaction', text: '회원님의 게시글에 새로운 반응이 달렸어요.', createdAt: '1시간 전', read: true, boardId: 'mask' },
   { id: 'notice-4', type: 'lifecycle', text: '정전 신고 게시판이 곧 종료됩니다.', createdAt: '2일 전', read: true, boardId: 'outage' },
 ]

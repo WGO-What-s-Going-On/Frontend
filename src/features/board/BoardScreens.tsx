@@ -7,7 +7,7 @@ import { BoardCard } from '../../components/ui/BoardCard'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
-import type { Category, Comment, CommentReaction } from '../../types/domain'
+import type { Category, Comment } from '../../types/domain'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
@@ -61,11 +61,10 @@ export function SearchScreen() {
 }
 
 function CommentItem({ comment, replies = [], onReply, isReply = false }: { comment: Comment; replies?: Comment[]; onReply: (comment: Comment) => void; isReply?: boolean }) {
-  const { user, reactToComment, deleteComment, reportTarget, blockUser } = useApp()
+  const { user, deleteComment, reportTarget, blockUser } = useApp()
   const [menu, setMenu] = useState<'actions' | 'report' | null>(null)
   const [photoOpen, setPhotoOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
-  const reactions: CommentReaction[] = ['도움돼요', '맞아요', '정보가 달라요']
   const reportReasons = ['부정확한 정보', '광고·홍보', '욕설·비방', '개인정보 노출']
 
   useEffect(() => {
@@ -80,7 +79,7 @@ function CommentItem({ comment, replies = [], onReply, isReply = false }: { comm
   return <article className={`comment ${isReply ? 'reply-comment' : ''} ${menu ? 'comment-menu-open' : ''}`}>
     <div className="comment-head"><div className="comment-identity"><span className="comment-avatar"><UserRound size={15}/></span><div><strong>{comment.authorName}</strong><small>{comment.createdAt}{comment.verified ? ' · 현장 인증' : ''}</small></div></div><button className="comment-icon-button" onClick={() => setMenu(menu ? null : 'actions')} aria-label="댓글 메뉴" aria-expanded={Boolean(menu)}><MoreHorizontal size={18}/></button></div>
     {comment.body && <p>{comment.body}</p>}{comment.imagePlaceholder && <div className="comment-image-placeholder">[이미지]</div>}{comment.imageUrl && <button className="comment-photo" onClick={() => setPhotoOpen(true)} aria-label="댓글 사진 크게 보기"><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></button>}
-    <div className="comment-actions"><div className="comment-reactions">{reactions.map((reaction) => <button key={reaction} className={comment.reactedByMe === reaction ? 'selected' : ''} onClick={() => reactToComment(comment.id, reaction)}>{reaction} <b>{comment.reactions[reaction]}</b></button>)}</div>{!isReply && <button className="reply-link" onClick={() => onReply(comment)}>답글</button>}</div>
+    {!isReply && <div className="comment-actions"><button className="reply-link" onClick={() => onReply(comment)}>댓글</button></div>}
     {!isReply && replies.length > 0 && <div className="comment-replies">{replies.map((reply) => <CommentItem key={reply.id} comment={reply} onReply={onReply} isReply/>)}</div>}
     {menu && <div ref={menuRef} className={`context-menu comment-context-menu ${menu === 'report' ? 'comment-report-menu' : ''}`} role="menu" aria-label={menu === 'report' ? '댓글 신고 사유' : '댓글 메뉴'}>{comment.authorId === user.id ? <button onClick={() => deleteComment(comment.id)}>댓글 삭제</button> : menu === 'actions' ? <><button onClick={() => setMenu('report')}>댓글 신고</button><button onClick={() => { blockUser(comment.authorId); setMenu(null) }}>사용자 차단</button></> : <><strong>신고 사유</strong>{reportReasons.map((reason) => <button key={reason} onClick={() => { reportTarget('댓글', comment.id, reason); setMenu(null) }}>{reason}</button>)}<button className="comment-report-back" onClick={() => setMenu('actions')}>뒤로</button></>}</div>}
     {photoOpen && comment.imageUrl && <div className="comment-photo-modal" role="dialog" aria-label="현장 사진 보기" onClick={() => setPhotoOpen(false)}><button aria-label="사진 닫기"><X size={22}/></button><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></div>}
@@ -103,7 +102,7 @@ export function BoardDetailScreen() {
   const rootComments = boardComments.filter((comment) => !comment.parentId)
   const shownComments = rootComments.slice(0, visibleComments)
   const remainingComments = rootComments.length - shownComments.length
-  const commentComposer = inRange && board.status === '실시간' ? <div className="detail-comment-input">{replyTo && <div className="replying"><span>{replyTo.authorName}님에게 답글 작성 중</span><button onClick={() => setReplyTo(null)}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => setCommentImageUrl('')} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><button className="comment-photo-add" onClick={() => commentFileRef.current?.click()} aria-label="댓글에 사진 첨부"><Camera size={20}/></button><input value={body} onChange={(event) => setBody(event.target.value)} placeholder={replyTo ? '답글을 입력하세요' : '댓글을 입력하세요'}/><button className="comment-submit" onClick={submit} disabled={!body.trim() && !commentImageUrl} aria-label="댓글 등록"><Send size={19}/></button></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => addPhoto(event.target.files?.[0])}/></div> : null
+  const commentComposer = inRange && board.status === '실시간' ? <div className="detail-comment-input">{replyTo && <div className="replying"><span>{replyTo.authorName}님에게 댓글 작성 중</span><button onClick={() => setReplyTo(null)}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => setCommentImageUrl('')} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><button className="comment-photo-add" onClick={() => commentFileRef.current?.click()} aria-label="댓글에 사진 첨부"><Camera size={20}/></button><input value={body} onChange={(event) => setBody(event.target.value)} placeholder="댓글을 입력하세요"/><button className="comment-submit" onClick={submit} disabled={!body.trim() && !commentImageUrl} aria-label="댓글 등록"><Send size={19}/></button></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => addPhoto(event.target.files?.[0])}/></div> : null
   return <AppShell nav={false} contentClassName="board-detail-screen" bottomContent={commentComposer}>
     <header className="detail-nav"><button className="icon" onClick={() => back('board')} aria-label="뒤로 가기"><ArrowLeft size={22}/></button><button className="icon" onClick={() => setMenu(!menu)} aria-label="게시글 메뉴"><MoreHorizontal size={24}/></button></header>
     {menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => go('edit')}>게시글 수정</button><button onClick={() => setConfirm('finish')}>게시판 종료</button><button onClick={() => setConfirm('delete')}>게시글 삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>게시글 신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>작성자 차단</button></>}</div>}

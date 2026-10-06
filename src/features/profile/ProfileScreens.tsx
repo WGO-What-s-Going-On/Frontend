@@ -43,5 +43,5 @@ export function AccountSettingsScreen() {
 
 export function AppSettingsScreen() {
   const { go, notificationSettings, updateNotificationSettings } = useApp()
-  return <AppShell><BackHeader title="앱 설정" onBack={() => go('my')}/><h4>알림 설정</h4><label className="setting-row"><span>주변 새 게시판 알림</span><input type="checkbox" checked={notificationSettings.nearby} onChange={(event) => updateNotificationSettings({ ...notificationSettings, nearby: event.target.checked })}/></label><label className="setting-row"><span>댓글과 답글 알림</span><input type="checkbox" checked={notificationSettings.replies} onChange={(event) => updateNotificationSettings({ ...notificationSettings, replies: event.target.checked })}/></label></AppShell>
+  return <AppShell><BackHeader title="앱 설정" onBack={() => go('my')}/><h4>알림 설정</h4><label className="setting-row"><span>주변 새 게시판 알림</span><input type="checkbox" checked={notificationSettings.nearby} onChange={(event) => updateNotificationSettings({ ...notificationSettings, nearby: event.target.checked })}/></label><label className="setting-row"><span>댓글 알림</span><input type="checkbox" checked={notificationSettings.replies} onChange={(event) => updateNotificationSettings({ ...notificationSettings, replies: event.target.checked })}/></label></AppShell>
 }
