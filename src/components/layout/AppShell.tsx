@@ -8,13 +8,13 @@ const tabs: { screen: Screen; label: string; icon: typeof Map }[] = [
   { screen: 'home', label: '지도', icon: Map },
   { screen: 'board', label: '게시판', icon: MessageSquare },
   { screen: 'alerts', label: '알림', icon: Bell },
-  { screen: 'my', label: 'MY', icon: UserRound },
+  { screen: 'my', label: '마이', icon: UserRound },
 ]
 
 function activeTab(screen: Screen) {
   if (['search', 'detail', 'outside', 'edit'].includes(screen)) return 'board'
   if (screen === 'create') return 'category'
-  if (['activity', 'profile-edit', 'account-settings', 'app-settings'].includes(screen)) return 'my'
+  if (['activity', 'profile-edit', 'account-settings'].includes(screen)) return 'my'
   return screen
 }
 

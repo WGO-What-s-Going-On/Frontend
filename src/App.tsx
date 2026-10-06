@@ -3,7 +3,7 @@ import { LoginScreen } from './features/auth/AuthScreens'
 import { MapScreen, OutsideRangeScreen } from './features/map/MapScreens'
 import { BoardListScreen, SearchScreen, BoardDetailScreen, CategoryScreen, CreateBoardScreen, EditBoardScreen } from './features/board/BoardScreens'
 import { NotificationScreen } from './features/notifications/NotificationScreen'
-import { ProfileScreen, ActivityScreen, ProfileEditScreen, AccountSettingsScreen, AppSettingsScreen } from './features/profile/ProfileScreens'
+import { ProfileScreen, ActivityScreen, ProfileEditScreen, AccountSettingsScreen } from './features/profile/ProfileScreens'
 import type { Screen } from './types/domain'
 
 const screens: Record<Screen, React.ComponentType> = {
@@ -20,7 +20,6 @@ const screens: Record<Screen, React.ComponentType> = {
   alerts: NotificationScreen,
   'profile-edit': ProfileEditScreen,
   'account-settings': AccountSettingsScreen,
-  'app-settings': AppSettingsScreen,
   outside: OutsideRangeScreen,
 }
 

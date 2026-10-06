@@ -1,7 +1,7 @@
 export type Screen =
   | 'login' | 'home' | 'board' | 'search' | 'detail'
   | 'category' | 'create' | 'edit' | 'my' | 'activity' | 'alerts'
-  | 'profile-edit' | 'account-settings' | 'app-settings' | 'outside'
+  | 'profile-edit' | 'account-settings' | 'outside'
 
 export type Category = '긴급 사고' | '도움 요청' | '동네 소식' | '일상 불편'
 export type BoardStatus = '실시간' | '종료됨' | '숨김'
