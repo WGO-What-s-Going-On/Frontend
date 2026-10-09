@@ -75,8 +75,7 @@ select:focus-visible,
 .photo,
 .comment-composer-row,
 .detail-inline-reactions,
-.replying,
-.quick-field textarea { border-color: var(--c-line); background-color: var(--c-surface); }
+.replying { border-color: var(--c-line); background-color: var(--c-surface); }
 .icon,
 .map-search,
 .detail-nav .icon,
