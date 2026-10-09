@@ -1,12 +1,12 @@
 /* WGO design layer — 기존 화면 구조(크기, 간격, 모양, 배치)는 그대로 두고 색과 글꼴만 입힌다. 기준은 docs/DESIGN.md */
 :root {
   --c-canvas: #ffffff;
-  --c-page: #f7f8fa;
-  --c-surface: #f1f3f5;
-  --c-line: #e3e6eb;
-  --c-ink: #17191e;
-  --c-body: #474c55;
-  --c-mute: #8b919c;
+  --c-page: #eef3fd;
+  --c-surface: #e9effb;
+  --c-line: #dbe3f3;
+  --c-ink: #121a2e;
+  --c-body: #3f4a60;
+  --c-mute: #7a869e;
   --c-accent: #2b5ce6;
   --c-accent-press: #2149bd;
   --c-accent-soft: #ebf0fd;
@@ -172,7 +172,7 @@ select:focus-visible,
 .map-shell,
 .map-shell .status-bar,
 .map-screen .map { background-color: #eceff3; }
-.map-top-overlay { background: linear-gradient(var(--c-page) 0%, rgba(247, 248, 250, .94) 67%, rgba(247, 248, 250, 0) 100%); }
+.map-top-overlay { background: linear-gradient(var(--c-page) 0%, rgba(238, 243, 253, .94) 67%, rgba(238, 243, 253, 0) 100%); }
 .map-road { border-color: #fafbfc; background: #d8dce4; box-shadow: 0 0 0 1px #dde0e6; }
 .map-block { border-color: #d9dde4; background: #e1e4ea; }
 .map-park { border-color: #cfdcd2; background: #dae7dd; }
@@ -189,3 +189,59 @@ select:focus-visible,
 .detail-inline-reactions .post-reactions.interactive button.selected b,
 .detail-inline-reactions .post-reactions.interactive button.selected span,
 .detail-inline-reactions .post-reactions.interactive button.selected svg { color: var(--c-accent); }
+
+/* ---------- 파랑 컨셉: 바탕, 글자, 회색 요소를 모두 파랑 계열로 ---------- */
+/* 기존 CSS에 직접 적힌 회색 글자를 토큰으로 */
+.screen h1,
+.screen h2,
+.screen h3 { color: var(--c-ink); }
+.ux-board-card-main > p,
+.detail-body,
+.board-detail-screen .comment > p,
+.title-progress-identity p,
+.map-bottom-sheet p { color: var(--c-body); }
+.ux-board-card-bottom,
+.ux-board-card-bottom small,
+.comment-head small,
+.title-progress-identity small,
+.alert small,
+.prototype-label { color: var(--c-mute) !important; }
+.detail-byline strong { color: var(--c-body); }
+
+/* 회색 원(아바타)은 연한 파랑 + 파란 아이콘 */
+.comment-avatar,
+.title-progress-avatar { color: var(--c-accent); background: var(--c-accent-soft); }
+
+/* 아이콘은 파랑 계열 회색 */
+.icon,
+.map-search,
+.detail-nav .icon { color: var(--c-ink); background-color: var(--c-canvas); }
+.ux-board-alert,
+.comment-icon-button,
+.comment-photo-add,
+.comment-submit { color: var(--c-mute); }
+.ux-board-alert.muted { color: var(--c-accent); }
+.detail-inline-reactions .post-reactions.interactive button:not(.selected),
+.detail-inline-reactions .post-reactions.interactive button:not(.selected) span { color: var(--c-body); }
+.comment-image-placeholder { color: var(--c-mute); border-color: var(--c-accent-line, #cad7f8); background: var(--c-surface); }
+
+/* 하단 메뉴 */
+.bottom-nav { border-color: var(--c-line); background: rgba(255, 255, 255, .97); }
+
+/* 지도와 로그인 지도도 파랑 계열 */
+.map-shell,
+.map-shell .status-bar,
+.map-screen .map { background-color: #e6ecf8; }
+.map-road { border-color: #f7f9fe; background: #cfd8ea; box-shadow: 0 0 0 1px #d6deee; }
+.map-block { border-color: #d3dcee; background: #dce4f3; }
+.map-block span,
+.map-park span { color: var(--c-mute); }
+.map-label { color: var(--c-body); }
+.login-screen .nearby-animation { border-color: var(--c-line); background: #e6ecf8; }
+.nearby-road { background: #cfd8ea; }
+.nearby-alert b { color: var(--c-ink); }
+.nearby-alert small { color: var(--c-mute); }
+.nearby-alert svg { color: var(--c-accent); }
+.login-screen .login-background { background: var(--c-page); }
+.map-filters button:not(.selected) { color: var(--c-ink); border-color: var(--c-line); }
+.map-shell .status-bar { background: var(--c-page); }
