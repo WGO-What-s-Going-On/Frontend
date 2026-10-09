@@ -348,4 +348,5 @@ select:focus-visible,
   font-weight: 700;
   transition: opacity .15s ease;
 }
-.alerts-read-all:active { opacity: .55; }
+.alerts-read-all:active:not(:disabled) { opacity: .55; }
+.alerts-read-all:disabled { color: var(--c-mute); cursor: default; }
