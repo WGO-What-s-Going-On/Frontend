@@ -333,3 +333,16 @@ select:focus-visible,
 .login-screen .nearby-event-news { animation-name: login-event-news; animation-delay: 0s; }
 
 
+
+/* 하단 메뉴 알림 배지: 종 아이콘을 가리지 않도록 오른쪽 위 바깥으로 */
+.nav-icon-wrap b {
+  top: -9px;
+  right: auto;
+  left: calc(100% - 5px);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-width: 2px;
+  font-size: 10px;
+  line-height: 1;
+}
