@@ -309,12 +309,25 @@ select:focus-visible,
 .login-screen .nearby-alert b { font-size: 14px; }
 .login-screen .nearby-event-news { right: 7%; bottom: 25%; animation-delay: .64s; }
 
-/* 로그인: 알림 카드가 먼저, 사건 칩 셋이 아주 조금씩 뒤따라 뜬다 (모두 3.2초 주기) */
+/* 로그인: 알림 카드가 먼저, 사건 칩 셋이 아주 조금씩 뒤따라 뜨고, 사라질 때는 함께 사라진다 (모두 3.2초 주기)
+   지연(delay) 대신 키프레임에서 등장 시점만 다르게 두고 사라지는 시점(84%~92%)은 맞춘다. 1% = 32ms */
 @keyframes login-alert-in {
   0%, 6%, 92%, 100% { opacity: 0; transform: translate(-50%, -8px); }
   16%, 84% { opacity: 1; transform: translate(-50%, 0); }
 }
+@keyframes login-event-fire {
+  0%, 10.4%, 92%, 100% { opacity: 0; transform: translateY(6px) scale(.9); }
+  20.4%, 84% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes login-event-help {
+  0%, 13.5%, 92%, 100% { opacity: 0; transform: translateY(6px) scale(.9); }
+  23.5%, 84% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes login-event-news {
+  0%, 16.6%, 92%, 100% { opacity: 0; transform: translateY(6px) scale(.9); }
+  26.6%, 84% { opacity: 1; transform: translateY(0) scale(1); }
+}
 .login-screen .nearby-alert { left: 43%; animation-name: login-alert-in; animation-delay: 0s; }
-.login-screen .nearby-event-fire { animation-delay: .14s; }
-.login-screen .nearby-event-help { animation-delay: .24s; }
-.login-screen .nearby-event-news { animation-delay: .34s; }
+.login-screen .nearby-event-fire { animation-name: login-event-fire; animation-delay: 0s; }
+.login-screen .nearby-event-help { animation-name: login-event-help; animation-delay: 0s; }
+.login-screen .nearby-event-news { animation-name: login-event-news; animation-delay: 0s; }
