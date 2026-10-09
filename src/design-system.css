@@ -290,3 +290,21 @@ select:focus-visible,
   background: transparent;
 }
 .login-shell .login-screen { padding-top: 66px; }
+
+/* 로그인 지도 위 알림과 사건 칩: 조금 크게, 우측 하단에 동네 소식 추가 */
+.login-screen .nearby-event {
+  gap: 7px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 18px;
+  font-size: 13px;
+}
+.login-screen .nearby-event i { width: 30px; height: 30px; }
+.login-screen .nearby-alert {
+  min-width: 210px;
+  gap: 11px;
+  padding: 12px 16px;
+  border-radius: 18px;
+}
+.login-screen .nearby-alert small { font-size: 11px; }
+.login-screen .nearby-alert b { font-size: 14px; }
+.login-screen .nearby-event-news { right: 7%; bottom: 25%; animation-delay: .64s; }

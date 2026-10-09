@@ -1,4 +1,4 @@
-import { Bell, CircleHelp, Flame, MapPin } from 'lucide-react'
+import { Bell, Flame, Hand, MapPin, Megaphone } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { useApp } from '../../context/AppContext'
 
@@ -14,9 +14,10 @@ export function LoginScreen() {
         <span className="nearby-road nearby-road-four"/>
         <span className="nearby-range"><i/><small>주변 150m</small></span>
         <span className="nearby-location"><MapPin size={27} strokeWidth={1.8}/></span>
-        <span className="nearby-event nearby-event-fire" data-category="긴급 사고"><i><Flame size={14}/></i><b>긴급 사고</b></span>
-        <span className="nearby-event nearby-event-help" data-category="도움 요청"><i><CircleHelp size={14}/></i><b>도움 요청</b></span>
-        <span className="nearby-alert"><Bell size={15}/><span><small>내 주변 새 소식</small><b>지금 확인해 보세요</b></span></span>
+        <span className="nearby-event nearby-event-fire" data-category="긴급 사고"><i><Flame size={16}/></i><b>긴급 사고</b></span>
+        <span className="nearby-event nearby-event-help" data-category="도움 요청"><i><Hand size={16}/></i><b>도움 요청</b></span>
+        <span className="nearby-event nearby-event-news" data-category="동네 소식"><i><Megaphone size={16}/></i><b>동네 소식</b></span>
+        <span className="nearby-alert"><Bell size={18}/><span><small>내 주변 소식</small><b>지금 확인해 보세요</b></span></span>
       </div>
     </div>
     <div className="start-card"><h3>간편하게 시작하기</h3><button className="kakao" onClick={() => go('home')}>카카오로 계속하기</button></div>
