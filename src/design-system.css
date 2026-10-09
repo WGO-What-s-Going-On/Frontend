@@ -332,34 +332,32 @@ select:focus-visible,
 .login-screen .nearby-event-help { animation-name: login-event-help; animation-delay: 0s; }
 .login-screen .nearby-event-news { animation-name: login-event-news; animation-delay: 0s; }
 
-/* 알림: 목록 아래 모두 읽음 */
-.alerts-read-all {
-  width: 100%;
-  min-height: 44px;
+/* 알림: 목록 위 안내 줄 — 읽지 않은 개수와 모두 읽음을 한 줄에, 다 읽으면 사라진다 */
+.alerts-unread-bar {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin-top: 8px;
+  justify-content: space-between;
+  gap: 12px;
+  margin: -4px 0 12px;
+  padding: 10px 6px 10px 16px;
+  border-radius: 14px;
+  background: var(--c-accent-soft);
+  color: var(--c-body);
+  font-size: 14px;
+}
+.alerts-unread-bar b { color: var(--c-accent); font-variant-numeric: tabular-nums; }
+.alerts-read-all {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 36px;
+  padding: 0 10px;
   color: var(--c-accent);
   border: 0;
+  border-radius: 10px;
   background: transparent;
   font-size: 14px;
   font-weight: 700;
-  transition: opacity .15s ease;
+  transition: background-color .15s ease;
 }
-/* 하단 메뉴 바로 위에 고정, 알림 목록은 그 뒤로 스크롤된다 */
-.alerts-read-all-bar {
-  position: absolute;
-  z-index: 5;
-  right: 0;
-  bottom: 93px;
-  left: 0;
-  padding: 14px 0 10px;
-  background: linear-gradient(rgba(255, 255, 255, 0), #fff 14px);
-  pointer-events: none;
-}
-.alerts-read-all-bar .alerts-read-all { margin-top: 0; pointer-events: auto; }
-.alerts-screen { padding-bottom: 176px; }
-.alerts-read-all:active:not(:disabled) { opacity: .55; }
-.alerts-read-all:disabled { color: var(--c-mute); cursor: default; }
+.alerts-read-all:active { background: rgba(43, 92, 230, .1); }
