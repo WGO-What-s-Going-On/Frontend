@@ -256,3 +256,26 @@ select:focus-visible,
 .board-detail-screen .detail-inline-reactions { border-color: transparent; background: #f5f5f5; }
 .board-detail-screen .detail-inline-reactions .post-reactions.interactive button:not(.selected),
 .board-detail-screen .detail-inline-reactions .post-reactions.interactive button:not(.selected) span { color: #666; }
+
+/* ---------- 로그인: 지도 애니메이션을 화면 전체로 ---------- */
+.login-screen .nearby-animation {
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+/* 문구가 지도 위에서 잘 읽히도록 위쪽만 흰색으로 흐리게 */
+.login-screen .login-background::after {
+  content: '';
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 220px;
+  background: linear-gradient(#fff 0%, #fff 50%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
+.login-screen .nearby-alert { top: 226px; }
+.login-screen .nearby-event-fire { top: 34%; }
+.login-screen .nearby-event-help { bottom: 30%; }
