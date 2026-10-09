@@ -24,7 +24,7 @@ interface PersistedMockState {
 
 const STORAGE_KEY = 'wgo-mockup-state-v1'
 // 목업 알림 목록을 바꾸면 올린다. 저장된 알림 버전이 다르면 알림만 새 목업으로 교체한다.
-const NOTICES_VERSION = 2
+const NOTICES_VERSION = 3
 
 function readPersistedState(): Partial<PersistedMockState> {
   try {
