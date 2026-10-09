@@ -349,3 +349,9 @@ select:focus-visible,
 
 /* 지도 핀 요약 시트: 작성 버튼(위쪽 끝 102px)과 겹치지 않게 위로 */
 .map-bottom-sheet { bottom: 108px; }
+
+/* 댓글 구분선: 마지막 댓글 아래에 미리 줄을 두지 않고, 다음 댓글이 생길 때 그 위에 생긴다 */
+.board-detail-screen .comment,
+.board-detail-screen .comment-replies .reply-comment { border-bottom: 0; }
+.board-detail-screen .comments-section > .comment + .comment,
+.board-detail-screen .comment-replies .reply-comment + .reply-comment { border-top: 1px solid var(--c-line); }
