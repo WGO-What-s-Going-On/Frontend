@@ -241,3 +241,19 @@ select:focus-visible,
 /* 지도 핀: 흰 테두리 없이 카테고리 색만 */
 .map-screen .map-pin,
 .map-screen .map-pin::after { border-color: var(--cat, var(--c-ink)); }
+
+/* ---------- 게시글 상세: 기존 무채색 유지, 반응 선택만 파랑 ---------- */
+.board-detail-screen,
+.detail-comment-input {
+  --c-surface: #f3f3f3;
+  --c-line: #e2e2e2;
+  --c-ink: #111111;
+  --c-body: #333333;
+  --c-mute: #777777;
+}
+.board-detail-screen .comment-avatar { color: #777; background: #ededed; }
+.board-detail-screen .comments-heading span { color: #222; background: #ededed; }
+.board-detail-screen .comment-image-placeholder { color: #666; border-color: #aaa; background: rgba(255, 255, 255, .55); }
+.board-detail-screen .detail-inline-reactions { border-color: transparent; background: #f5f5f5; }
+.board-detail-screen .detail-inline-reactions .post-reactions.interactive button:not(.selected),
+.board-detail-screen .detail-inline-reactions .post-reactions.interactive button:not(.selected) span { color: #666; }
