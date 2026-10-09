@@ -14,8 +14,8 @@ export function LoginScreen() {
         <span className="nearby-road nearby-road-four"/>
         <span className="nearby-range"><i/><small>주변 150m</small></span>
         <span className="nearby-location"><MapPin size={27} strokeWidth={1.8}/></span>
-        <span className="nearby-event nearby-event-fire"><i><Flame size={14}/></i><b>긴급 사고</b></span>
-        <span className="nearby-event nearby-event-help"><i><CircleHelp size={14}/></i><b>도움 요청</b></span>
+        <span className="nearby-event nearby-event-fire" data-category="긴급 사고"><i><Flame size={14}/></i><b>긴급 사고</b></span>
+        <span className="nearby-event nearby-event-help" data-category="도움 요청"><i><CircleHelp size={14}/></i><b>도움 요청</b></span>
         <span className="nearby-alert"><Bell size={15}/><span><small>내 주변 새 소식</small><b>지금 확인해 보세요</b></span></span>
       </div>
     </div>

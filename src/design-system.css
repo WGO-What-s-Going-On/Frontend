@@ -576,22 +576,34 @@ select:focus-visible,
 .compose-fab:active { transform: scale(.94); background: var(--c-accent-press) !important; }
 .compose-fab span { font-size: 10px; font-weight: 700; }
 
-/* ---------- 아직 다듬기 전 화면: 이전 블루 테마 값을 토큰으로 유지 ---------- */
+/* ---------- 로그인 ---------- */
 .login-shell,
-.login-shell .status-bar { background: #f4f5f8; }
-.login-screen .nearby-animation {
-  border-color: var(--c-line);
-  background: radial-gradient(circle at 82% 76%, #fafbff 0 38px, transparent 39px), #e9ecf2;
-}
-.nearby-road { background: #d6dbe5; }
-.nearby-range { border-color: var(--c-accent); background: rgba(255, 255, 255, .42); }
+.login-shell .status-bar { background: var(--c-canvas); }
+.login-screen > .eyebrow { color: var(--c-mute); font-size: 15px; font-weight: 500; }
+.login-screen .hero { font-size: 28px; line-height: 38px; font-weight: 700; letter-spacing: -.02em; }
+.login-screen .login-background { background: none; }
+.login-screen .nearby-animation { border-color: transparent; background: #eef0f3; box-shadow: none; }
+.nearby-road { background: #dde1e7; }
+.nearby-range { border-color: rgba(43, 92, 230, .6); background: rgba(43, 92, 230, .06); }
 .nearby-range::before,
 .nearby-range::after,
-.nearby-range > i { border-color: #7b98ee; }
-.nearby-location,
-.nearby-event i { background: var(--c-accent); }
-.nearby-range small { background: var(--c-accent-press); }
-.nearby-alert { border-color: var(--c-line); }
+.nearby-range > i { border-color: rgba(43, 92, 230, .25); }
+.nearby-location { background: var(--c-accent); }
+.nearby-range small { color: var(--c-accent-press); background: #fff; box-shadow: 0 1px 3px rgba(23, 25, 30, .12); }
+.nearby-event { border: 0; box-shadow: var(--shadow-float); }
+.nearby-event i { background: var(--cat, var(--c-accent)); }
+.nearby-alert { border: 0; box-shadow: var(--shadow-float); }
+
+.login-screen .start-card {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.login-screen .start-card h3 { color: var(--c-body); font-size: 14px; font-weight: 500; text-align: center; }
+.login-screen .start-card h3 + .kakao { margin-top: 12px; }
+.login-screen .kakao { min-height: 54px; font-size: 16px; font-weight: 600; }
 
 .alert i,
 .range i,
