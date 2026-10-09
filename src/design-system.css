@@ -332,42 +332,4 @@ select:focus-visible,
 .login-screen .nearby-event-help { animation-name: login-event-help; animation-delay: 0s; }
 .login-screen .nearby-event-news { animation-name: login-event-news; animation-delay: 0s; }
 
-/* 알림: 하단 메뉴 위 오른쪽에 떠 있는 모두 읽음 (엄지 영역), 다 읽으면 사라진다 */
-.alerts-read-all-float {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  position: absolute;
-  z-index: 6;
-  right: 20px;
-  bottom: 109px;
-  min-height: 44px;
-  padding: 0 10px 0 14px;
-  color: var(--c-accent);
-  border: 1px solid var(--c-line);
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(23, 25, 30, .06), 0 6px 16px rgba(23, 25, 30, .12);
-  font-size: 14px;
-  font-weight: 700;
-  animation: alerts-float-in .2s ease-out both;
-  transition: transform .15s ease;
-}
-.alerts-read-all-float:active { transform: scale(.96); }
-.alerts-read-all-float b {
-  min-width: 22px;
-  height: 22px;
-  display: grid;
-  place-items: center;
-  padding: 0 6px;
-  color: #fff;
-  border-radius: 999px;
-  background: var(--c-accent);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-}
-@keyframes alerts-float-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.alerts-screen { padding-bottom: 170px; }
+/* 알림: 화면에 들어오면 자동으로 모두 읽음 처리 (별도 버튼 없음) */
