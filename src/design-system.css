@@ -308,3 +308,13 @@ select:focus-visible,
 .login-screen .nearby-alert small { font-size: 11px; }
 .login-screen .nearby-alert b { font-size: 14px; }
 .login-screen .nearby-event-news { right: 7%; bottom: 25%; animation-delay: .64s; }
+
+/* 로그인: 알림 카드가 먼저, 사건 칩 셋이 아주 조금씩 뒤따라 뜬다 (모두 3.2초 주기) */
+@keyframes login-alert-in {
+  0%, 6%, 92%, 100% { opacity: 0; transform: translate(-50%, -8px); }
+  16%, 84% { opacity: 1; transform: translate(-50%, 0); }
+}
+.login-screen .nearby-alert { left: 43%; animation-name: login-alert-in; animation-delay: 0s; }
+.login-screen .nearby-event-fire { animation-delay: .14s; }
+.login-screen .nearby-event-help { animation-delay: .24s; }
+.login-screen .nearby-event-news { animation-delay: .34s; }
