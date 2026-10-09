@@ -1,7 +1,7 @@
 /* WGO design layer — 기존 화면 구조(크기, 간격, 모양, 배치)는 그대로 두고 색과 글꼴만 입힌다. 기준은 docs/DESIGN.md */
 :root {
   --c-canvas: #ffffff;
-  --c-page: #eef3fd;
+  --c-page: #ffffff;
   --c-surface: #e9effb;
   --c-line: #dbe3f3;
   --c-ink: #121a2e;
@@ -172,7 +172,7 @@ select:focus-visible,
 .map-shell,
 .map-shell .status-bar,
 .map-screen .map { background-color: #eceff3; }
-.map-top-overlay { background: linear-gradient(var(--c-page) 0%, rgba(238, 243, 253, .94) 67%, rgba(238, 243, 253, 0) 100%); }
+.map-top-overlay { background: linear-gradient(var(--c-page) 0%, rgba(255, 255, 255, .94) 67%, rgba(255, 255, 255, 0) 100%); }
 .map-road { border-color: #fafbfc; background: #d8dce4; box-shadow: 0 0 0 1px #dde0e6; }
 .map-block { border-color: #d9dde4; background: #e1e4ea; }
 .map-park { border-color: #cfdcd2; background: #dae7dd; }
