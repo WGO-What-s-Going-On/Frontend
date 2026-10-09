@@ -74,6 +74,17 @@ export const initialComments: Comment[] = [
 export const initialNotices: Notice[] = [
   { id: 'notice-1', type: 'nearby', text: '내 주변 150m 이내에 새 게시판이 생성되었어요.', createdAt: '3분 전', read: false, boardId: 'fire' },
   { id: 'notice-2', type: 'reply', text: '회원님의 댓글에 새 댓글이 달렸어요.', createdAt: '15분 전', read: false, boardId: 'fire' },
+  { id: 'notice-5', type: 'nearby', text: '내 주변에서 긴급 사고 게시글이 올라왔어요.', createdAt: '22분 전', read: false, boardId: 'fire' },
+  { id: 'notice-6', type: 'reply', text: '알림을 켠 게시판에 새 댓글이 달렸어요.', createdAt: '35분 전', read: false, boardId: 'outage' },
+  { id: 'notice-7', type: 'reaction', text: '회원님의 댓글이 도움이 됐대요.', createdAt: '48분 전', read: false, boardId: 'outage' },
   { id: 'notice-3', type: 'reaction', text: '회원님의 게시글에 새로운 반응이 달렸어요.', createdAt: '1시간 전', read: true, boardId: 'mask' },
+  { id: 'notice-8', type: 'nearby', text: '내 주변 150m 이내에 도움 요청이 올라왔어요.', createdAt: '2시간 전', read: true, boardId: 'mask' },
+  { id: 'notice-9', type: 'reply', text: '회원님의 게시글에 새 댓글이 달렸어요.', createdAt: '3시간 전', read: true, boardId: 'mask' },
+  { id: 'notice-10', type: 'lifecycle', text: '마스크 나눔 게시판이 종료됐어요.', createdAt: '5시간 전', read: true, boardId: 'mask' },
+  { id: 'notice-11', type: 'reaction', text: '회원님의 게시글에 "지금도 그래요" 반응이 달렸어요.', createdAt: '8시간 전', read: true, boardId: 'outage' },
+  { id: 'notice-12', type: 'nearby', text: '내 주변에서 새 동네 소식이 올라왔어요.', createdAt: '어제', read: true, boardId: 'mask' },
+  { id: 'notice-13', type: 'reply', text: '알림을 켠 게시판에 새 댓글이 달렸어요.', createdAt: '어제', read: true, boardId: 'fire' },
+  { id: 'notice-14', type: 'lifecycle', text: '화재 신고 게시판이 곧 종료됩니다.', createdAt: '어제', read: true, boardId: 'fire' },
   { id: 'notice-4', type: 'lifecycle', text: '정전 신고 게시판이 곧 종료됩니다.', createdAt: '2일 전', read: true, boardId: 'outage' },
+  { id: 'notice-15', type: 'nearby', text: '내 주변 150m 이내에 새 게시판이 생성되었어요.', createdAt: '3일 전', read: true, boardId: 'outage' },
 ]

@@ -19,9 +19,12 @@ interface PersistedMockState {
   mutedBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
+  noticesVersion?: number
 }
 
 const STORAGE_KEY = 'wgo-mockup-state-v1'
+// 목업 알림 목록을 바꾸면 올린다. 저장된 알림 버전이 다르면 알림만 새 목업으로 교체한다.
+const NOTICES_VERSION = 2
 
 function readPersistedState(): Partial<PersistedMockState> {
   try {
@@ -80,7 +83,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState(persisted.user ?? initialUser)
   const [boards, setBoards] = useState(persisted.boards ?? initialBoards)
   const [comments, setComments] = useState(persisted.comments ?? initialComments)
-  const [notices, setNotices] = useState(persisted.notices ?? initialNotices)
+  const [notices, setNotices] = useState(persisted.noticesVersion === NOTICES_VERSION && persisted.notices ? persisted.notices : initialNotices)
   const [reports, setReports] = useState<Report[]>(persisted.reports ?? [])
   const [storedBoardId, setCurrentBoardId] = useState(persisted.currentBoardId ?? 'fire')
   const currentBoardId = boardIdFromPath(location.pathname) ?? storedBoardId
@@ -92,7 +95,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState('')
 
   useEffect(() => {
-    const state: PersistedMockState = { user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings }
+    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings])
 
