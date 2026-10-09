@@ -331,3 +331,21 @@ select:focus-visible,
 .login-screen .nearby-event-fire { animation-name: login-event-fire; animation-delay: 0s; }
 .login-screen .nearby-event-help { animation-name: login-event-help; animation-delay: 0s; }
 .login-screen .nearby-event-news { animation-name: login-event-news; animation-delay: 0s; }
+
+/* 알림: 목록 아래 모두 읽음 */
+.alerts-read-all {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: var(--c-accent);
+  border: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+  transition: opacity .15s ease;
+}
+.alerts-read-all:active { opacity: .55; }
