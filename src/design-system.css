@@ -439,6 +439,113 @@ select:focus-visible,
   box-shadow: var(--shadow-float);
 }
 
+/* ---------- 지도 ---------- */
+.map-shell,
+.map-shell .status-bar,
+.map-screen .map { background-color: #eef0f3; }
+.map-top-overlay {
+  padding: 16px 20px 28px;
+  background: linear-gradient(#fff 0%, rgba(255, 255, 255, .92) 64%, rgba(255, 255, 255, 0) 100%);
+}
+.map-top-overlay header { margin-bottom: 12px; }
+.map-top-overlay .map-search { margin-right: -8px; }
+.map-filters { gap: 6px; }
+.map-filters button { box-shadow: 0 1px 2px rgba(23, 25, 30, .06); background: var(--c-canvas); }
+
+.map-block { border-color: #dfe2e8; background: #e4e7ec; }
+.map-block span,
+.map-park span { color: var(--c-mute); }
+.map-park { border-color: #d3e2d6; background: #dcebdf; }
+.map-water { border-color: #cbd9ec; background: #d7e4f4; }
+.map-label { color: var(--c-body); }
+.map-road { border-color: #fbfbfc; background: #d8dce3; box-shadow: 0 0 0 1px #dde0e6; }
+.map-shell .status-bar { background: #fff; }
+
+/* 내 위치와 150m: 지도에서 파랑은 나에게만 */
+.map-screen .radius {
+  border: 1.5px solid rgba(43, 92, 230, .55);
+  background: rgba(43, 92, 230, .07);
+}
+.map-screen .radius b {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #fff;
+  background: var(--c-accent);
+  box-shadow: 0 0 0 6px rgba(43, 92, 230, .18), 0 1px 3px rgba(23, 25, 30, .25);
+}
+.map-screen .radius small {
+  padding: 3px 8px;
+  color: var(--c-accent-press);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(23, 25, 30, .12);
+  font-size: 12px;
+  font-weight: 600;
+  top: auto;
+  right: auto;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 사건 핀: 카테고리 색 */
+.map-screen .map-pin,
+.map-screen .map-pin::after { background: var(--cat, var(--c-ink)); }
+.map-screen .map-pin {
+  padding: 8px 12px;
+  border-radius: 999px;
+  box-shadow: var(--shadow-float);
+  font-size: 13px;
+  font-weight: 600;
+  transition: transform .16s var(--ease);
+}
+.map-screen .map-pin::after { bottom: -6px; width: 9px; height: 9px; }
+.map-screen .map-pin.active {
+  transform: translateY(-3px) scale(1.06);
+  background: var(--cat, var(--c-ink));
+  z-index: 6;
+}
+.map-screen .map-pin:not(.active):active { transform: scale(.96); }
+
+/* 핀을 눌렀을 때 시트: 배경 지도가 이미 보이므로 미니 지도 장식은 숨김 */
+.map-bottom-sheet {
+  right: 8px;
+  left: 8px;
+  padding: 12px 20px 20px;
+  border: 0;
+  border-radius: var(--radius-sheet);
+  box-shadow: 0 -2px 8px rgba(23, 25, 30, .06), 0 12px 32px rgba(23, 25, 30, .18);
+}
+.map-bottom-sheet .incident-preview { display: none; }
+.sheet-handle span { background: var(--c-line); }
+.sheet-close { top: 12px; right: 10px; width: 40px; height: 40px; color: var(--c-mute); background: transparent; }
+.sheet-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--c-body);
+  font-size: 12px;
+  font-weight: 600;
+}
+.sheet-category::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--cat, var(--c-mute));
+}
+.map-bottom-sheet h2 { margin: 6px 0 4px; padding-right: 32px; font-size: 18px; line-height: 26px; font-weight: 700; }
+.map-bottom-sheet p { color: var(--c-body); font-size: 14px; line-height: 21px; }
+.sheet-meta { gap: 12px; margin: 12px 0 16px; color: var(--c-mute); font-size: 13px; font-variant-numeric: tabular-nums; }
+.sheet-detail {
+  width: 100%;
+  min-height: 48px;
+  border-radius: var(--radius-control);
+  font-size: 15px;
+  font-weight: 600;
+}
+
 /* ---------- 하단 메뉴와 작성 버튼 ---------- */
 .bottom-nav {
   border-color: var(--c-line);
@@ -486,18 +593,6 @@ select:focus-visible,
 .nearby-range small { background: var(--c-accent-press); }
 .nearby-alert { border-color: var(--c-line); }
 
-.map-shell,
-.map-shell .status-bar,
-.map-screen .map { background-color: #eceef2; }
-.map-top-overlay { background: linear-gradient(#fff 0%, rgba(255, 255, 255, .94) 67%, transparent 100%); }
-.map-block { border-color: #d9dce3; background: #e1e4ea; }
-.map-park { border-color: #cfdccf; background: #dce8dc; }
-.map-water { border-color: #c8d6ea; background: #d6e3f3; }
-.map-screen .radius { border-color: var(--c-accent); background: rgba(43, 92, 230, .08); }
-.map-screen .radius small,
-.map-screen .map-pin,
-.map-screen .map-pin::after,
-.map-screen .map-pin.active { background: var(--c-accent); }
 .alert i,
 .range i,
 .radius b { background: var(--c-accent); }

@@ -44,7 +44,7 @@ export function MapScreen() {
       <div className="map-park"><span>새봄공원</span></div>
       <span className="map-label label-station">강남역</span><span className="map-label label-road">테헤란로</span>
       <div className="radius"><b/><small>150m</small></div>
-      {nearby.map((board, index) => <button key={board.id} className={`map-pin marker-${index % 3} ${selectedBoard?.id === board.id ? 'active' : ''}`} onClick={(event) => { event.stopPropagation(); setSelectedBoard(board) }}>{markerLabel(board)}</button>)}
+      {nearby.map((board, index) => <button key={board.id} className={`map-pin marker-${index % 3} ${selectedBoard?.id === board.id ? 'active' : ''}`} data-category={board.category} onClick={(event) => { event.stopPropagation(); setSelectedBoard(board) }}>{markerLabel(board)}</button>)}
     </div>
     <div className="map-top-overlay">
       <header><h1>내 주변 지도</h1><button className="icon map-search" onClick={() => go('search')} aria-label="검색"><Search size={26}/></button></header>
