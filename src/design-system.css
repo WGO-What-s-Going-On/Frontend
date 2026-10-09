@@ -127,7 +127,7 @@ select:focus-visible,
 }
 
 /* ---------- 하단 메뉴 ---------- */
-.bottom-nav { border-color: var(--c-line); background: rgba(255, 255, 255, .96); }
+.bottom-nav { border-color: var(--c-line); background: #fff; }
 .bottom-nav button { color: var(--c-mute); }
 .bottom-nav button.active { color: var(--c-accent); }
 .nav-icon-wrap b { background: var(--c-urgent); }
@@ -225,7 +225,7 @@ select:focus-visible,
 .comment-image-placeholder { color: var(--c-mute); border-color: var(--c-accent-line, #cad7f8); background: var(--c-surface); }
 
 /* 하단 메뉴 */
-.bottom-nav { border-color: var(--c-line); background: rgba(255, 255, 255, .97); }
+.bottom-nav { border-color: var(--c-line); background: #fff; }
 
 /* 지도와 로그인 지도는 중립 회색 */
 .map-block span,
@@ -348,5 +348,18 @@ select:focus-visible,
   font-weight: 700;
   transition: opacity .15s ease;
 }
+/* 하단 메뉴 바로 위에 고정, 알림 목록은 그 뒤로 스크롤된다 */
+.alerts-read-all-bar {
+  position: absolute;
+  z-index: 5;
+  right: 0;
+  bottom: 93px;
+  left: 0;
+  padding: 14px 0 10px;
+  background: linear-gradient(rgba(255, 255, 255, 0), #fff 14px);
+  pointer-events: none;
+}
+.alerts-read-all-bar .alerts-read-all { margin-top: 0; pointer-events: auto; }
+.alerts-screen { padding-bottom: 176px; }
 .alerts-read-all:active:not(:disabled) { opacity: .55; }
 .alerts-read-all:disabled { color: var(--c-mute); cursor: default; }
