@@ -8,7 +8,7 @@ import './reach-fix.css'
 import './prototype.css'
 import './flow-only.css'
 import './ux-exploration.css'
-import './theme-experiment.css'
+import './design-system.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><BrowserRouter><AppProvider><App /></AppProvider></BrowserRouter></React.StrictMode>,
