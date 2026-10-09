@@ -387,3 +387,20 @@ select:focus-visible,
   font-weight: 600;
 }
 .board-detail-screen .comment-head small .comment-verified svg { flex: none; }
+
+/* 댓글 입력: 보낼 수 있을 때만 전송 버튼이 파랑 */
+.detail-comment-input .comment-submit:not(:disabled) { color: var(--c-accent); }
+
+/* 답글 작성 중: 입력창 위 안내와 대상 댓글을 연한 파랑으로 표시 */
+.detail-comment-input .replying {
+  color: var(--c-accent-press);
+  border-color: transparent;
+  background: var(--c-accent-soft);
+}
+.detail-comment-input .replying button { color: var(--c-accent); }
+.board-detail-screen .comment.reply-target,
+.board-detail-screen .comment-replies .reply-comment.reply-target { background: var(--c-accent-soft); }
+/* 원댓글 강조는 화면 좌우 끝까지 (레이아웃은 그대로) */
+.board-detail-screen .comments-section > .comment.reply-target {
+  box-shadow: -20px 0 0 var(--c-accent-soft), 20px 0 0 var(--c-accent-soft);
+}
