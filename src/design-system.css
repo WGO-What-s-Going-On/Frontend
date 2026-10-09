@@ -279,3 +279,14 @@ select:focus-visible,
 .login-screen .nearby-alert { top: 226px; }
 .login-screen .nearby-event-fire { top: 34%; }
 .login-screen .nearby-event-help { bottom: 30%; }
+
+/* 로그인: 상태바(시간, 흐름 검증용)까지 지도가 덮도록 상태바를 지도 위에 띄운다 */
+.login-shell .status-bar {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: transparent;
+}
+.login-shell .login-screen { padding-top: 66px; }
