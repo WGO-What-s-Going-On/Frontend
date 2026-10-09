@@ -264,6 +264,18 @@ select:focus-visible,
   border-radius: 0;
   box-shadow: none;
 }
+/* 지도는 맨 위까지 비치고, 문구 뒤만 살짝 밝힌다 */
+.login-screen .login-background::after {
+  content: '';
+  position: absolute;
+  z-index: 10;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 240px;
+  background: linear-gradient(rgba(255, 255, 255, .72) 0%, rgba(255, 255, 255, .55) 55%, rgba(255, 255, 255, 0) 100%);
+  pointer-events: none;
+}
 .login-screen .nearby-alert { top: 226px; }
 .login-screen .nearby-event-fire { top: 34%; }
 .login-screen .nearby-event-help { bottom: 30%; }
