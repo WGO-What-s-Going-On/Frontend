@@ -355,3 +355,25 @@ select:focus-visible,
 .board-detail-screen .comment-replies .reply-comment { border-bottom: 0; }
 .board-detail-screen .comments-section > .comment + .comment,
 .board-detail-screen .comment-replies .reply-comment + .reply-comment { border-top: 1px solid var(--c-line); }
+
+/* 답글: 들여쓰기를 줄이고 답글마다 ↳ 화살표로 표시 */
+.board-detail-screen .comment-replies {
+  margin-left: 0;
+  padding-left: 0;
+}
+.board-detail-screen .comment-replies::before { content: none; }
+.board-detail-screen .comment-replies .reply-comment {
+  position: relative;
+  padding-left: 38px;
+}
+.board-detail-screen .comment-replies .reply-comment::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 14px;
+  width: 16px;
+  height: 16px;
+  background: #9a9a9a;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 10 20 15 15 20'/%3E%3Cpath d='M4 4v7a4 4 0 0 0 4 4h12'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='15 10 20 15 15 20'/%3E%3Cpath d='M4 4v7a4 4 0 0 0 4 4h12'/%3E%3C/svg%3E") center / contain no-repeat;
+}
