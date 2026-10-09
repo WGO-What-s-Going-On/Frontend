@@ -245,3 +245,6 @@ select:focus-visible,
 .login-screen .login-background { background: var(--c-page); }
 .map-filters button:not(.selected) { color: var(--c-ink); border-color: var(--c-line); }
 .map-shell .status-bar { background: var(--c-page); }
+/* 지도 핀: 흰 테두리 없이 카테고리 색만 */
+.map-screen .map-pin,
+.map-screen .map-pin::after { border-color: var(--cat, var(--c-ink)); }
