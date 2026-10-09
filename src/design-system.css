@@ -332,32 +332,42 @@ select:focus-visible,
 .login-screen .nearby-event-help { animation-name: login-event-help; animation-delay: 0s; }
 .login-screen .nearby-event-news { animation-name: login-event-news; animation-delay: 0s; }
 
-/* 알림: 목록 위 안내 줄 — 읽지 않은 개수와 모두 읽음을 한 줄에, 다 읽으면 사라진다 */
-.alerts-unread-bar {
+/* 알림: 하단 메뉴 위 오른쪽에 떠 있는 모두 읽음 (엄지 영역), 다 읽으면 사라진다 */
+.alerts-read-all-float {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: -4px 0 12px;
-  padding: 10px 6px 10px 16px;
-  border-radius: 14px;
-  background: var(--c-accent-soft);
-  color: var(--c-body);
-  font-size: 14px;
-}
-.alerts-unread-bar b { color: var(--c-accent); font-variant-numeric: tabular-nums; }
-.alerts-read-all {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  min-height: 36px;
-  padding: 0 10px;
+  gap: 6px;
+  position: absolute;
+  z-index: 6;
+  right: 20px;
+  bottom: 109px;
+  min-height: 44px;
+  padding: 0 10px 0 14px;
   color: var(--c-accent);
-  border: 0;
-  border-radius: 10px;
-  background: transparent;
+  border: 1px solid var(--c-line);
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(23, 25, 30, .06), 0 6px 16px rgba(23, 25, 30, .12);
   font-size: 14px;
   font-weight: 700;
-  transition: background-color .15s ease;
+  animation: alerts-float-in .2s ease-out both;
+  transition: transform .15s ease;
 }
-.alerts-read-all:active { background: rgba(43, 92, 230, .1); }
+.alerts-read-all-float:active { transform: scale(.96); }
+.alerts-read-all-float b {
+  min-width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+  color: #fff;
+  border-radius: 999px;
+  background: var(--c-accent);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+@keyframes alerts-float-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.alerts-screen { padding-bottom: 170px; }
