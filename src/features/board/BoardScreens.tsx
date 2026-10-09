@@ -108,7 +108,6 @@ export function BoardDetailScreen() {
     <header className="detail-nav"><button className="icon" onClick={() => back('board')} aria-label="뒤로 가기"><ArrowLeft size={22}/></button><button className="icon" onClick={() => setMenu(!menu)} aria-label="게시글 메뉴"><MoreHorizontal size={24}/></button></header>
     {menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => go('edit')}>게시글 수정</button><button onClick={() => setConfirm('finish')}>게시판 종료</button><button onClick={() => setConfirm('delete')}>게시글 삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>게시글 신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>작성자 차단</button></>}</div>}
     <article className="detail-article">
-      <span className="detail-category" data-category={board.category}>{board.category}</span>
       <h1 title={board.title}>{board.title}</h1>
       <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span><span><MapPin size={12}/>{board.distance}m</span></div>
       <p className="detail-body">{board.body}</p>
