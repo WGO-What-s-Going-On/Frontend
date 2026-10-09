@@ -177,3 +177,9 @@ select:focus-visible,
 .map-screen .map-pin,
 .map-screen .map-pin::after,
 .map-screen .map-pin.active { background: var(--cat, var(--c-ink)); }
+
+/* ---------- 게시글 반응: 누른 반응은 파랑 ---------- */
+.detail-inline-reactions .post-reactions.interactive button.selected,
+.detail-inline-reactions .post-reactions.interactive button.selected b,
+.detail-inline-reactions .post-reactions.interactive button.selected span,
+.detail-inline-reactions .post-reactions.interactive button.selected svg { color: var(--c-accent); }
