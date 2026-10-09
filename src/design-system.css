@@ -348,4 +348,4 @@ select:focus-visible,
 }
 
 /* 지도 핀 요약 시트: 작성 버튼(위쪽 끝 102px)과 겹치지 않게 위로 */
-.map-bottom-sheet { bottom: 116px; }
+.map-bottom-sheet { bottom: 108px; }
