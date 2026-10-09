@@ -228,17 +228,10 @@ select:focus-visible,
 /* 하단 메뉴 */
 .bottom-nav { border-color: var(--c-line); background: rgba(255, 255, 255, .97); }
 
-/* 지도와 로그인 지도도 파랑 계열 */
-.map-shell,
-.map-shell .status-bar,
-.map-screen .map { background-color: #e6ecf8; }
-.map-road { border-color: #f7f9fe; background: #cfd8ea; box-shadow: 0 0 0 1px #d6deee; }
-.map-block { border-color: #d3dcee; background: #dce4f3; }
+/* 지도와 로그인 지도는 중립 회색 */
 .map-block span,
 .map-park span { color: var(--c-mute); }
 .map-label { color: var(--c-body); }
-.login-screen .nearby-animation { border-color: var(--c-line); background: #e6ecf8; }
-.nearby-road { background: #cfd8ea; }
 .nearby-alert b { color: var(--c-ink); }
 .nearby-alert small { color: var(--c-mute); }
 .nearby-alert svg { color: var(--c-accent); }
