@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { Camera, MapPin, X } from 'lucide-react'
+import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
 import { useApp } from '../../context/AppContext'
 import type { Category } from '../../types/domain'
@@ -31,7 +32,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         <label className="quick-field quick-detail-field"><span>상세 내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder="무슨 일이 있었는지 자세히 알려주세요" maxLength={500}/></label>
         <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>
         <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name)}/>
-        <button className="quick-submit" onClick={submit} disabled={!body.trim()}>게시하기</button>
+        <Button className="quick-submit" onClick={submit} disabled={!body.trim()}>게시하기</Button>
       </>}
     </section>
   </div>

@@ -1,4 +1,5 @@
 import { Clock3, MapPin, X } from 'lucide-react'
+import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
 import type { Board } from '../../types/domain'
 
@@ -22,6 +23,6 @@ export function IncidentBottomSheet({ board, onClose, onOpen }: IncidentBottomSh
     <h2>{board.title}</h2>
     <p>{board.body}</p>
     <div className="sheet-meta"><span><MapPin size={14}/>{board.distance}m 근처</span><span><Clock3 size={14}/>{board.createdAt}</span></div>
-    <button className="sheet-detail" onClick={onOpen}>자세히 보기</button>
+    <Button className="sheet-detail" onClick={onOpen}>자세히 보기</Button>
   </aside>
 }

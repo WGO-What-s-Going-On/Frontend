@@ -1,5 +1,6 @@
 import { Bell, Flame, Hand, MapPin, Megaphone } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
+import { Button } from '../../components/ui/Button'
 import { useApp } from '../../context/AppContext'
 
 export function LoginScreen() {
@@ -20,6 +21,6 @@ export function LoginScreen() {
         <span className="nearby-alert"><Bell size={18}/><span><small>내 주변 소식</small><b>지금 확인해 보세요</b></span></span>
       </div>
     </div>
-    <div className="start-card"><h3>간편하게 시작하기</h3><button className="kakao" onClick={() => go('home')}>카카오로 계속하기</button></div>
+    <div className="start-card"><h3>간편하게 시작하기</h3><Button className="kakao" onClick={() => go('home')}>카카오로 계속하기</Button></div>
   </AppShell>
 }
