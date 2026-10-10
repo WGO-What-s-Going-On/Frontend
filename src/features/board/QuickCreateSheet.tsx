@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Camera, MapPin, X } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import type { Category } from '../../types/domain'
-import { writeCategoryLabel } from './categoryLabels'
+import { writeCategoryLabel } from '../../domain/labels'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 

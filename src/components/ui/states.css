@@ -1,0 +1,37 @@
+/* 로딩·에러 상태 컴포넌트 전용. 기존 클래스는 건드리지 않는다. */
+.skeleton {
+  display: block;
+  background: linear-gradient(90deg, var(--c-surface) 0%, #f7f9fd 50%, var(--c-surface) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+}
+.skeleton-card {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--c-line);
+  border-radius: 18px;
+  background: var(--c-canvas);
+}
+.skeleton-row {
+  display: flex;
+  gap: 8px;
+  padding: 14px 0;
+}
+.skeleton-row > span { display: grid; flex: 1; gap: 8px; }
+.error-state {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 40px 16px;
+  text-align: center;
+}
+.error-state strong { color: var(--c-ink); font-size: 15px; }
+.error-state p { margin: 0 0 8px; color: var(--c-mute); font-size: 13px; }
+@keyframes skeleton-shimmer {
+  from { background-position: 100% 0; }
+  to { background-position: -100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; }
+}

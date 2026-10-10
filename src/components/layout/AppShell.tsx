@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Bell, Map, MessageSquare, Plus, UserRound } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { QuickCreateSheet } from '../../features/board/QuickCreateSheet'
+import { Toast } from '../ui/Toast'
 import type { Screen } from '../../types/domain'
 
 const tabs: { screen: Screen; label: string; icon: typeof Map }[] = [
@@ -39,7 +40,7 @@ export function AppShell({ children, nav = true, contentClassName = '', shellCla
     {bottomContent}
     {nav && <><nav className="bottom-nav ux-bottom-nav">{tabs.map(({ screen: target, label, icon: Icon }) => <button key={target} className={active === target ? 'active' : ''} onClick={() => go(target)}><span className="nav-icon-wrap"><Icon size={22}/>{target === 'alerts' && unreadNotices > 0 && <b>{unreadNotices}</b>}</span><span>{label}</span></button>)}</nav><button className="compose-fab" onClick={() => setComposerOpen(true)} aria-label="새 글 작성"><Plus size={23}/><span>작성</span></button></>}
     {composerOpen && <QuickCreateSheet onClose={() => setComposerOpen(false)}/>}
-    {toast && <div className="toast" role="status">{toast}</div>}
+    <Toast message={toast}/>
     <div className="home-indicator"/>
   </main>
 }

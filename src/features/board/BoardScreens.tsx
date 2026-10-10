@@ -5,10 +5,11 @@ import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { EmptyState } from '../../components/ui/EmptyState'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
 import type { Category, Comment } from '../../types/domain'
-import { writeCategoryLabel } from './categoryLabels'
+import { writeCategoryLabel } from '../../domain/labels'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
@@ -146,6 +147,3 @@ function BoardForm({ mode }: { mode: 'create' | 'edit' }) {
 export function CreateBoardScreen() { return <BoardForm mode="create"/> }
 export function EditBoardScreen() { return <BoardForm mode="edit"/> }
 
-function EmptyState({ title, action, onAction }: { title: string; action: string; onAction: () => void }) {
-  return <div className="empty-state"><strong>{title}</strong><button className="secondary-button" onClick={onAction}>{action}</button></div>
-}
