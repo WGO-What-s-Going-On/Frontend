@@ -4,6 +4,7 @@ import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { FilterChips } from '../../components/ui/FilterChips'
 import { useApp } from '../../context/AppContext'
 import { TitleProgressCard } from './TitleProgressCard'
 
@@ -25,7 +26,7 @@ export function ActivityScreen() {
     { label: '내가 작성한', count: boards.filter((board) => board.authorId === user.id).length },
   ] as const
   const filtered = useMemo(() => filter === '최근 본' ? recentBoardIds.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] }) : boards.filter((board) => filter === '댓글 단' && participatingIds.has(board.id) || filter === '공감한' && board.reactedByMe || filter === '내가 작성한' && board.authorId === user.id), [boards, filter, user.id, comments, recentBoardIds])
-  return <AppShell><BackHeader title="최근 활동 내역" onBack={() => go('my')}/><div className="chips activity-filters">{filters.map((item) => <button key={item.label} className={filter === item.label ? 'selected' : ''} onClick={() => setFilter(item.label)}>{item.label}<span>{item.count}</span></button>)}</div><div className="post-list compact">{filtered.map((board) => <BoardCard key={board.id} board={board} showBody onOpen={() => openBoard(board.id)}/>)}</div></AppShell>
+  return <AppShell><BackHeader title="최근 활동 내역" onBack={() => go('my')}/><FilterChips className="chips activity-filters" options={filters.map((item) => ({ value: item.label, count: item.count }))} selected={filter} onSelect={setFilter}/><div className="post-list compact">{filtered.map((board) => <BoardCard key={board.id} board={board} showBody onOpen={() => openBoard(board.id)}/>)}</div></AppShell>
 }
 
 export function ProfileEditScreen() {

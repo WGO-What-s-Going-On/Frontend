@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Search } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
+import { FilterChips } from '../../components/ui/FilterChips'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
 import type { Board } from '../../types/domain'
@@ -48,7 +49,7 @@ export function MapScreen() {
     </div>
     <div className="map-top-overlay">
       <header><h1>내 주변 지도</h1><button className="icon map-search" onClick={() => go('search')} aria-label="검색"><Search size={26}/></button></header>
-      <div className="map-filters">{filters.map((item) => <button key={item} className={filter === item ? 'selected' : ''} onClick={() => selectFilter(item)}>{item}</button>)}</div>
+      <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
     </div>
     {selectedBoard && <IncidentBottomSheet board={selectedBoard} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
   </AppShell>
