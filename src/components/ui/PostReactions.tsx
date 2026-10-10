@@ -5,8 +5,8 @@ export const reactionLabels: PostReaction[] = ['저도 궁금해요', '지금도
 const reactionOptions = [
   { label: '저도 궁금해요', shortLabel: '궁금', fullLabel: '저도 궁금해요', icon: CircleHelp },
   { label: '지금도 그래요', shortLabel: '진행 중', fullLabel: '아직 진행 중이에요', icon: Radio },
-  { label: '도움 됐어요', shortLabel: '도움됨', fullLabel: '도움돼요', icon: Lightbulb },
-  { label: '이제 끝났어요', shortLabel: '종료', fullLabel: '종료됐어요', icon: CircleCheck },
+  { label: '도움 됐어요', shortLabel: '유익함', fullLabel: '유익해요', icon: Lightbulb },
+  { label: '이제 끝났어요', shortLabel: '끝남', fullLabel: '끝났어요', icon: CircleCheck },
 ] satisfies { label: PostReaction; shortLabel: string; fullLabel: string; icon: typeof CircleHelp }[]
 
 export function PostReactions({ board, interactive = false, fullLabels = false, onReact }: { board: Board; interactive?: boolean; fullLabels?: boolean; onReact?: (reaction: PostReaction) => void }) {
