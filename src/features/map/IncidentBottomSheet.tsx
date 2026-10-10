@@ -1,4 +1,5 @@
 import { Clock3, MapPin, X } from 'lucide-react'
+import { IconButton } from '../../components/ui/IconButton'
 import type { Board } from '../../types/domain'
 
 interface IncidentBottomSheetProps {
@@ -10,7 +11,7 @@ interface IncidentBottomSheetProps {
 export function IncidentBottomSheet({ board, onClose, onOpen }: IncidentBottomSheetProps) {
   return <aside className="map-bottom-sheet" aria-label={`${board.title} 요약`}>
     <button className="sheet-handle" onClick={onClose} aria-label="사건 정보 닫기"><span/></button>
-    <button className="sheet-close" onClick={onClose} aria-label="닫기"><X size={20}/></button>
+    <IconButton className="sheet-close" label="닫기" onClick={onClose}><X size={20}/></IconButton>
     <div className="incident-preview" aria-hidden="true">
       <span className="preview-building preview-building-one"/>
       <span className="preview-building preview-building-two"/>
