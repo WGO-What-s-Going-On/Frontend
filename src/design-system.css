@@ -711,3 +711,49 @@ html { -webkit-tap-highlight-color: transparent; }
   box-shadow: none !important;
 }
 .login-night-screen .start-card h3 { margin: 0; text-align: center; font-size: 14px; font-weight: 500; }
+
+/* ---------- 게시글·댓글 ⋯ 메뉴 (작은 팝오버) ----------
+   항목은 배경 없는 글자 줄, 버튼 바로 아래 오른쪽에 붙어서 빠르고 부드럽게 펼쳐진다 */
+.board-detail-screen .detail-menu,
+.board-detail-screen .comment-context-menu {
+  display: grid;
+  gap: 0;
+  width: auto;
+  min-width: 128px;
+  margin: 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(23, 25, 30, .06), 0 8px 24px rgba(23, 25, 30, .14);
+  transform-origin: top right;
+  animation: popover-in .16s cubic-bezier(.2, .8, .2, 1);
+}
+.board-detail-screen .detail-menu button,
+.board-detail-screen .comment-context-menu button {
+  width: 100%;
+  padding: 9px 12px;
+  color: var(--c-ink);
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  white-space: nowrap;
+}
+.board-detail-screen .detail-menu button:hover,
+.board-detail-screen .detail-menu button:active,
+.board-detail-screen .comment-context-menu button:hover,
+.board-detail-screen .comment-context-menu button:active { background: #f3f3f3; }
+.detail-title-menu-wrap .detail-menu { top: calc(100% + 2px); right: 2px; }
+@keyframes popover-in {
+  from { opacity: 0; transform: translateY(-4px) scale(.96); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .board-detail-screen .detail-menu,
+  .board-detail-screen .comment-context-menu { animation: none; }
+}
+.board-detail-screen .comment-icon-button:hover,
+.board-detail-screen .comment-icon-button[aria-expanded="true"] { background: transparent; }
