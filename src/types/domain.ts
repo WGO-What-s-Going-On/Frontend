@@ -27,6 +27,9 @@ export interface Board {
   status: BoardStatus
   views: number
   reactions: Record<PostReaction, number>
+  // 내가 누른 게시글 반응. 여러 개를 동시에 누를 수 있다.
+  // (예전 저장 데이터는 하나만 담던 reactedByMe라서 myReactions()로 함께 읽는다)
+  myReactions?: PostReaction[]
   reactedByMe?: PostReaction
   imageName?: string
 }
@@ -64,4 +67,8 @@ export interface Report {
   targetId: string
   reason: string
   status: '접수' | '처리 완료'
+}
+
+export function myReactions(board: Board): PostReaction[] {
+  return board.myReactions ?? (board.reactedByMe ? [board.reactedByMe] : [])
 }

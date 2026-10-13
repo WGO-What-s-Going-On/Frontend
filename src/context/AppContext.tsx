@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
+import { myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Report, Screen, User } from '../types/domain'
 
 interface BoardInput { category: Category; title: string; body: string; imageName?: string }
@@ -128,11 +129,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const finishBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '종료됨' } : board)); showToast('게시판을 종료했습니다.') }
   const reactToBoard = (id: string, reaction: PostReaction) => setBoards((items) => items.map((board) => {
     if (board.id !== id) return board
-    const previous = board.reactedByMe
-    const reactions = { ...board.reactions }
-    if (previous) reactions[previous] -= 1
-    if (previous !== reaction) reactions[reaction] += 1
-    return { ...board, reactions, reactedByMe: previous === reaction ? undefined : reaction }
+    const mine = myReactions(board)
+    const pressed = mine.includes(reaction)
+    const reactions = { ...board.reactions, [reaction]: Math.max(0, board.reactions[reaction] + (pressed ? -1 : 1)) }
+    return { ...board, reactions, myReactions: pressed ? mine.filter((item) => item !== reaction) : [...mine, reaction], reactedByMe: undefined }
   }))
   const addComment = (body: string, parentId?: string, imageUrl?: string) => {
     setComments((items) => [...items, { id: `comment-${Date.now()}`, boardId: currentBoardId, authorId: user.id, authorName: user.nickname, body, imageUrl, read: true, createdAt: '방금 전', verified: inRange, parentId, reactions: { '도움돼요': 0, '맞아요': 0, '정보가 달라요': 0 } }])

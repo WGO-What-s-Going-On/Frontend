@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { useApp } from '../../context/AppContext'
+import { myReactions } from '../../types/domain'
 import { TitleProgressCard } from './TitleProgressCard'
 
 export function ProfileScreen() {
@@ -23,10 +24,10 @@ export function ActivityScreen() {
   const filters = [
     { label: '최근 본', count: recentBoardIds.length },
     { label: '댓글 단', count: participatingIds.size },
-    { label: '공감한', count: boards.filter((board) => board.reactedByMe).length },
+    { label: '공감한', count: boards.filter((board) => myReactions(board).length > 0).length },
     { label: '내가 작성한', count: boards.filter((board) => board.authorId === user.id).length },
   ] as const
-  const filtered = useMemo(() => filter === '최근 본' ? recentBoardIds.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] }) : boards.filter((board) => filter === '댓글 단' && participatingIds.has(board.id) || filter === '공감한' && board.reactedByMe || filter === '내가 작성한' && board.authorId === user.id), [boards, filter, user.id, comments, recentBoardIds])
+  const filtered = useMemo(() => filter === '최근 본' ? recentBoardIds.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] }) : boards.filter((board) => filter === '댓글 단' && participatingIds.has(board.id) || filter === '공감한' && myReactions(board).length > 0 || filter === '내가 작성한' && board.authorId === user.id), [boards, filter, user.id, comments, recentBoardIds])
   return <AppShell><BackHeader title="최근 활동 내역" onBack={() => go('my')}/><FilterChips className="chips activity-filters" options={filters.map((item) => ({ value: item.label, count: item.count }))} selected={filter} onSelect={setFilter}/><div className="post-list compact">{filtered.map((board) => <BoardCard key={board.id} board={board} showBody onOpen={() => openBoard(board.id)}/>)}</div></AppShell>
 }
 
