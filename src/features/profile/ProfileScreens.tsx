@@ -10,11 +10,22 @@ import { useApp } from '../../context/AppContext'
 import { myReactions } from '../../types/domain'
 import { TitleProgressCard } from './TitleProgressCard'
 
+// 뱃지 (USR-F12): 도움 활동에 따라 얻는다. 실제 획득 기준은 백엔드가 계산한다.
+function earnedBadges({ posts, comments, likes, finished }: { posts: number; comments: number; likes: number; finished: number }) {
+  return [
+    { name: '첫 소식', hint: '게시판 1개 만들기', earned: posts >= 1 },
+    { name: '해결사', hint: '내 게시판 1개 마무리', earned: finished >= 1 },
+    { name: '탐정', hint: '댓글 하트 10개 받기', earned: likes >= 10 },
+    { name: '단골 이웃', hint: '댓글 10개 쓰기', earned: comments >= 10 },
+  ]
+}
+
 export function ProfileScreen() {
   const { user, boards, comments, go } = useApp()
-  const postCount = boards.filter((board) => board.authorId === user.id).length
-  const commentCount = comments.filter((comment) => comment.authorId === user.id).length
-  return <AppShell><header><h1>마이페이지</h1></header><TitleProgressCard postCount={postCount} commentCount={commentCount}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정</h4><div className="menu-group"><button onClick={() => go('profile-edit')}>프로필 수정 <ChevronRight/></button><button onClick={() => go('account-settings')}>계정 관리 <ChevronRight/></button></div></AppShell>
+  const myBoards = boards.filter((board) => board.authorId === user.id)
+  const myComments = comments.filter((comment) => comment.authorId === user.id)
+  const badges = earnedBadges({ posts: myBoards.length, comments: myComments.length, likes: myComments.reduce((sum, comment) => sum + (comment.likes ?? 0), 0), finished: myBoards.filter((board) => board.status === '종료됨').length })
+  return <AppShell><header><h1>마이페이지</h1></header><TitleProgressCard postCount={myBoards.length} commentCount={myComments.length} name={user.nickname}/><h4>뱃지 <small>{badges.filter((badge) => badge.earned).length}/{badges.length}</small></h4><ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정</h4><div className="menu-group"><button onClick={() => go('profile-edit')}>프로필 수정 <ChevronRight/></button><button onClick={() => go('account-settings')}>계정 관리 <ChevronRight/></button></div></AppShell>
 }
 
 export function ActivityScreen() {

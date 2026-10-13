@@ -14,6 +14,7 @@ import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
 import type { Category, Comment } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
+import { AuthorToggle } from './AuthorToggle'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
@@ -66,7 +67,7 @@ export function SearchScreen() {
   </AppShell>
 }
 
-function CommentItem({ comment, replies = [], onReply, isReply = false, replyTargetId }: { comment: Comment; replies?: Comment[]; onReply: (comment: Comment) => void; isReply?: boolean; replyTargetId?: string }) {
+function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, replyTargetId }: { comment: Comment; replies?: Comment[]; onReply: (comment: Comment) => void; onEdit: (comment: Comment) => void; isReply?: boolean; replyTargetId?: string }) {
   const { user, deleteComment, reportTarget, blockUser, toggleCommentLike } = useApp()
   const [menu, setMenu] = useState<'actions' | 'report' | null>(null)
   const [photoOpen, setPhotoOpen] = useState(false)
@@ -83,20 +84,21 @@ function CommentItem({ comment, replies = [], onReply, isReply = false, replyTar
   }, [menu])
 
   return <article className={`comment comment-clickable ${isReply ? 'reply-comment' : ''} ${menu ? 'comment-menu-open' : ''} ${replyTargetId === comment.id ? 'reply-target' : ''}`} tabIndex={0} aria-label={`${comment.authorName} 댓글에 댓글 작성`} onClick={(event) => { const target = event.target as HTMLElement; if (target.closest('.comment') !== event.currentTarget || target.closest('button, a, input, textarea, select, .context-menu') || window.getSelection()?.toString()) return; event.stopPropagation(); onReply(comment) }} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onReply(comment) } }}>
-    <div className="comment-head"><div className="comment-identity"><div><strong>{comment.authorName}</strong><small>{comment.createdAt}</small></div></div><IconButton className="comment-icon-button" label="댓글 메뉴" onClick={() => setMenu(menu ? null : 'actions')} expanded={Boolean(menu)}><MoreHorizontal size={18}/></IconButton></div>
+    <div className="comment-head"><div className="comment-identity"><div><strong>{comment.authorName}</strong><small>{comment.createdAt}{comment.edited && <span className="comment-edited">수정됨</span>}</small></div></div><IconButton className="comment-icon-button" label="댓글 메뉴" onClick={() => setMenu(menu ? null : 'actions')} expanded={Boolean(menu)}><MoreHorizontal size={18}/></IconButton></div>
     {comment.body && <p>{comment.body}</p>}{comment.imagePlaceholder && <div className="comment-image-placeholder">[이미지]</div>}{comment.imageUrl && <button className="comment-photo" onClick={() => setPhotoOpen(true)} aria-label="댓글 사진 크게 보기"><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></button>}
     <div className="comment-actions"><button className={`comment-like ${comment.likedByMe ? 'liked' : ''}`} onClick={() => toggleCommentLike(comment.id)} aria-label={`좋아요 ${comment.likes ?? 0}개`} aria-pressed={Boolean(comment.likedByMe)}><HeartIcon size={17} filled={comment.likedByMe}/><span>{comment.likes ?? 0}</span></button><button className="comment-reply-button" onClick={() => onReply(comment)}>답글 달기</button></div>
-    {!isReply && replies.length > 0 && <div className="comment-replies">{replies.map((reply) => <CommentItem key={reply.id} comment={reply} onReply={onReply} isReply replyTargetId={replyTargetId}/>)}</div>}
-    {menu && <div ref={menuRef} className={`context-menu comment-context-menu ${menu === 'report' ? 'comment-report-menu' : ''}`} role="menu" aria-label={menu === 'report' ? '댓글 신고 사유' : '댓글 메뉴'}>{comment.authorId === user.id ? <button onClick={() => deleteComment(comment.id)}>댓글 삭제</button> : menu === 'actions' ? <><button onClick={() => setMenu('report')}>댓글 신고</button><button onClick={() => { blockUser(comment.authorId); setMenu(null) }}>사용자 차단</button></> : <><strong>신고 사유</strong>{reportReasons.map((reason) => <button key={reason} onClick={() => { reportTarget('댓글', comment.id, reason); setMenu(null) }}>{reason}</button>)}<button className="comment-report-back" onClick={() => setMenu('actions')}>뒤로</button></>}</div>}
+    {!isReply && replies.length > 0 && <div className="comment-replies">{replies.map((reply) => <CommentItem key={reply.id} comment={reply} onReply={onReply} onEdit={onEdit} isReply replyTargetId={replyTargetId}/>)}</div>}
+    {menu && <div ref={menuRef} className={`context-menu comment-context-menu ${menu === 'report' ? 'comment-report-menu' : ''}`} role="menu" aria-label={menu === 'report' ? '댓글 신고 사유' : '댓글 메뉴'}>{comment.authorId === user.id ? <><button onClick={() => { onEdit(comment); setMenu(null) }}>댓글 수정</button><button onClick={() => deleteComment(comment.id)}>댓글 삭제</button></> : menu === 'actions' ? <><button onClick={() => setMenu('report')}>댓글 신고</button><button onClick={() => { blockUser(comment.authorId); setMenu(null) }}>사용자 차단</button></> : <><strong>신고 사유</strong>{reportReasons.map((reason) => <button key={reason} onClick={() => { reportTarget('댓글', comment.id, reason); setMenu(null) }}>{reason}</button>)}<button className="comment-report-back" onClick={() => setMenu('actions')}>뒤로</button></>}</div>}
     {photoOpen && comment.imageUrl && <div className="comment-photo-modal" role="dialog" aria-label="현장 사진 보기" onClick={() => setPhotoOpen(false)}><button aria-label="사진 닫기"><X size={22}/></button><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></div>}
   </article>
 }
 
 export function BoardDetailScreen() {
-  const { currentBoard: board, back, comments, user, go, inRange, reactToBoard, addComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
+  const { currentBoard: board, back, comments, user, go, inRange, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
   const [body, setBody] = useState('')
   const [commentImageUrl, setCommentImageUrl] = useState('')
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
+  const [editing, setEditing] = useState<Comment | null>(null)
   const [menu, setMenu] = useState(false)
   const [visibleComments, setVisibleComments] = useState(3)
   const [confirm, setConfirm] = useState<'delete' | 'finish' | null>(null)
@@ -104,13 +106,21 @@ export function BoardDetailScreen() {
   const commentInputRef = useRef<HTMLInputElement>(null)
   if (!board) return null
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))
-  const submit = () => { if (!body.trim() && !commentImageUrl) return; addComment(body.trim(), replyTo?.parentId || replyTo?.id, commentImageUrl || undefined); setBody(''); setCommentImageUrl(''); setReplyTo(null); setVisibleComments(boardComments.length + 1) }
+  const submit = () => {
+    if (!body.trim() && !commentImageUrl) return
+    if (editing) { updateComment(editing.id, body.trim()); setEditing(null) }
+    else { addComment(body.trim(), replyTo?.parentId || replyTo?.id, commentImageUrl || undefined); setReplyTo(null); setVisibleComments(boardComments.length + 1) }
+    setBody(''); setCommentImageUrl('')
+  }
   const addPhoto = (file?: File) => { if (file) setCommentImageUrl(URL.createObjectURL(file)) }
-  const startComment = (comment: Comment) => { setReplyTo(comment); requestAnimationFrame(() => commentInputRef.current?.focus()) }
+  const startComment = (comment: Comment) => { setEditing(null); setReplyTo(comment); requestAnimationFrame(() => commentInputRef.current?.focus()) }
+  // 내 댓글 수정 (PST-F08): 입력창에 기존 내용을 넣고 수정 모드로
+  const startEdit = (comment: Comment) => { setReplyTo(null); setEditing(comment); setBody(comment.body); requestAnimationFrame(() => commentInputRef.current?.focus()) }
+  const cancelCompose = () => { setReplyTo(null); if (editing) { setEditing(null); setBody('') } }
   const rootComments = boardComments.filter((comment) => !comment.parentId)
   const shownComments = rootComments.slice(0, visibleComments)
   const remainingComments = rootComments.length - shownComments.length
-  const commentComposer = inRange && board.status === '실시간' ? <div className="detail-comment-input">{replyTo && <div className="replying"><span>{replyTo.authorName}님에게 댓글 작성 중</span><button onClick={() => setReplyTo(null)}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => setCommentImageUrl('')} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><IconButton className="comment-photo-add" label="댓글에 사진 첨부" onClick={() => commentFileRef.current?.click()}><Camera size={20}/></IconButton><input ref={commentInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder="댓글을 입력하세요"/><IconButton className="comment-submit" label="댓글 등록" onClick={submit} disabled={!body.trim() && !commentImageUrl}><Send size={19}/></IconButton></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => addPhoto(event.target.files?.[0])}/></div> : null
+  const commentComposer = inRange && board.status === '실시간' ? <div className="detail-comment-input">{(replyTo || editing) && <div className="replying"><span>{editing ? '댓글 수정 중' : `${replyTo?.authorName}님에게 댓글 작성 중`}</span><button onClick={cancelCompose}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => setCommentImageUrl('')} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><IconButton className="comment-photo-add" label="댓글에 사진 첨부" onClick={() => commentFileRef.current?.click()}><Camera size={20}/></IconButton><input ref={commentInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder="댓글을 입력하세요"/><IconButton className="comment-submit" label={editing ? '댓글 수정' : '댓글 등록'} onClick={submit} disabled={!body.trim() && !commentImageUrl}><Send size={19}/></IconButton></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => addPhoto(event.target.files?.[0])}/></div> : null
   return <AppShell nav={false} contentClassName="board-detail-screen" bottomContent={commentComposer}>
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('board')}><ArrowLeft size={22}/></IconButton></header>
     <article className="detail-article">
@@ -121,7 +131,7 @@ export function BoardDetailScreen() {
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={inRange && board.status === '실시간'} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
     </article>
     {!inRange && <div className="notice-box"><strong>150m 밖에서는 열람만 가능합니다.</strong></div>}
-    <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={startComment} replyTargetId={replyTo?.id}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong><p>가장 먼저 상황을 알려주세요</p></div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>접기 <ChevronUp size={17}/></button>}</section>
+    <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={startComment} onEdit={startEdit} replyTargetId={replyTo?.id}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong><p>가장 먼저 상황을 알려주세요</p></div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>접기 <ChevronUp size={17}/></button>}</section>
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="목업에서는 즉시 목록에서 제거됩니다." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
     {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description="종료 후에는 새 댓글과 반응을 작성할 수 없습니다." confirmLabel="종료" onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>} 
   </AppShell>
@@ -139,13 +149,14 @@ function BoardForm({ mode }: { mode: 'create' | 'edit' }) {
   const [title, setTitle] = useState(mode === 'edit' ? currentBoard?.title || '' : '')
   const [body, setBody] = useState(mode === 'edit' ? currentBoard?.body || '' : '')
   const [imageName, setImageName] = useState(mode === 'edit' ? currentBoard?.imageName : undefined)
+  const [anonymous, setAnonymous] = useState(false)
   if (!inRange) return <AppShell><BackHeader title="게시판 작성" onBack={() => go('board')}/><EmptyState title="150m 밖에서는 게시판을 작성할 수 없습니다." action="지도로 돌아가기" onAction={() => go('home')}/></AppShell>
   const submit = () => {
     if (!title.trim() || !body.trim()) return
     if (mode === 'edit' && currentBoard) updateBoard(currentBoard.id, { title: title.trim(), body: body.trim(), category })
-    else createBoard({ title: title.trim(), body: body.trim(), category, imageName })
+    else createBoard({ title: title.trim(), body: body.trim(), category, imageName, anonymous })
   }
-  return <AppShell><BackHeader title={mode === 'edit' ? '게시글 수정' : '게시판 만들기'} onBack={() => go(mode === 'edit' ? 'detail' : 'category')}/><div className="live-card"><small>현재 위치 150m 안</small><strong>참여 가능 38명</strong><p>정확한 상세 위치는 다른 사용자에게 공개되지 않습니다.</p></div><label>카테고리</label><select className="field" value={category} onChange={(event) => setCategory(event.target.value as Category)}>{categories.map((item) => <option key={item} value={item}>{categoryLabel[item]}</option>)}</select><label>제목</label><input className="field" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="무슨 일이 궁금한가요?" maxLength={50}/><small className="counter">{title.length}/50</small><label>상황 설명</label><textarea className="field" value={body} onChange={(event) => setBody(event.target.value)} placeholder="확인한 사실과 궁금한 점을 적어주세요." maxLength={500}/><label className="file-field">현장 사진 첨부<input type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name)}/></label>{imageName && <div className="attachment">{imageName}<button onClick={() => setImageName(undefined)}>삭제</button></div>}<Button className="primary" onClick={submit} disabled={!title.trim() || !body.trim()}>{mode === 'edit' ? '수정 저장' : '게시판 열기'}</Button></AppShell>
+  return <AppShell><BackHeader title={mode === 'edit' ? '게시글 수정' : '게시판 만들기'} onBack={() => go(mode === 'edit' ? 'detail' : 'category')}/><div className="live-card"><small>현재 위치 150m 안</small><strong>참여 가능 38명</strong><p>정확한 상세 위치는 다른 사용자에게 공개되지 않습니다.</p></div><label>카테고리</label><select className="field" value={category} onChange={(event) => setCategory(event.target.value as Category)}>{categories.map((item) => <option key={item} value={item}>{categoryLabel[item]}</option>)}</select><label>제목</label><input className="field" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="무슨 일이 궁금한가요?" maxLength={50}/><small className="counter">{title.length}/50</small><label>상황 설명</label><textarea className="field" value={body} onChange={(event) => setBody(event.target.value)} placeholder="확인한 사실과 궁금한 점을 적어주세요." maxLength={500}/><label className="file-field">현장 사진 첨부<input type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name)}/></label>{imageName && <div className="attachment">{imageName}<button onClick={() => setImageName(undefined)}>삭제</button></div>}{mode === 'create' && <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>}<Button className="primary" onClick={submit} disabled={!title.trim() || !body.trim()}>{mode === 'edit' ? '수정 저장' : '게시판 열기'}</Button></AppShell>
 }
 
 export function CreateBoardScreen() { return <BoardForm mode="create"/> }

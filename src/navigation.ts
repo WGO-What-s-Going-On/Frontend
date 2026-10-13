@@ -16,6 +16,9 @@ export function screenFromPath(pathname: string): Screen {
   if (pathname === '/my/account') return 'account-settings'
   if (pathname === '/my/app-settings' || pathname === '/my/settings') return 'my'
   if (pathname === '/alerts') return 'alerts'
+  if (pathname === '/signup/terms') return 'terms'
+  if (pathname === '/signup/nickname') return 'nickname'
+  if (pathname === '/permission/location') return 'location-permission'
   return 'login'
 }
 
@@ -36,6 +39,9 @@ export function pathForScreen(screen: Screen, boardId?: string) {
     'profile-edit': '/my/edit',
     'account-settings': '/my/account',
     outside: `/boards/${encodedBoardId}/outside`,
+    terms: '/signup/terms',
+    nickname: '/signup/nickname',
+    'location-permission': '/permission/location',
   }
   return paths[screen]
 }

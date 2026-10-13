@@ -5,6 +5,7 @@ import { IconButton } from '../../components/ui/IconButton'
 import { useApp } from '../../context/AppContext'
 import type { Category } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
+import { AuthorToggle } from './AuthorToggle'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
@@ -13,13 +14,14 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   const [category, setCategory] = useState<Category>('긴급 사고')
   const [body, setBody] = useState('')
   const [imageName, setImageName] = useState<string>()
+  const [anonymous, setAnonymous] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const submit = () => {
     const content = body.trim()
     if (!content) return
     const title = content.split(/\n|[.!?。！？]/)[0].trim().slice(0, 50) || `${category} 상황 공유`
-    createBoard({ category, title, body: content, imageName })
+    createBoard({ category, title, body: content, imageName, anonymous })
   }
 
   return <div className="quick-compose-layer" role="dialog" aria-modal="true" aria-label="빠른 글쓰기">
@@ -32,6 +34,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         <label className="quick-field quick-detail-field"><span>상세 내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder="무슨 일이 있었는지 자세히 알려주세요" maxLength={500}/></label>
         <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>
         <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name)}/>
+        <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>
         <Button className="quick-submit" onClick={submit} disabled={!body.trim()}>게시하기</Button>
       </>}
     </section>

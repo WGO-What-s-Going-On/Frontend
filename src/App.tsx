@@ -1,5 +1,6 @@
 import { useApp } from './context/AppContext'
 import { LoginScreen } from './features/auth/AuthScreens'
+import { LocationPermissionScreen, NicknameScreen, TermsScreen } from './features/auth/OnboardingScreens'
 import { MapScreen, OutsideRangeScreen } from './features/map/MapScreens'
 import { BoardListScreen, SearchScreen, BoardDetailScreen, CategoryScreen, CreateBoardScreen, EditBoardScreen } from './features/board/BoardScreens'
 import { NotificationScreen } from './features/notifications/NotificationScreen'
@@ -21,6 +22,9 @@ const screens: Record<Screen, React.ComponentType> = {
   'profile-edit': ProfileEditScreen,
   'account-settings': AccountSettingsScreen,
   outside: OutsideRangeScreen,
+  terms: TermsScreen,
+  nickname: NicknameScreen,
+  'location-permission': LocationPermissionScreen,
 }
 
 export default function App() {

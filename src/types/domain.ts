@@ -2,6 +2,7 @@ export type Screen =
   | 'login' | 'home' | 'board' | 'search' | 'detail'
   | 'category' | 'create' | 'edit' | 'my' | 'activity' | 'alerts'
   | 'profile-edit' | 'account-settings' | 'outside'
+  | 'terms' | 'nickname' | 'location-permission'
 
 export type Category = '긴급 사고' | '도움 요청' | '동네 소식' | '일상 불편'
 export type BoardStatus = '실시간' | '종료됨' | '숨김'
@@ -13,6 +14,8 @@ export interface User {
   nickname: string
   age: number
   bio: string
+  // 약관 동의와 닉네임 설정을 마쳤는지
+  onboarded?: boolean
 }
 
 export interface Board {
@@ -32,6 +35,8 @@ export interface Board {
   myReactions?: PostReaction[]
   reactedByMe?: PostReaction
   imageName?: string
+  // 닉네임 대신 익명으로 표시한 게시글 (USR-F08)
+  anonymous?: boolean
   // 작성 후 수정한 적이 있으면 true (상세에 '수정됨' 표시)
   edited?: boolean
 }
@@ -52,6 +57,7 @@ export interface Comment {
   reactedByMe?: CommentReaction
   likedByMe?: boolean
   likes?: number
+  edited?: boolean
 }
 
 export interface Notice {

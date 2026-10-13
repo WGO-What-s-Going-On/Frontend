@@ -5,7 +5,8 @@ import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Report, Screen, User } from '../types/domain'
 
-interface BoardInput { category: Category; title: string; body: string; imageName?: string }
+interface BoardInput { category: Category; title: string; body: string; imageName?: string; anonymous?: boolean }
+export type LocationPermission = 'unknown' | 'granted' | 'denied'
 interface NotificationSettings { nearby: boolean; replies: boolean }
 
 interface PersistedMockState {
@@ -21,6 +22,7 @@ interface PersistedMockState {
   alertBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
+  locationPermission: LocationPermission
   noticesVersion?: number
 }
 
@@ -50,10 +52,16 @@ interface AppContextValue {
   alertBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
+  locationPermission: LocationPermission
   toast: string
   go: (screen: Screen) => void
   back: (fallback?: Screen) => void
   openBoard: (id: string) => void
+  startLogin: () => void
+  agreeTerms: () => void
+  completeNickname: (nickname: string) => void
+  setLocationPermission: (permission: LocationPermission) => void
+  updateComment: (id: string, body: string) => void
   setInRange: (value: boolean) => void
   createBoard: (input: BoardInput) => void
   updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category'>) => void
@@ -96,12 +104,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [alertBoardIds, setAlertBoardIds] = useState<string[]>(persisted.alertBoardIds ?? [])
   const [recentBoardIds, setRecentBoardIds] = useState<string[]>(persisted.recentBoardIds ?? [])
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(persisted.notificationSettings ?? { nearby: true, replies: true })
+  const [locationPermission, setLocationPermissionState] = useState<LocationPermission>(persisted.locationPermission ?? 'unknown')
   const [toast, setToast] = useState('')
 
   useEffect(() => {
-    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings }
+    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings])
+  }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission])
 
   const showToast = (message: string) => {
     setToast(message)
@@ -110,10 +119,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const go = (next: Screen) => navigate(pathForScreen(next, currentBoardId))
   const back = (fallback: Screen = 'board') => location.key === 'default' ? go(fallback) : navigate(-1)
   const openBoard = (id: string) => { setCurrentBoardId(id); setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)]); navigate(pathForScreen(inRange ? 'detail' : 'outside', id)) }
+  // 로그인 흐름: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도 (실제 카카오 인증은 백엔드 연동 때)
+  const startLogin = () => go(!user.onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home')
+  const agreeTerms = () => go('nickname')
+  const completeNickname = (nickname: string) => { setUser((value) => ({ ...value, nickname, onboarded: true })); go('location-permission') }
+  const setLocationPermission = (permission: LocationPermission) => {
+    setLocationPermissionState(permission)
+    // 위치 권한이 없으면 150m 판정을 할 수 없어 열람만 가능하다 (MAP-F01, MAP-F05)
+    setInRange(permission === 'granted')
+    go('home')
+  }
   const createBoard = (input: BoardInput) => {
     const id = `board-${Date.now()}`
     setBoards((items) => [{
-      id, authorId: user.id, authorName: user.nickname, distance: 0, createdAt: '방금 전', status: '실시간', views: 1,
+      id, authorId: user.id, authorName: input.anonymous ? '익명' : user.nickname, distance: 0, createdAt: '방금 전', status: '실시간', views: 1,
       reactions: { '저도 궁금해요': 0, '지금도 그래요': 0, '도움 됐어요': 0, '이제 끝났어요': 0 }, ...input,
     }, ...items])
     setCurrentBoardId(id)
@@ -142,6 +161,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setComments((items) => [...items, { id: `comment-${Date.now()}`, boardId: currentBoardId, authorId: user.id, authorName: user.nickname, body, imageUrl, read: true, createdAt: '방금 전', verified: inRange, parentId, reactions: { '도움돼요': 0, '맞아요': 0, '정보가 달라요': 0 } }])
     showToast('댓글을 등록했습니다.')
   }
+  const updateComment = (id: string, body: string) => { setComments((items) => items.map((comment) => comment.id === id ? { ...comment, body, edited: true } : comment)); showToast('댓글을 수정했습니다.') }
   const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
   const markCommentRead = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, read: true } : comment))
   const toggleCommentLike = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, likedByMe: !comment.likedByMe, likes: Math.max(0, (comment.likes ?? 0) + (comment.likedByMe ? -1 : 1)) } : comment))
@@ -168,10 +188,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast,
-    go, back, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, toast,
+    go, back, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
