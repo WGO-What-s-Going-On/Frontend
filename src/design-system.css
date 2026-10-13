@@ -555,3 +555,5 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 .ux-board-header .ux-sort-trigger svg { position: static; color: var(--c-mute); }
 .ux-board-header .ux-sort-trigger[aria-expanded="true"] { color: var(--c-ink); }
+/* 정렬 글자 오른쪽 끝을 카드 안 알림 종 아이콘의 오른쪽 끝에 맞춘다 */
+.ux-board-header .ux-sort-filter { margin-right: 17px; }
