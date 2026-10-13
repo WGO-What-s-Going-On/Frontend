@@ -67,6 +67,7 @@ interface AppContextValue {
   updateUser: (input: Pick<User, 'nickname' | 'bio'>) => void
   markNoticeRead: (id: string) => void
   markAllNoticesRead: () => void
+  deleteNotice: (id: string) => void
   reportTarget: (targetType: Report['targetType'], targetId: string, reason: string) => void
   blockUser: (userId: string) => void
   toggleBoardNotifications: (boardId: string) => void
@@ -151,6 +152,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const updateUser = (input: Pick<User, 'nickname' | 'bio'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
   const markNoticeRead = (id: string) => setNotices((items) => items.map((notice) => notice.id === id ? { ...notice, read: true } : notice))
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
+  const deleteNotice = (id: string) => setNotices((items) => items.filter((notice) => notice.id !== id))
   const reportTarget = (targetType: Report['targetType'], targetId: string, reason: string) => { setReports((items) => [...items, { id: `report-${Date.now()}`, targetType, targetId, reason, status: '접수' }]); showToast('신고가 접수되었습니다.') }
   const blockUser = (userId: string) => { setBlockedUsers((items) => [...new Set([...items, userId])]); showToast('사용자를 차단했습니다.') }
   const toggleBoardNotifications = (boardId: string) => setAlertBoardIds((items) => items.includes(boardId) ? items.filter((id) => id !== boardId) : [...items, boardId])
@@ -164,7 +166,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast,
     go, back, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
-    updateUser, markNoticeRead, markAllNoticesRead, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
+    updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
