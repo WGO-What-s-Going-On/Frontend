@@ -459,3 +459,35 @@ select:focus-visible,
 .detail-title-menu-wrap { margin-right: 9px; }
 /* 댓글 ⋯ 메뉴는 게시글 메뉴보다 한 단계 연하게 */
 .board-detail-screen .comment-icon-button { color: #b4b4b4; }
+
+/* 댓글 아래 하트와 답글 달기 */
+.board-detail-screen .comment-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+  margin-bottom: -4px;
+}
+.comment-like {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  margin-left: -6px;
+  padding: 0;
+  color: var(--c-urgent);
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  transition: transform .15s ease;
+}
+.comment-like:active { transform: scale(.88); }
+.comment-reply-button {
+  padding: 4px 2px;
+  color: #999;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+}
+.comment-reply-button:active { color: #666; }

@@ -45,6 +45,7 @@ export interface Comment {
   parentId?: string
   reactions: Record<CommentReaction, number>
   reactedByMe?: CommentReaction
+  likedByMe?: boolean
 }
 
 export interface Notice {

@@ -63,6 +63,7 @@ interface AppContextValue {
   deleteComment: (id: string) => void
   markCommentRead: (id: string) => void
   reactToComment: (id: string, reaction: CommentReaction) => void
+  toggleCommentLike: (id: string) => void
   updateUser: (input: Pick<User, 'nickname' | 'bio'>) => void
   markNoticeRead: (id: string) => void
   markAllNoticesRead: () => void
@@ -138,6 +139,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
   const markCommentRead = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, read: true } : comment))
+  const toggleCommentLike = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, likedByMe: !comment.likedByMe } : comment))
   const reactToComment = (id: string, reaction: CommentReaction) => setComments((items) => items.map((comment) => {
     if (comment.id !== id) return comment
     const previous = comment.reactedByMe
@@ -161,7 +163,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast,
-    go, back, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment,
+    go, back, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
     updateUser, markNoticeRead, markAllNoticesRead, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
