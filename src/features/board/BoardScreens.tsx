@@ -48,7 +48,7 @@ export function BoardListScreen() {
     return () => document.removeEventListener('pointerdown', closeMenu)
   }, [sortMenuOpen])
   return <AppShell contentClassName="ux-board-screen">
-    <header className="ux-board-header"><h1>게시판</h1><IconButton className="icon map-search" label="검색" onClick={() => go('search')}><Search size={26}/></IconButton></header>
+    <header className="ux-board-header"><h1>게시판</h1></header>
     <div className="ux-filter-row"><div ref={sortMenuRef} className="ux-sort-filter"><button className="ux-sort-trigger" onClick={() => setSortMenuOpen((open) => !open)} aria-label="게시글 정렬" aria-haspopup="menu" aria-expanded={sortMenuOpen}><span>{sort}</span><ChevronDown size={14}/></button>{sortMenuOpen && <div className="ux-sort-menu" role="menu">{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuOpen(false) }}>{item}</button>)}</div>}</div><FilterChips className="ux-category-filters" options={categoryOptions} selected={category} onSelect={(item) => updateFilter('category', item)}/></div>
     <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={!alertBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => updateFilter('category', '전체')}/>}</div>
   </AppShell>

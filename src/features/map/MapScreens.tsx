@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import { Search } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
 import { FilterChips } from '../../components/ui/FilterChips'
-import { IconButton } from '../../components/ui/IconButton'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
 import type { Board } from '../../types/domain'
@@ -50,7 +48,7 @@ export function MapScreen() {
       {nearby.map((board, index) => <button key={board.id} className={`map-pin marker-${index % 8} ${selectedBoard?.id === board.id ? 'active' : ''}`} data-category={board.category} onClick={(event) => { event.stopPropagation(); setSelectedBoard(board) }}>{markerLabel(board)}</button>)}
     </div>
     <div className="map-top-overlay">
-      <header><h1>내 주변 지도</h1><IconButton className="icon map-search" label="검색" onClick={() => go('search')}><Search size={26}/></IconButton></header>
+      <header><h1>내 주변 지도</h1></header>
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
     </div>
     {selectedBoard && <IncidentBottomSheet board={selectedBoard} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
