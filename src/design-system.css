@@ -565,7 +565,9 @@ html { -webkit-tap-highlight-color: transparent; }
 .login-night-shell .status-bar,
 .login-night-screen {
   color: #fff;
-  background: #111318;
+  background:
+    radial-gradient(120% 60% at 50% 0%, #1d2433 0%, rgba(13, 16, 24, 0) 70%),
+    linear-gradient(#0d1018 0%, #121621 55%, #0a0c12 100%);
 }
 .login-night-shell .status-bar { background: transparent; color: #fff; }
 .login-night-shell .prototype-label { color: rgba(255, 255, 255, .55); }
@@ -581,69 +583,53 @@ html { -webkit-tap-highlight-color: transparent; }
   pointer-events: none;
 }
 
-/* 가운데: 내 위치와 반경 150m. 원이 은은하게 맥박 치고 신호가 바깥으로 퍼진다 */
-.night-center {
+/* 멀리 보이는 사이렌·가로등 불빛 (흐릿한 빛 번짐) */
+.night-light {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-}
-.night-range,
-.night-scan {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 200px;
-  height: 200px;
-  margin: -100px 0 0 -100px;
   border-radius: 50%;
+  filter: blur(26px);
+  opacity: .5;
 }
-.night-range {
-  border: 1px solid rgba(255, 255, 255, .18);
-  animation: night-range-breathe 3.2s ease-in-out infinite;
+.night-light-red { top: 200px; left: 40%; width: 120px; height: 70px; background: #ff3b3b; animation: night-siren-red 1.6s ease-in-out infinite; }
+.night-light-blue { top: 190px; left: 64%; width: 110px; height: 66px; background: #2f6bff; animation: night-siren-blue 1.6s ease-in-out infinite; }
+.night-light-warm { top: 120px; left: -30px; width: 160px; height: 120px; background: #f2a43a; opacity: .18; }
+.night-light-warm-two { bottom: 120px; right: -40px; width: 180px; height: 140px; background: #f2a43a; opacity: .12; }
+@keyframes night-siren-red { 0%, 100% { opacity: .55; } 50% { opacity: .15; } }
+@keyframes night-siren-blue { 0%, 100% { opacity: .12; } 50% { opacity: .55; } }
+
+/* 가운데 지도: 기존 지도 애니메이션(도로, 맥박 치는 150m 원, 퍼지는 신호, 숨 쉬는 내 위치)을 밤 배경에 맞춘다 */
+.login-night .night-map {
+  z-index: 1;
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-mask-image: radial-gradient(80% 40% at 50% 52%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(80% 40% at 50% 52%, #000 45%, transparent 100%);
 }
-.night-scan {
-  border: 1px solid rgba(108, 148, 255, .5);
-  opacity: 0;
-  animation: night-scan 3.2s ease-out infinite;
+.login-night .night-map .nearby-road { background: #1c2230; }
+.login-night .night-map .nearby-road::after { background: rgba(255, 255, 255, .1); }
+.login-night .night-map .nearby-range {
+  border-color: rgba(108, 148, 255, .85);
+  animation-name: night-range-pulse;
 }
-.night-scan-late { animation-delay: 1.6s; }
-@keyframes night-range-breathe {
-  0%, 100% { background: rgba(108, 148, 255, .03); }
-  50% { background: rgba(108, 148, 255, .08); }
-}
-@keyframes night-scan {
-  0% { opacity: .8; transform: scale(.1); }
-  100% { opacity: 0; transform: scale(1.35); }
-}
-.night-me {
-  position: absolute;
-  top: -8px;
-  left: -8px;
-  width: 16px;
-  height: 16px;
-  border: 3px solid #fff;
-  border-radius: 50%;
+.login-night .night-map .nearby-range::before,
+.login-night .night-map .nearby-range::after,
+.login-night .night-map .nearby-range > i { border-color: rgba(108, 148, 255, .7); }
+.login-night .night-map .nearby-range small {
+  color: #fff;
   background: var(--c-accent);
 }
-.night-me::before {
-  content: '';
-  position: absolute;
-  inset: -10px;
-  border-radius: 50%;
-  background: rgba(108, 148, 255, .25);
-  animation: night-me-breathe 2.4s ease-in-out infinite;
+.login-night .night-map .nearby-location {
+  color: #fff;
+  border-color: rgba(255, 255, 255, .9);
+  background: var(--c-accent);
+  box-shadow: 0 0 0 8px rgba(43, 92, 230, .18), 0 8px 24px rgba(43, 92, 230, .45);
 }
-@keyframes night-me-breathe { 0%, 100% { transform: scale(.75); opacity: .9; } 50% { transform: scale(1.2); opacity: .3; } }
-.night-center small {
-  position: absolute;
-  top: 108px;
-  left: 0;
-  transform: translateX(-50%);
-  color: rgba(255, 255, 255, .45);
-  font-size: 12px;
-  font-weight: 600;
+@keyframes night-range-pulse {
+  0%, 100% { background: rgba(91, 140, 255, .08); }
+  45%, 70% { background: rgba(91, 140, 255, .2); }
 }
 
 /* 질문 말풍선: 차례로 떠오르고(0.4초 간격), 떠 있는 동안 둥둥, 마지막엔 함께 사라진다 (7초 주기) */
@@ -656,21 +642,33 @@ html { -webkit-tap-highlight-color: transparent; }
 .night-bubble > span {
   display: block;
   padding: 10px 14px;
-  color: rgba(255, 255, 255, .92);
-  border-radius: 16px;
-  background: #1e222b;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 18px;
+  background: rgba(28, 31, 40, .82);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.45;
   white-space: nowrap;
   animation: night-bubble-float 3.4s ease-in-out infinite;
 }
-/* 말풍선 꼬리 대신 말하는 사람 쪽 모서리만 덜 둥글게 */
-.night-bubble-crowd > span,
-.night-bubble-food > span,
-.night-bubble-team > span { border-bottom-left-radius: 4px; }
-.night-bubble-siren > span,
-.night-bubble-lost > span { border-bottom-right-radius: 4px; }
+/* 말풍선 꼬리: 말하는 사람 쪽으로 작은 점 두 개 */
+.night-bubble > span::before,
+.night-bubble > span::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(28, 31, 40, .82);
+}
+.night-bubble > span::before { width: 9px; height: 9px; bottom: -11px; left: 22px; }
+.night-bubble > span::after { width: 5px; height: 5px; bottom: -19px; left: 16px; }
+.night-bubble-siren > span::before,
+.night-bubble-lost > span::before { left: auto; right: 22px; }
+.night-bubble-siren > span::after,
+.night-bubble-lost > span::after { left: auto; right: 16px; }
 
 .night-bubble-crowd { top: 196px; left: 16px; animation-name: night-bubble-1; }
 .night-bubble-siren { top: 252px; right: 14px; animation-name: night-bubble-2; }
@@ -693,7 +691,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   .night-bubble { opacity: 1; animation: none; }
-  .night-bubble > span, .night-range, .night-scan, .night-me::before { animation: none; }
+  .night-bubble > span, .night-light { animation: none; }
 }
 .login-night-screen > .eyebrow.blue { color: rgba(255, 255, 255, .62) !important; }
 .login-night-screen .start-card {
