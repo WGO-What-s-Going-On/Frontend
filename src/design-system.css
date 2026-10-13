@@ -597,53 +597,45 @@ html { -webkit-tap-highlight-color: transparent; }
 @keyframes night-siren-red { 0%, 100% { opacity: .55; } 50% { opacity: .15; } }
 @keyframes night-siren-blue { 0%, 100% { opacity: .12; } 50% { opacity: .55; } }
 
-/* 반경 150m: 가운데 위치 핀과 금빛 동심원 */
-.night-radius {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
+/* 가운데 지도: 기존 지도 애니메이션(도로, 맥박 치는 150m 원, 퍼지는 신호, 숨 쉬는 내 위치)을 밤 배경에 맞춘다 */
+.login-night .night-map {
+  z-index: 1;
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-mask-image: radial-gradient(80% 40% at 50% 52%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(80% 40% at 50% 52%, #000 45%, transparent 100%);
 }
-.night-ring {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
+.login-night .night-map .nearby-road { background: #1c2230; }
+.login-night .night-map .nearby-road::after { background: rgba(255, 255, 255, .1); }
+.login-night .night-map .nearby-range {
+  border-color: rgba(108, 148, 255, .85);
+  animation-name: night-range-pulse;
 }
-.night-ring-inner { width: 92px; height: 92px; border: 1.5px solid rgba(245, 181, 68, .85); background: rgba(245, 181, 68, .08); }
-.night-ring-middle { width: 176px; height: 176px; border: 1px solid rgba(245, 181, 68, .45); }
-.night-ring-outer { width: 268px; height: 268px; border: 1px dashed rgba(245, 181, 68, .35); animation: night-ring-turn 40s linear infinite; }
-.night-ring-scan { width: 92px; height: 92px; border: 1.5px solid rgba(245, 181, 68, .7); animation: night-scan 3.2s ease-out infinite; }
-@keyframes night-ring-turn { to { transform: translate(-50%, -50%) rotate(360deg); } }
-@keyframes night-scan {
-  0% { width: 92px; height: 92px; opacity: .9; }
-  100% { width: 268px; height: 268px; opacity: 0; }
-}
-.night-pin {
-  position: absolute;
-  top: -22px;
-  left: -13px;
+.login-night .night-map .nearby-range::before,
+.login-night .night-map .nearby-range::after,
+.login-night .night-map .nearby-range > i { border-color: rgba(108, 148, 255, .7); }
+.login-night .night-map .nearby-range small {
   color: #fff;
-  filter: drop-shadow(0 0 10px rgba(245, 181, 68, .6));
-  animation: night-pin-float 3.2s ease-in-out infinite;
+  background: var(--c-accent);
 }
-@keyframes night-pin-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
-.night-radius small {
-  position: absolute;
-  top: 12px;
-  left: 0;
-  transform: translateX(-50%);
+.login-night .night-map .nearby-location {
   color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: .02em;
+  border-color: rgba(255, 255, 255, .9);
+  background: var(--c-accent);
+  box-shadow: 0 0 0 8px rgba(43, 92, 230, .18), 0 8px 24px rgba(43, 92, 230, .45);
+}
+@keyframes night-range-pulse {
+  0%, 100% { background: rgba(91, 140, 255, .08); }
+  45%, 70% { background: rgba(91, 140, 255, .2); }
 }
 
 /* 질문 말풍선: 차례로 떠오르고(0.4초 간격), 떠 있는 동안 둥둥, 마지막엔 함께 사라진다 (7초 주기) */
 .night-bubble {
   position: absolute;
+  z-index: 2;
   opacity: 0;
   animation: 7s ease-in-out infinite both;
 }
@@ -699,7 +691,7 @@ html { -webkit-tap-highlight-color: transparent; }
 
 @media (prefers-reduced-motion: reduce) {
   .night-bubble { opacity: 1; animation: none; }
-  .night-bubble > span, .night-pin, .night-ring-outer, .night-ring-scan, .night-light { animation: none; }
+  .night-bubble > span, .night-light { animation: none; }
 }
 .login-night-screen > .eyebrow.blue { color: rgba(255, 255, 255, .62) !important; }
 .login-night-screen .start-card {
