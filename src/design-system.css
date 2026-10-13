@@ -559,25 +559,21 @@ html { -webkit-tap-highlight-color: transparent; }
 .ux-board-header .ux-sort-filter { margin-right: 17px; }
 
 /* ======================================================================
-   로그인 첫 화면: 반경 150m + 사람들의 질문 말풍선 (밝은 배경)
+   로그인 첫 화면: 밤거리 + 반경 150m + 사람들의 질문 말풍선
    ====================================================================== */
 .login-night-shell,
 .login-night-shell .status-bar,
 .login-night-screen {
-  color: var(--c-ink);
+  color: #fff;
   background:
-    radial-gradient(90% 55% at 50% 50%, #f3f6fd 0%, rgba(255, 255, 255, 0) 70%),
-    #fff;
+    radial-gradient(120% 60% at 50% 0%, #1d2433 0%, rgba(13, 16, 24, 0) 70%),
+    linear-gradient(#0d1018 0%, #121621 55%, #0a0c12 100%);
 }
-.login-night-shell .status-bar { background: transparent; color: var(--c-ink); }
-.login-night-screen > .eyebrow.blue { color: var(--c-mute) !important; }
-.login-night-screen .hero { color: var(--c-ink); }
-.login-night-screen .start-card {
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-.login-night-screen .start-card h3 { margin: 0; color: var(--c-body); text-align: center; font-size: 14px; font-weight: 500; }
+.login-night-shell .status-bar { background: transparent; color: #fff; }
+.login-night-shell .prototype-label { color: rgba(255, 255, 255, .55); }
+.login-night-screen > .eyebrow { color: rgba(255, 255, 255, .6); }
+.login-night-screen .hero { color: #fff; }
+.login-night-screen .start-card h3 { color: rgba(255, 255, 255, .72); }
 
 .login-night {
   position: absolute;
@@ -587,20 +583,21 @@ html { -webkit-tap-highlight-color: transparent; }
   pointer-events: none;
 }
 
-/* 멀리서 번지는 사이렌 불빛 (밝은 배경에서는 아주 옅게) */
+/* 멀리 보이는 사이렌·가로등 불빛 (흐릿한 빛 번짐) */
 .night-light {
   position: absolute;
   border-radius: 50%;
-  filter: blur(30px);
+  filter: blur(26px);
+  opacity: .5;
 }
-.night-light-red { top: 200px; left: 40%; width: 120px; height: 70px; background: #ff6b6b; animation: night-siren-red 1.6s ease-in-out infinite; }
-.night-light-blue { top: 190px; left: 64%; width: 110px; height: 66px; background: #5b8cff; animation: night-siren-blue 1.6s ease-in-out infinite; }
-.night-light-warm,
-.night-light-warm-two { display: none; }
-@keyframes night-siren-red { 0%, 100% { opacity: .22; } 50% { opacity: .05; } }
-@keyframes night-siren-blue { 0%, 100% { opacity: .05; } 50% { opacity: .22; } }
+.night-light-red { top: 200px; left: 40%; width: 120px; height: 70px; background: #ff3b3b; animation: night-siren-red 1.6s ease-in-out infinite; }
+.night-light-blue { top: 190px; left: 64%; width: 110px; height: 66px; background: #2f6bff; animation: night-siren-blue 1.6s ease-in-out infinite; }
+.night-light-warm { top: 120px; left: -30px; width: 160px; height: 120px; background: #f2a43a; opacity: .18; }
+.night-light-warm-two { bottom: 120px; right: -40px; width: 180px; height: 140px; background: #f2a43a; opacity: .12; }
+@keyframes night-siren-red { 0%, 100% { opacity: .55; } 50% { opacity: .15; } }
+@keyframes night-siren-blue { 0%, 100% { opacity: .12; } 50% { opacity: .55; } }
 
-/* 반경 150m: 가운데 내 위치(파랑)와 동심원 */
+/* 반경 150m: 가운데 위치 핀과 금빛 동심원 */
 .night-radius {
   position: absolute;
   top: 50%;
@@ -615,10 +612,10 @@ html { -webkit-tap-highlight-color: transparent; }
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
-.night-ring-inner { width: 92px; height: 92px; border: 1.5px solid rgba(43, 92, 230, .7); background: rgba(43, 92, 230, .07); }
-.night-ring-middle { width: 176px; height: 176px; border: 1px solid rgba(43, 92, 230, .3); }
-.night-ring-outer { width: 268px; height: 268px; border: 1px dashed rgba(43, 92, 230, .3); animation: night-ring-turn 40s linear infinite; }
-.night-ring-scan { width: 92px; height: 92px; border: 1.5px solid rgba(43, 92, 230, .55); animation: night-scan 3.2s ease-out infinite; }
+.night-ring-inner { width: 92px; height: 92px; border: 1.5px solid rgba(245, 181, 68, .85); background: rgba(245, 181, 68, .08); }
+.night-ring-middle { width: 176px; height: 176px; border: 1px solid rgba(245, 181, 68, .45); }
+.night-ring-outer { width: 268px; height: 268px; border: 1px dashed rgba(245, 181, 68, .35); animation: night-ring-turn 40s linear infinite; }
+.night-ring-scan { width: 92px; height: 92px; border: 1.5px solid rgba(245, 181, 68, .7); animation: night-scan 3.2s ease-out infinite; }
 @keyframes night-ring-turn { to { transform: translate(-50%, -50%) rotate(360deg); } }
 @keyframes night-scan {
   0% { width: 92px; height: 92px; opacity: .9; }
@@ -628,8 +625,8 @@ html { -webkit-tap-highlight-color: transparent; }
   position: absolute;
   top: -22px;
   left: -13px;
-  color: var(--c-accent);
-  filter: drop-shadow(0 2px 6px rgba(43, 92, 230, .35));
+  color: #fff;
+  filter: drop-shadow(0 0 10px rgba(245, 181, 68, .6));
   animation: night-pin-float 3.2s ease-in-out infinite;
 }
 @keyframes night-pin-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
@@ -638,7 +635,7 @@ html { -webkit-tap-highlight-color: transparent; }
   top: 12px;
   left: 0;
   transform: translateX(-50%);
-  color: var(--c-accent-press);
+  color: #fff;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: .02em;
@@ -653,11 +650,13 @@ html { -webkit-tap-highlight-color: transparent; }
 .night-bubble > span {
   display: block;
   padding: 10px 14px;
-  color: var(--c-ink);
-  border: 1px solid var(--c-line);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .08);
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(23, 25, 30, .05), 0 8px 22px rgba(23, 25, 30, .1);
+  background: rgba(28, 31, 40, .82);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.45;
@@ -669,12 +668,11 @@ html { -webkit-tap-highlight-color: transparent; }
 .night-bubble > span::after {
   content: '';
   position: absolute;
-  border: 1px solid var(--c-line);
   border-radius: 50%;
-  background: #fff;
+  background: rgba(28, 31, 40, .82);
 }
-.night-bubble > span::before { width: 9px; height: 9px; bottom: -12px; left: 22px; }
-.night-bubble > span::after { width: 5px; height: 5px; bottom: -20px; left: 16px; }
+.night-bubble > span::before { width: 9px; height: 9px; bottom: -11px; left: 22px; }
+.night-bubble > span::after { width: 5px; height: 5px; bottom: -19px; left: 16px; }
 .night-bubble-siren > span::before,
 .night-bubble-lost > span::before { left: auto; right: 22px; }
 .night-bubble-siren > span::after,
@@ -703,3 +701,10 @@ html { -webkit-tap-highlight-color: transparent; }
   .night-bubble { opacity: 1; animation: none; }
   .night-bubble > span, .night-pin, .night-ring-outer, .night-ring-scan, .night-light { animation: none; }
 }
+.login-night-screen > .eyebrow.blue { color: rgba(255, 255, 255, .62) !important; }
+.login-night-screen .start-card {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.login-night-screen .start-card h3 { margin: 0; text-align: center; font-size: 14px; font-weight: 500; }
