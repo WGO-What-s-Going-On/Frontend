@@ -136,8 +136,10 @@ select:focus-visible,
 .ux-board-card-top > span[data-category],
 .sheet-category[data-category] { color: var(--cat); }
 .ux-board-card-top > span[data-category] { background: var(--cat-soft); }
-.ux-board-alert { color: var(--c-mute); }
-.ux-board-alert.muted { color: var(--c-ink); }
+/* 게시판 알림: 꺼짐(기본, 대각선 종)은 연한 회색, 켜짐은 파랑.
+   꺼짐 클래스 muted가 예전 범용 .muted { color: #666 !important } 와 겹치므로 !important로 이긴다 */
+.ux-board-alert { color: var(--c-accent); }
+.ux-board-alert.muted { color: var(--c-mute) !important; }
 
 .badge,
 .pill,
@@ -215,11 +217,9 @@ select:focus-visible,
 .icon,
 .map-search,
 .detail-nav .icon { color: var(--c-ink); background-color: var(--c-canvas); }
-.ux-board-alert,
 .comment-icon-button,
 .comment-photo-add,
 .comment-submit { color: var(--c-mute); }
-.ux-board-alert.muted { color: var(--c-accent); }
 .detail-inline-reactions .post-reactions.interactive button:not(.selected),
 .detail-inline-reactions .post-reactions.interactive button:not(.selected) span { color: var(--c-body); }
 .comment-image-placeholder { color: var(--c-mute); border-color: var(--c-accent-line, #cad7f8); background: var(--c-surface); }
