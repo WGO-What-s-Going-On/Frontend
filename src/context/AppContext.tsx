@@ -121,7 +121,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     navigate(pathForScreen('detail', id))
   }
   const updateBoard = (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category'>) => {
-    setBoards((items) => items.map((board) => board.id === id ? { ...board, ...input } : board))
+    setBoards((items) => items.map((board) => {
+      if (board.id !== id) return board
+      const changed = board.title !== input.title || board.body !== input.body || board.category !== input.category
+      return changed ? { ...board, ...input, edited: true } : board
+    }))
     showToast('게시글을 수정했습니다.')
     go('detail')
   }

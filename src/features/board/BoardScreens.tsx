@@ -115,7 +115,7 @@ export function BoardDetailScreen() {
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('board')}><ArrowLeft size={22}/></IconButton></header>
     <article className="detail-article">
       <div className="detail-title-row"><h1 title={board.title}>{board.title}</h1><span className="detail-title-menu-wrap"><IconButton className="detail-title-menu" label="게시글 메뉴" onClick={() => setMenu(!menu)} expanded={menu}><MoreHorizontal size={18}/></IconButton>{menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => go('edit')}>게시글 수정</button><button onClick={() => setConfirm('finish')}>게시판 종료</button><button onClick={() => setConfirm('delete')}>게시글 삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>게시글 신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>작성자 차단</button></>}</div>}</span></div>
-      <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span><span><MapPin size={12}/>{board.distance}m</span></div>
+      <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span>{board.edited && <span className="detail-edited">수정됨</span>}<span><MapPin size={12}/>{board.distance}m</span></div>
       <p className="detail-body">{board.body}</p>
       {board.imageName && <div className="attachment">첨부 이미지: {board.imageName}</div>}
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={inRange && board.status === '실시간'} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>

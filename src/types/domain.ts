@@ -32,6 +32,8 @@ export interface Board {
   myReactions?: PostReaction[]
   reactedByMe?: PostReaction
   imageName?: string
+  // 작성 후 수정한 적이 있으면 true (상세에 '수정됨' 표시)
+  edited?: boolean
 }
 
 export interface Comment {
