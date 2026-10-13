@@ -557,3 +557,154 @@ html { -webkit-tap-highlight-color: transparent; }
 .ux-board-header .ux-sort-trigger[aria-expanded="true"] { color: var(--c-ink); }
 /* 정렬 글자 오른쪽 끝을 카드 안 알림 종 아이콘의 오른쪽 끝에 맞춘다 */
 .ux-board-header .ux-sort-filter { margin-right: 17px; }
+
+/* ======================================================================
+   로그인 첫 화면: 밤거리 + 반경 150m + 사람들의 질문 말풍선
+   ====================================================================== */
+.login-night-shell,
+.login-night-shell .status-bar,
+.login-night-screen {
+  color: #fff;
+  background:
+    radial-gradient(120% 60% at 50% 0%, #1d2433 0%, rgba(13, 16, 24, 0) 70%),
+    linear-gradient(#0d1018 0%, #121621 55%, #0a0c12 100%);
+}
+.login-night-shell .status-bar { background: transparent; color: #fff; }
+.login-night-shell .prototype-label { color: rgba(255, 255, 255, .55); }
+.login-night-screen > .eyebrow { color: rgba(255, 255, 255, .6); }
+.login-night-screen .hero { color: #fff; }
+.login-night-screen .start-card h3 { color: rgba(255, 255, 255, .72); }
+
+.login-night {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 멀리 보이는 사이렌·가로등 불빛 (흐릿한 빛 번짐) */
+.night-light {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(26px);
+  opacity: .5;
+}
+.night-light-red { top: 200px; left: 40%; width: 120px; height: 70px; background: #ff3b3b; animation: night-siren-red 1.6s ease-in-out infinite; }
+.night-light-blue { top: 190px; left: 64%; width: 110px; height: 66px; background: #2f6bff; animation: night-siren-blue 1.6s ease-in-out infinite; }
+.night-light-warm { top: 120px; left: -30px; width: 160px; height: 120px; background: #f2a43a; opacity: .18; }
+.night-light-warm-two { bottom: 120px; right: -40px; width: 180px; height: 140px; background: #f2a43a; opacity: .12; }
+@keyframes night-siren-red { 0%, 100% { opacity: .55; } 50% { opacity: .15; } }
+@keyframes night-siren-blue { 0%, 100% { opacity: .12; } 50% { opacity: .55; } }
+
+/* 반경 150m: 가운데 위치 핀과 금빛 동심원 */
+.night-radius {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+}
+.night-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+.night-ring-inner { width: 92px; height: 92px; border: 1.5px solid rgba(245, 181, 68, .85); background: rgba(245, 181, 68, .08); }
+.night-ring-middle { width: 176px; height: 176px; border: 1px solid rgba(245, 181, 68, .45); }
+.night-ring-outer { width: 268px; height: 268px; border: 1px dashed rgba(245, 181, 68, .35); animation: night-ring-turn 40s linear infinite; }
+.night-ring-scan { width: 92px; height: 92px; border: 1.5px solid rgba(245, 181, 68, .7); animation: night-scan 3.2s ease-out infinite; }
+@keyframes night-ring-turn { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes night-scan {
+  0% { width: 92px; height: 92px; opacity: .9; }
+  100% { width: 268px; height: 268px; opacity: 0; }
+}
+.night-pin {
+  position: absolute;
+  top: -22px;
+  left: -13px;
+  color: #fff;
+  filter: drop-shadow(0 0 10px rgba(245, 181, 68, .6));
+  animation: night-pin-float 3.2s ease-in-out infinite;
+}
+@keyframes night-pin-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.night-radius small {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  transform: translateX(-50%);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+
+/* 질문 말풍선: 차례로 떠오르고(0.4초 간격), 떠 있는 동안 둥둥, 마지막엔 함께 사라진다 (7초 주기) */
+.night-bubble {
+  position: absolute;
+  opacity: 0;
+  animation: 7s ease-in-out infinite both;
+}
+.night-bubble > span {
+  display: block;
+  padding: 10px 14px;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 18px;
+  background: rgba(28, 31, 40, .82);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  white-space: nowrap;
+  animation: night-bubble-float 3.4s ease-in-out infinite;
+}
+/* 말풍선 꼬리: 말하는 사람 쪽으로 작은 점 두 개 */
+.night-bubble > span::before,
+.night-bubble > span::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(28, 31, 40, .82);
+}
+.night-bubble > span::before { width: 9px; height: 9px; bottom: -11px; left: 22px; }
+.night-bubble > span::after { width: 5px; height: 5px; bottom: -19px; left: 16px; }
+.night-bubble-siren > span::before,
+.night-bubble-lost > span::before { left: auto; right: 22px; }
+.night-bubble-siren > span::after,
+.night-bubble-lost > span::after { left: auto; right: 16px; }
+
+.night-bubble-crowd { top: 196px; left: 16px; animation-name: night-bubble-1; }
+.night-bubble-siren { top: 252px; right: 14px; animation-name: night-bubble-2; }
+.night-bubble-lost { top: 560px; right: 16px; animation-name: night-bubble-3; }
+.night-bubble-food { top: 600px; left: 18px; animation-name: night-bubble-4; }
+.night-bubble-team { top: 356px; left: 10px; animation-name: night-bubble-5; }
+.night-bubble-crowd > span { animation-delay: -.4s; }
+.night-bubble-siren > span { animation-delay: -1.6s; }
+.night-bubble-lost > span { animation-delay: -2.4s; }
+.night-bubble-food > span { animation-delay: -.9s; }
+.night-bubble-team > span { animation-delay: -2.9s; }
+
+@keyframes night-bubble-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+/* 1% = 70ms. 등장 시점만 다르고 사라지는 구간(86%~93%)은 모두 같다 */
+@keyframes night-bubble-1 { 0%, 2%, 93%, 100% { opacity: 0; transform: translateY(10px) scale(.94); } 8%, 86% { opacity: 1; transform: none; } }
+@keyframes night-bubble-2 { 0%, 8%, 93%, 100% { opacity: 0; transform: translateY(10px) scale(.94); } 14%, 86% { opacity: 1; transform: none; } }
+@keyframes night-bubble-3 { 0%, 14%, 93%, 100% { opacity: 0; transform: translateY(10px) scale(.94); } 20%, 86% { opacity: 1; transform: none; } }
+@keyframes night-bubble-4 { 0%, 20%, 93%, 100% { opacity: 0; transform: translateY(10px) scale(.94); } 26%, 86% { opacity: 1; transform: none; } }
+@keyframes night-bubble-5 { 0%, 26%, 93%, 100% { opacity: 0; transform: translateY(10px) scale(.94); } 32%, 86% { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .night-bubble { opacity: 1; animation: none; }
+  .night-bubble > span, .night-pin, .night-ring-outer, .night-ring-scan, .night-light { animation: none; }
+}
+.login-night-screen > .eyebrow.blue { color: rgba(255, 255, 255, .62) !important; }
+.login-night-screen .start-card {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.login-night-screen .start-card h3 { margin: 0; text-align: center; font-size: 14px; font-weight: 500; }
