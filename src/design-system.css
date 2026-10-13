@@ -428,3 +428,6 @@ select:focus-visible,
 .board-detail-screen .comment-replies { margin-top: 6px; }
 .board-detail-screen .comment-replies .reply-comment { padding-top: 8px; padding-bottom: 9px; }
 .board-detail-screen .comment-replies .reply-comment::before { top: 9px; }
+
+/* 원댓글 ⋯ 메뉴를 답글 ⋯ 메뉴와 같은 세로줄에 맞춘다 (답글은 회색 영역 안쪽 여백만큼 들어가 있다) */
+.board-detail-screen .comments-section > .comment > .comment-head .comment-icon-button { margin-right: 10px; }
