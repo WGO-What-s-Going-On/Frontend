@@ -73,10 +73,11 @@ export const initialComments: Comment[] = [
 
 export const initialNotices: Notice[] = [
   { id: 'notice-1', type: 'nearby', text: '내 주변 150m 이내에 새 게시판이 생성되었어요.', createdAt: '3분 전', read: false, boardId: 'fire' },
-  { id: 'notice-2', type: 'reply', text: '회원님의 댓글에 새 댓글이 달렸어요.', createdAt: '15분 전', read: false, boardId: 'fire' },
+  { id: 'notice-2', type: 'reply', text: '회원님의 댓글에 새 답글이 달렸어요.', createdAt: '15분 전', read: false, boardId: 'fire', commentId: 'comment-2' },
   { id: 'notice-5', type: 'nearby', text: '내 주변에서 긴급 사고 게시글이 올라왔어요.', createdAt: '22분 전', read: false, boardId: 'fire' },
-  { id: 'notice-6', type: 'reply', text: '알림을 켠 게시판에 새 댓글이 달렸어요.', createdAt: '35분 전', read: false, boardId: 'outage' },
-  { id: 'notice-7', type: 'reaction', text: '회원님의 댓글이 도움이 됐대요.', createdAt: '48분 전', read: false, boardId: 'outage' },
+  { id: 'notice-6', type: 'reply', text: '내 게시판에 새 댓글이 달렸어요.', createdAt: '35분 전', read: false, boardId: 'outage', commentId: 'outage-comment-6' },
+  { id: 'notice-7', type: 'comment-like', text: '회원님의 댓글에 하트가 3개 달렸어요.', createdAt: '48분 전', read: false, boardId: 'outage', commentId: 'outage-comment-5' },
+  { id: 'notice-16', type: 'bundle', text: '정전 게시판에 새로운 반응이 12개 있어요.', createdAt: '52분 전', read: false, boardId: 'outage' },
   { id: 'notice-3', type: 'reaction', text: '회원님의 게시글에 새로운 반응이 달렸어요.', createdAt: '1시간 전', read: true, boardId: 'mask' },
   { id: 'notice-8', type: 'nearby', text: '내 주변 150m 이내에 도움 요청이 올라왔어요.', createdAt: '2시간 전', read: true, boardId: 'mask' },
   { id: 'notice-9', type: 'reply', text: '회원님의 게시글에 새 댓글이 달렸어요.', createdAt: '3시간 전', read: true, boardId: 'mask' },

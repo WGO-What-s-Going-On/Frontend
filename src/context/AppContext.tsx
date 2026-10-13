@@ -5,7 +5,8 @@ import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Report, Screen, User } from '../types/domain'
 
-interface BoardInput { category: Category; title: string; body: string; imageName?: string }
+interface BoardInput { category: Category; title: string; body: string; imageName?: string; imageUrl?: string; anonymous?: boolean }
+export type LocationPermission = 'unknown' | 'granted' | 'denied'
 interface NotificationSettings { nearby: boolean; replies: boolean }
 
 interface PersistedMockState {
@@ -21,12 +22,13 @@ interface PersistedMockState {
   alertBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
+  locationPermission: LocationPermission
   noticesVersion?: number
 }
 
 const STORAGE_KEY = 'wgo-mockup-state-v1'
 // 목업 알림 목록을 바꾸면 올린다. 저장된 알림 버전이 다르면 알림만 새 목업으로 교체한다.
-const NOTICES_VERSION = 5
+const NOTICES_VERSION = 6
 
 function readPersistedState(): Partial<PersistedMockState> {
   try {
@@ -50,13 +52,27 @@ interface AppContextValue {
   alertBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
+  locationPermission: LocationPermission
+  // 주변 150m 안 활성 사용자 수 (MAP-F16). 목업 값, 실제로는 백엔드가 대략적인 범위로 내려준다.
+  nearbyUserCount: number
+  // 알림에서 들어올 때 스크롤해서 보여줄 댓글
+  focusCommentId?: string
   toast: string
   go: (screen: Screen) => void
   back: (fallback?: Screen) => void
   openBoard: (id: string) => void
+  openNotice: (notice: Notice) => void
+  clearFocusComment: () => void
+  startLogin: () => void
+  agreeTerms: () => void
+  completeNickname: (nickname: string) => void
+  setLocationPermission: (permission: LocationPermission) => void
+  resolveBoard: (id: string) => void
+  updateComment: (id: string, body: string) => void
+  withdraw: () => void
   setInRange: (value: boolean) => void
   createBoard: (input: BoardInput) => void
-  updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category'>) => void
+  updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'imageUrl' | 'imageName'>) => void
   deleteBoard: (id: string) => void
   finishBoard: (id: string) => void
   reactToBoard: (id: string, reaction: PostReaction) => void
@@ -65,7 +81,7 @@ interface AppContextValue {
   markCommentRead: (id: string) => void
   reactToComment: (id: string, reaction: CommentReaction) => void
   toggleCommentLike: (id: string) => void
-  updateUser: (input: Pick<User, 'nickname' | 'bio'>) => void
+  updateUser: (input: Pick<User, 'nickname' | 'bio' | 'profileImage'>) => void
   markNoticeRead: (id: string) => void
   markAllNoticesRead: () => void
   deleteNotice: (id: string) => void
@@ -96,12 +112,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [alertBoardIds, setAlertBoardIds] = useState<string[]>(persisted.alertBoardIds ?? [])
   const [recentBoardIds, setRecentBoardIds] = useState<string[]>(persisted.recentBoardIds ?? [])
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(persisted.notificationSettings ?? { nearby: true, replies: true })
+  const [locationPermission, setLocationPermissionState] = useState<LocationPermission>(persisted.locationPermission ?? 'unknown')
+  const [focusCommentId, setFocusCommentId] = useState<string>()
   const [toast, setToast] = useState('')
 
   useEffect(() => {
-    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings }
+    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings])
+  }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission])
 
   const showToast = (message: string) => {
     setToast(message)
@@ -109,27 +127,51 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const go = (next: Screen) => navigate(pathForScreen(next, currentBoardId))
   const back = (fallback: Screen = 'board') => location.key === 'default' ? go(fallback) : navigate(-1)
-  const openBoard = (id: string) => { setCurrentBoardId(id); setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)]); navigate(pathForScreen(inRange ? 'detail' : 'outside', id)) }
+  // 게시판을 열 때마다 조회수 1 증가 (PST-F12, 실제 집계는 백엔드)
+  const openBoard = (id: string) => {
+    setCurrentBoardId(id)
+    setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)])
+    setBoards((items) => items.map((board) => board.id === id ? { ...board, views: board.views + 1 } : board))
+    navigate(pathForScreen(inRange ? 'detail' : 'outside', id))
+  }
+  const openNotice = (notice: Notice) => {
+    setNotices((items) => items.map((item) => item.id === notice.id ? { ...item, read: true } : item))
+    if (!notice.boardId) return
+    setFocusCommentId(notice.commentId)
+    openBoard(notice.boardId)
+  }
+  const clearFocusComment = () => setFocusCommentId(undefined)
+  // 로그인 흐름: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도 (실제 카카오 인증은 백엔드 연동 때)
+  const startLogin = () => go(!user.onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home')
+  const agreeTerms = () => go('nickname')
+  const completeNickname = (nickname: string) => { setUser((value) => ({ ...value, nickname, onboarded: true })); go('location-permission') }
+  const setLocationPermission = (permission: LocationPermission) => {
+    setLocationPermissionState(permission)
+    // 위치 권한이 없으면 150m 판정을 할 수 없어 열람만 가능하다 (MAP-F01, MAP-F05)
+    setInRange(permission === 'granted')
+    go('home')
+  }
   const createBoard = (input: BoardInput) => {
     const id = `board-${Date.now()}`
     setBoards((items) => [{
-      id, authorId: user.id, authorName: user.nickname, distance: 0, createdAt: '방금 전', status: '실시간', views: 1,
+      id, authorId: user.id, authorName: input.anonymous ? '익명' : user.nickname, distance: 0, createdAt: '방금 전', status: '실시간', views: 1,
       reactions: { '저도 궁금해요': 0, '지금도 그래요': 0, '도움 됐어요': 0, '이제 끝났어요': 0 }, ...input,
     }, ...items])
     setCurrentBoardId(id)
     showToast('게시판이 생성되었습니다.')
     navigate(pathForScreen('detail', id))
   }
-  const updateBoard = (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category'>) => {
+  const updateBoard = (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'imageUrl' | 'imageName'>) => {
     setBoards((items) => items.map((board) => {
       if (board.id !== id) return board
-      const changed = board.title !== input.title || board.body !== input.body || board.category !== input.category
+      const changed = board.title !== input.title || board.body !== input.body || board.category !== input.category || board.imageUrl !== input.imageUrl
       return changed ? { ...board, ...input, edited: true } : board
     }))
     showToast('게시글을 수정했습니다.')
     go('detail')
   }
   const deleteBoard = (id: string) => { setBoards((items) => items.filter((board) => board.id !== id)); showToast('게시글을 삭제했습니다.'); go('board') }
+  const resolveBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '해결됨' } : board)); showToast('해결된 게시판으로 표시했어요.') }
   const finishBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '종료됨' } : board)); showToast('게시판을 종료했습니다.') }
   const reactToBoard = (id: string, reaction: PostReaction) => setBoards((items) => items.map((board) => {
     if (board.id !== id) return board
@@ -142,6 +184,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setComments((items) => [...items, { id: `comment-${Date.now()}`, boardId: currentBoardId, authorId: user.id, authorName: user.nickname, body, imageUrl, read: true, createdAt: '방금 전', verified: inRange, parentId, reactions: { '도움돼요': 0, '맞아요': 0, '정보가 달라요': 0 } }])
     showToast('댓글을 등록했습니다.')
   }
+  const updateComment = (id: string, body: string) => { setComments((items) => items.map((comment) => comment.id === id ? { ...comment, body, edited: true } : comment)); showToast('댓글을 수정했습니다.') }
   const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
   const markCommentRead = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, read: true } : comment))
   const toggleCommentLike = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, likedByMe: !comment.likedByMe, likes: Math.max(0, (comment.likes ?? 0) + (comment.likedByMe ? -1 : 1)) } : comment))
@@ -153,10 +196,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (previous !== reaction) reactions[reaction] += 1
     return { ...comment, reactions, reactedByMe: previous === reaction ? undefined : reaction }
   }))
-  const updateUser = (input: Pick<User, 'nickname' | 'bio'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
+  const updateUser = (input: Pick<User, 'nickname' | 'bio' | 'profileImage'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
   const markNoticeRead = (id: string) => setNotices((items) => items.map((notice) => notice.id === id ? { ...notice, read: true } : notice))
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
   const deleteNotice = (id: string) => setNotices((items) => items.filter((notice) => notice.id !== id))
+  // 탈퇴 (USR-F10): 내가 쓴 글·댓글의 작성자를 익명화하고 처음 상태로 돌아간다
+  const withdraw = () => {
+    setBoards((items) => items.map((board) => board.authorId === user.id ? { ...board, authorName: '탈퇴한 사용자' } : board))
+    setComments((items) => items.map((comment) => comment.authorId === user.id ? { ...comment, authorName: '탈퇴한 사용자' } : comment))
+    setUser((value) => ({ ...value, id: `me-${Date.now()}`, profileImage: undefined, onboarded: false }))
+    setLocationPermissionState('unknown')
+    showToast('회원 탈퇴 처리되었습니다.')
+    go('login')
+  }
   const reportTarget = (targetType: Report['targetType'], targetId: string, reason: string) => { setReports((items) => [...items, { id: `report-${Date.now()}`, targetType, targetId, reason, status: '접수' }]); showToast('신고가 접수되었습니다.') }
   const blockUser = (userId: string) => { setBlockedUsers((items) => [...new Set([...items, userId])]); showToast('사용자를 차단했습니다.') }
   const toggleBoardNotifications = (boardId: string) => setAlertBoardIds((items) => items.includes(boardId) ? items.filter((id) => id !== boardId) : [...items, boardId])
@@ -168,10 +220,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast,
-    go, back, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, nearbyUserCount: 38, focusCommentId, toast,
+    go, back, openBoard, openNotice, clearFocusComment, startLogin, agreeTerms, completeNickname, setLocationPermission, resolveBoard, updateComment, withdraw, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, focusCommentId, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

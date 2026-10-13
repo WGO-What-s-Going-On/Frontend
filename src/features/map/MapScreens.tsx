@@ -6,6 +6,7 @@ import { FilterChips } from '../../components/ui/FilterChips'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
 import { categoryLabel } from '../../domain/labels'
+import { activityLevel, isHotBoard, isOpenBoard } from '../../types/domain'
 import type { Board } from '../../types/domain'
 import { IncidentBottomSheet } from './IncidentBottomSheet'
 
@@ -13,11 +14,12 @@ type MapFilter = '전체' | '긴급/사고' | '도움요청' | 'HOT'
 
 const filters: MapFilter[] = ['전체', '긴급/사고', '도움요청', 'HOT']
 
-function filterBoards(boards: Board[], filter: MapFilter) {
-  const visible = boards.filter((board) => board.status !== '숨김')
+function filterBoards(boards: Board[], filter: MapFilter, commentCount: (board: Board) => number) {
+  // 종료·해결된 게시판은 지도에서 뺀다 (MOD-F18 아카이브)
+  const visible = boards.filter((board) => isOpenBoard(board))
   if (filter === '긴급/사고') return visible.filter((board) => board.category === '긴급 사고')
   if (filter === '도움요청') return visible.filter((board) => board.category === '도움 요청')
-  if (filter === 'HOT') return [...visible].sort((a, b) => b.views - a.views).slice(0, 2)
+  if (filter === 'HOT') return visible.filter((board) => isHotBoard(board, commentCount(board)))
   return visible
 }
 
@@ -29,10 +31,12 @@ function markerLabel(board: Board) {
 }
 
 export function MapScreen() {
-  const { go, boards, openBoard } = useApp()
+  const { go, boards, comments, openBoard, locationPermission } = useApp()
   const [filter, setFilter] = useState<MapFilter>('전체')
   const [selectedBoard, setSelectedBoard] = useState<Board>()
-  const nearby = filterBoards(boards, filter)
+  const commentCount = (board: Board) => comments.filter((comment) => comment.boardId === board.id).length
+  const lastUpdate = (board: Board) => [...comments].reverse().find((comment) => comment.boardId === board.id)?.createdAt ?? board.createdAt
+  const nearby = filterBoards(boards, filter, commentCount)
   const selectFilter = (next: MapFilter) => { setFilter(next); setSelectedBoard(undefined) }
   return <AppShell shellClassName="map-shell" contentClassName="map-screen">
     <div className="map" onClick={() => setSelectedBoard(undefined)}>
@@ -51,8 +55,9 @@ export function MapScreen() {
     <div className="map-top-overlay">
       <header><h1>내 주변 지도</h1></header>
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
+      {locationPermission !== 'granted' && <button className="map-permission-banner" onClick={() => go('location-permission')}>위치 권한이 꺼져 있어 글쓰기·댓글이 제한돼요 <b>켜기</b></button>}
     </div>
-    {selectedBoard && <IncidentBottomSheet board={selectedBoard} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
+    {selectedBoard && <IncidentBottomSheet board={selectedBoard} activity={activityLevel(selectedBoard, commentCount(selectedBoard))} updatedAt={lastUpdate(selectedBoard)} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
   </AppShell>
 }
 

@@ -14,7 +14,7 @@ const bubbles = [
 ]
 
 export function LoginScreen() {
-  const { go } = useApp()
+  const { startLogin } = useApp()
   return <AppShell nav={false} contentClassName="login-screen login-night-screen" shellClassName="login-shell login-night-shell">
     <p className="eyebrow blue">What’s Going On?</p><h1 className="hero">주변에서 일어나는 일을<br/>즉시 확인하세요</h1>
     <div className="login-night" aria-hidden="true">
@@ -32,6 +32,6 @@ export function LoginScreen() {
       </div>
       {bubbles.map((bubble) => <span key={bubble.id} className={`night-bubble night-bubble-${bubble.id}`}><span>{bubble.text}</span></span>)}
     </div>
-    <div className="start-card"><h3>간편하게 시작하기</h3><Button className="kakao" onClick={() => go('home')}>카카오로 계속하기</Button></div>
+    <div className="start-card"><h3>간편하게 시작하기</h3><Button className="kakao" onClick={startLogin}>카카오로 계속하기</Button></div>
   </AppShell>
 }

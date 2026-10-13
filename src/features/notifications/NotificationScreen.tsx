@@ -8,7 +8,7 @@ const OPEN_THRESHOLD = 56
 
 // 알림 한 줄. 왼쪽으로 밀면 오른쪽에 읽음·삭제 버튼이 드러난다.
 function NoticeRow({ notice, open, onOpenChange }: { notice: Notice; open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { markNoticeRead, deleteNotice, openBoard } = useApp()
+  const { markNoticeRead, deleteNotice, openNotice } = useApp()
   const [dragX, setDragX] = useState<number | null>(null)
   const start = useRef<{ x: number; y: number; base: number; axis: 'x' | 'y' | null } | null>(null)
   const moved = useRef(false)
@@ -49,8 +49,7 @@ function NoticeRow({ notice, open, onOpenChange }: { notice: Notice; open: boole
       onClick={() => {
         if (moved.current) return
         if (open) { onOpenChange(false); return }
-        markNoticeRead(notice.id)
-        if (notice.boardId) openBoard(notice.boardId)
+        openNotice(notice)
       }}
     ><span><strong>{notice.text}</strong><small>{notice.createdAt}</small></span>{!notice.read && <i/>}</button>
   </div>
