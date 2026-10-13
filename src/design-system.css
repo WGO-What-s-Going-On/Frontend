@@ -418,3 +418,8 @@ select:focus-visible,
   align-items: baseline;
   gap: 6px;
 }
+
+/* 댓글 본문을 닉네임 줄에 가깝게: ⋯ 버튼이 줄 높이를 키우지 않게 하고 본문 위 여백을 줄인다 */
+.board-detail-screen .comment-head .comment-icon-button { margin-top: -8px; margin-bottom: -8px; }
+.board-detail-screen .comment > p { margin-top: 4px; }
+.board-detail-screen .comment-replies .reply-comment::before { top: 12px; }
