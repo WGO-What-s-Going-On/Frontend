@@ -411,3 +411,10 @@ select:focus-visible,
   left: 50%;
   transform: translateX(-50%);
 }
+
+/* 댓글: 시간을 닉네임 옆에 한 줄로 */
+.board-detail-screen .comment-identity > div {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
