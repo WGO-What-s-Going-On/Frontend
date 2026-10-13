@@ -16,7 +16,8 @@ interface PersistedMockState {
   currentBoardId: string
   inRange: boolean
   blockedUsers: string[]
-  mutedBoardIds: string[]
+  // 알림을 켠 게시판. 게시판 알림은 기본으로 꺼져 있고, 사용자가 켠 게시판만 담는다.
+  alertBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
   noticesVersion?: number
@@ -45,7 +46,7 @@ interface AppContextValue {
   currentBoard?: Board
   inRange: boolean
   blockedUsers: string[]
-  mutedBoardIds: string[]
+  alertBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
   toast: string
@@ -89,15 +90,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const currentBoardId = boardIdFromPath(location.pathname) ?? storedBoardId
   const [inRange, setInRange] = useState(persisted.inRange ?? true)
   const [blockedUsers, setBlockedUsers] = useState<string[]>(persisted.blockedUsers ?? [])
-  const [mutedBoardIds, setMutedBoardIds] = useState<string[]>(persisted.mutedBoardIds ?? [])
+  const [alertBoardIds, setAlertBoardIds] = useState<string[]>(persisted.alertBoardIds ?? [])
   const [recentBoardIds, setRecentBoardIds] = useState<string[]>(persisted.recentBoardIds ?? [])
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(persisted.notificationSettings ?? { nearby: true, replies: true })
   const [toast, setToast] = useState('')
 
   useEffect(() => {
-    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings }
+    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings])
+  }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings])
 
   const showToast = (message: string) => {
     setToast(message)
@@ -150,7 +151,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
   const reportTarget = (targetType: Report['targetType'], targetId: string, reason: string) => { setReports((items) => [...items, { id: `report-${Date.now()}`, targetType, targetId, reason, status: '접수' }]); showToast('신고가 접수되었습니다.') }
   const blockUser = (userId: string) => { setBlockedUsers((items) => [...new Set([...items, userId])]); showToast('사용자를 차단했습니다.') }
-  const toggleBoardNotifications = (boardId: string) => setMutedBoardIds((items) => items.includes(boardId) ? items.filter((id) => id !== boardId) : [...items, boardId])
+  const toggleBoardNotifications = (boardId: string) => setAlertBoardIds((items) => items.includes(boardId) ? items.filter((id) => id !== boardId) : [...items, boardId])
   const updateNotificationSettings = (settings: NotificationSettings) => setNotificationSettings(settings)
   const resolveReport = (id: string, hideTarget: boolean) => {
     const report = reports.find((item) => item.id === id)
@@ -159,10 +160,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings, toast,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast,
     go, back, openBoard, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment,
     updateUser, markNoticeRead, markAllNoticesRead, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, mutedBoardIds, recentBoardIds, notificationSettings, toast])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
