@@ -46,6 +46,7 @@ export interface Comment {
   reactions: Record<CommentReaction, number>
   reactedByMe?: CommentReaction
   likedByMe?: boolean
+  likes?: number
 }
 
 export interface Notice {

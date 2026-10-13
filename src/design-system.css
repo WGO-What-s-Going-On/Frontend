@@ -389,12 +389,6 @@ select:focus-visible,
   background: var(--c-accent-soft);
 }
 .detail-comment-input .replying button { color: var(--c-accent); }
-.board-detail-screen .comment.reply-target,
-.board-detail-screen .comment-replies .reply-comment.reply-target { background: var(--c-accent-soft); }
-/* 원댓글 강조는 화면 좌우 끝까지 (레이아웃은 그대로) */
-.board-detail-screen .comments-section > .comment.reply-target {
-  box-shadow: -20px 0 0 var(--c-accent-soft), 20px 0 0 var(--c-accent-soft);
-}
 
 /* 목업 지도 핀 자리: 3곳 → 8곳 (실제 지도 API 전까지 겹침 방지). 150m 원과 상단 필터, 하단 메뉴를 피해서 둔다 */
 .map-screen .marker-3 { top: 46%; left: 3%; right: auto; }
@@ -469,12 +463,12 @@ select:focus-visible,
   margin-bottom: -4px;
 }
 .comment-like {
-  width: 28px;
   height: 28px;
-  display: grid;
-  place-items: center;
-  margin-left: -6px;
-  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: -4px;
+  padding: 0 4px;
   color: var(--c-urgent);
   border: 0;
   border-radius: 50%;
@@ -491,3 +485,12 @@ select:focus-visible,
   font-weight: 500;
 }
 .comment-reply-button:active { color: #666; }
+
+/* 댓글을 누르거나 답글 달기를 눌러도 배경은 칠하지 않는다 (작성 대상은 입력창 위 안내로만 표시) */
+.board-detail-screen .comment-clickable:hover,
+.board-detail-screen .comment-clickable:focus-visible,
+.board-detail-screen .comment-replies .reply-comment:hover,
+.board-detail-screen .comment-replies .reply-comment:focus-visible { background: transparent; }
+.board-detail-screen .comment-clickable:focus-visible { outline: 2px solid var(--c-accent); outline-offset: -2px; }
+.comment-like span { color: #999; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.comment-like.liked span { color: var(--c-urgent); }

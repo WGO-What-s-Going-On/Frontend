@@ -139,7 +139,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
   const markCommentRead = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, read: true } : comment))
-  const toggleCommentLike = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, likedByMe: !comment.likedByMe } : comment))
+  const toggleCommentLike = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, likedByMe: !comment.likedByMe, likes: Math.max(0, (comment.likes ?? 0) + (comment.likedByMe ? -1 : 1)) } : comment))
   const reactToComment = (id: string, reaction: CommentReaction) => setComments((items) => items.map((comment) => {
     if (comment.id !== id) return comment
     const previous = comment.reactedByMe
