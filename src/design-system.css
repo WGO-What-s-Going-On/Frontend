@@ -538,3 +538,20 @@ html { -webkit-tap-highlight-color: transparent; }
 /* 게시판: 정렬(거리·최신·활발·참여 가능)은 제목 줄 오른쪽 끝, 아래 줄은 카테고리 필터만 */
 .ux-board-header .ux-sort-filter { margin-left: auto; }
 .ux-board-header .ux-sort-menu { right: 0; left: auto; }
+/* 정렬 버튼: 테두리·배경 없이 글자 + 화살표만 (아래 둥근 필터 칩과 구분) */
+.ux-board-header .ux-sort-trigger,
+.ux-board-header .ux-sort-trigger:hover,
+.ux-board-header .ux-sort-trigger:focus-visible {
+  width: auto;
+  min-height: 32px;
+  gap: 2px;
+  padding: 0 0 0 6px;
+  color: var(--c-body);
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ux-board-header .ux-sort-trigger svg { position: static; color: var(--c-mute); }
+.ux-board-header .ux-sort-trigger[aria-expanded="true"] { color: var(--c-ink); }
