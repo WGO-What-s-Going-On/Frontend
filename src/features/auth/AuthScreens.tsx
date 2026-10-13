@@ -16,7 +16,7 @@ const bubbles = [
 export function LoginScreen() {
   const { go } = useApp()
   return <AppShell nav={false} contentClassName="login-screen login-night-screen" shellClassName="login-shell login-night-shell">
-    <p className="eyebrow blue">What’s Going On?</p><h1 className="hero">주변에서 일어나는 일을<br/>묻거나 즉시 확인하세요</h1>
+    <p className="eyebrow blue">What’s Going On?</p><h1 className="hero">주변에서 일어나는 일을<br/>즉시 확인하세요</h1>
     <div className="login-night" aria-hidden="true">
       <span className="night-light night-light-red"/>
       <span className="night-light night-light-blue"/>

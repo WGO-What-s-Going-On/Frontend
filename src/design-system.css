@@ -702,9 +702,12 @@ html { -webkit-tap-highlight-color: transparent; }
   .night-bubble > span, .night-pin, .night-ring-outer, .night-ring-scan, .night-light { animation: none; }
 }
 .login-night-screen > .eyebrow.blue { color: rgba(255, 255, 255, .62) !important; }
+/* 시작 영역: 얇은 테두리로 연출 영역과 구분 */
 .login-night-screen .start-card {
-  border: 0 !important;
-  background: transparent !important;
+  padding: 18px 18px 20px;
+  border: 1px solid rgba(255, 255, 255, .14) !important;
+  border-radius: 24px;
+  background: rgba(17, 20, 28, .72) !important;
   box-shadow: none !important;
 }
 .login-night-screen .start-card h3 { margin: 0; text-align: center; font-size: 14px; font-weight: 500; }
