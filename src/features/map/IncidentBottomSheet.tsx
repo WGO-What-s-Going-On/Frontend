@@ -1,6 +1,7 @@
 import { Clock3, MapPin, X } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
+import { categoryLabel } from '../../domain/labels'
 import type { Board } from '../../types/domain'
 
 interface IncidentBottomSheetProps {
@@ -19,7 +20,7 @@ export function IncidentBottomSheet({ board, onClose, onOpen }: IncidentBottomSh
       <span className="preview-road"/>
       <span className="preview-marker"><MapPin size={20}/></span>
     </div>
-    <span className="sheet-category" data-category={board.category}>{board.category}</span>
+    <span className="sheet-category" data-category={board.category}>{categoryLabel[board.category]}</span>
     <h2>{board.title}</h2>
     <p>{board.body}</p>
     <div className="sheet-meta"><span><MapPin size={14}/>{board.distance}m 근처</span><span><Clock3 size={14}/>{board.createdAt}</span></div>

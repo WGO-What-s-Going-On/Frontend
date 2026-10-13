@@ -3,16 +3,8 @@ import type { Category, PostReaction } from '../types/domain'
 // 화면에 보이는 문구 모음. 저장·전송되는 값(타입)과 화면 문구를 분리해 둔다.
 // 백엔드 연동 후에는 서버 코드값(예: EMERGENCY) → 문구 변환도 여기서 한다.
 
-// 글쓰기 화면의 카테고리 이름
-export const writeCategoryLabel: Record<Category, string> = {
-  '긴급 사고': '긴급 사고',
-  '도움 요청': '도움 요청',
-  '동네 소식': '동네 / 일상',
-  '일상 불편': '기타',
-}
-
-// 게시판 목록 상단 필터의 카테고리 이름
-export const filterCategoryLabel: Record<Category, string> = {
+// 카테고리 이름. 게시판 필터, 게시글 카드, 지도 시트, 글쓰기 화면이 모두 이 이름을 쓴다.
+export const categoryLabel: Record<Category, string> = {
   '긴급 사고': '긴급/사고',
   '도움 요청': '도움 요청',
   '동네 소식': '동네/일상',

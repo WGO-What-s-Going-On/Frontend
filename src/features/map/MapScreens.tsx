@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
+import { categoryLabel } from '../../domain/labels'
 import type { Board } from '../../types/domain'
 import { IncidentBottomSheet } from './IncidentBottomSheet'
 
@@ -61,7 +62,7 @@ export function OutsideRangeScreen() {
   return <AppShell>
     <BackHeader title="읽기 전용 게시판" onBack={() => go('home')}/>
     <div className="notice-box"><strong>현재 참여 범위 밖입니다.</strong><p>게시판은 확인할 수 있지만 글, 댓글, 사진, 반응 작성은 제한됩니다.</p></div>
-    <article className="topic"><span className="badge">{currentBoard.category}</span><h2>{currentBoard.title}</h2><p>{currentBoard.body}</p><PostReactions board={currentBoard}/></article>
+    <article className="topic"><span className="badge">{categoryLabel[currentBoard.category]}</span><h2>{currentBoard.title}</h2><p>{currentBoard.body}</p><PostReactions board={currentBoard}/></article>
     <Button className="secondary-button" onClick={() => go('home')}>지도에서 다른 게시판 보기</Button>
     <button className="text-link" onClick={() => { setInRange(true); go('detail') }}>프로토타입: 150m 안으로 이동</button>
   </AppShell>
