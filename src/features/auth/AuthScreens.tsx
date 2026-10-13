@@ -3,8 +3,7 @@ import { AppShell } from '../../components/layout/AppShell'
 import { Button } from '../../components/ui/Button'
 import { useApp } from '../../context/AppContext'
 
-// 첫 화면 연출: 밤거리 지도 위 반경 150m에서 사람들이 궁금한 걸 묻는 장면.
-// 가운데 지도(도로·150m 원·내 위치)는 기존 지도 애니메이션을 어두운 배경에 맞춘 것이다.
+// 첫 화면 연출: 밤거리 사건 현장에서 반경 150m 사람들이 궁금한 걸 묻는 장면.
 // 말풍선은 차례로 떠올라 둥둥 떠 있다가 함께 사라지고, 다시 반복된다.
 const bubbles = [
   { id: 'crowd', text: <>여기 누가 오길래<br/>이렇게 사람이 많지?</> },
@@ -23,13 +22,13 @@ export function LoginScreen() {
       <span className="night-light night-light-blue"/>
       <span className="night-light night-light-warm"/>
       <span className="night-light night-light-warm-two"/>
-      <div className="nearby-animation night-map">
-        <span className="nearby-road nearby-road-one"/>
-        <span className="nearby-road nearby-road-two"/>
-        <span className="nearby-road nearby-road-three"/>
-        <span className="nearby-road nearby-road-four"/>
-        <span className="nearby-range"><i/><small>주변 150m</small></span>
-        <span className="nearby-location"><MapPin size={27} strokeWidth={1.8}/></span>
+      <div className="night-radius">
+        <i className="night-ring night-ring-outer"/>
+        <i className="night-ring night-ring-middle"/>
+        <i className="night-ring night-ring-inner"/>
+        <i className="night-ring night-ring-scan"/>
+        <span className="night-pin"><MapPin size={26} strokeWidth={2}/></span>
+        <small>150m</small>
       </div>
       {bubbles.map((bubble) => <span key={bubble.id} className={`night-bubble night-bubble-${bubble.id}`}><span>{bubble.text}</span></span>)}
     </div>
