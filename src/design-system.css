@@ -534,3 +534,7 @@ html { -webkit-tap-highlight-color: transparent; }
   -webkit-user-select: none;
 }
 .alert-swipe .alert.dragging { transition: none; }
+
+/* 게시판: 정렬(거리·최신·활발·참여 가능)은 제목 줄 오른쪽 끝, 아래 줄은 카테고리 필터만 */
+.ux-board-header .ux-sort-filter { margin-left: auto; }
+.ux-board-header .ux-sort-menu { right: 0; left: auto; }

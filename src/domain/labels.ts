@@ -11,6 +11,14 @@ export const writeCategoryLabel: Record<Category, string> = {
   '일상 불편': '기타',
 }
 
+// 게시판 목록 상단 필터의 카테고리 이름
+export const filterCategoryLabel: Record<Category, string> = {
+  '긴급 사고': '긴급/사고',
+  '도움 요청': '도움 요청',
+  '동네 소식': '동네/일상',
+  '일상 불편': '기타',
+}
+
 // 게시글 반응: full은 상세 화면, short는 좁은 곳에서 쓰는 이름
 export const reactionLabel: Record<PostReaction, { full: string; short: string }> = {
   '저도 궁금해요': { full: '저도 궁금해요', short: '궁금' },
