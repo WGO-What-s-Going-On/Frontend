@@ -454,3 +454,8 @@ select:focus-visible,
 }
 .detail-title-menu:active { background: var(--c-surface); }
 .detail-title-menu-wrap .detail-menu { top: calc(100% + 4px); right: 0; left: auto; }
+/* 게시글 ⋯ 메뉴는 제목 줄 오른쪽 끝, 댓글 ⋯ 메뉴와 같은 세로줄에 둔다 */
+.detail-title-row h1 { flex: 1 1 auto; }
+.detail-title-menu-wrap { margin-right: 9px; }
+/* 댓글 ⋯ 메뉴는 게시글 메뉴보다 한 단계 연하게 */
+.board-detail-screen .comment-icon-button { color: #b4b4b4; }
