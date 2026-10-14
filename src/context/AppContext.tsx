@@ -133,7 +133,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // 화면 모드를 <html data-theme>에 반영한다 (첫 그림 전 적용은 index.html 스크립트가 한다)
   useEffect(() => {
     document.documentElement.dataset.theme = themeMode
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeMode === 'dark' ? '#1c1f26' : '#ffffff')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeMode === 'dark' ? '#2a2d34' : '#ffffff')
   }, [themeMode])
 
   useEffect(() => {
