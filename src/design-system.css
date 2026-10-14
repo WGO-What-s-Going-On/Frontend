@@ -241,21 +241,13 @@ select:focus-visible,
 .map-screen .map-pin,
 .map-screen .map-pin::after { border-color: var(--cat, var(--c-ink)); }
 
-/* ---------- 게시글 상세: 기존 무채색 유지, 반응 선택만 파랑 ---------- */
-.board-detail-screen,
-.detail-comment-input {
-  --c-surface: #f3f3f3;
-  --c-line: #e2e2e2;
-  --c-ink: #111111;
-  --c-body: #333333;
-  --c-mute: #777777;
-}
-.board-detail-screen .comment-avatar { color: #777; background: #ededed; }
-.board-detail-screen .comments-heading span { color: #222; background: #ededed; }
-.board-detail-screen .comment-image-placeholder { color: #666; border-color: #aaa; background: rgba(255, 255, 255, .55); }
-.board-detail-screen .detail-inline-reactions { border-color: transparent; background: #f5f5f5; }
-.board-detail-screen .detail-inline-reactions .post-reactions.interactive button:not(.selected),
-.board-detail-screen .detail-inline-reactions .post-reactions.interactive button:not(.selected) span { color: #666; }
+/* ---------- 게시글 상세: 다른 화면과 같은 색. 회색 칠 없이 흰 바탕, 누른 반응과 댓글 수만 파랑 ---------- */
+.board-detail-screen .comments-heading span { color: var(--c-accent); background: transparent; }
+.board-detail-screen .comment-image-placeholder { color: var(--c-mute); border-color: var(--c-line); background: #fff; }
+.board-detail-screen .detail-inline-reactions { padding-left: 0; padding-right: 0; border-color: transparent; background: transparent; }
+.board-detail-screen .comments-heading span { min-width: 0; margin-left: 2px; padding: 0; }
+/* 댓글 입력칸: 칩과 같은 연회색, 입력 중에는 흰 바탕 + 파란 테두리 */
+.detail-comment-input .comment-composer-row { border-color: #f2f4f6; background: #f2f4f6; }
 
 /* ---------- 로그인: 지도 애니메이션을 화면 전체로 ---------- */
 .login-screen .nearby-animation {
