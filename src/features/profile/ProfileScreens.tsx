@@ -5,6 +5,7 @@ import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
 import { Button } from '../../components/ui/Button'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
+import { EmptyState } from '../../components/ui/EmptyState'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { useApp, type NotificationSettings } from '../../context/AppContext'
 import { myReactions } from '../../types/domain'
@@ -41,7 +42,12 @@ export function ActivityScreen() {
     { label: '내가 작성한', count: boards.filter((board) => board.authorId === user.id).length },
   ] as const
   const filtered = useMemo(() => filter === '최근 본' ? recentBoardIds.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] }) : boards.filter((board) => filter === '댓글 단' && participatingIds.has(board.id) || filter === '공감한' && myReactions(board).length > 0 || filter === '내가 작성한' && board.authorId === user.id), [boards, filter, user.id, comments, recentBoardIds])
-  return <AppShell><BackHeader title="최근 활동 내역" onBack={() => go('my')}/><FilterChips className="chips activity-filters" options={filters.map((item) => ({ value: item.label, count: item.count }))} selected={filter} onSelect={setFilter}/><div className="post-list compact">{filtered.map((board) => <BoardCard key={board.id} board={board} showBody onOpen={() => openBoard(board.id)}/>)}</div></AppShell>
+  const emptyText = { '최근 본': '최근에 본 게시판이 없어요.', '댓글 단': '댓글을 단 게시판이 없어요.', '공감한': '반응을 남긴 게시판이 없어요.', '내가 작성한': '작성한 게시판이 없어요.' }
+  // 게시판 목록과 같은 여백·칩·카드를 써서 같은 화면처럼 보이게 한다
+  return <AppShell contentClassName="ux-board-screen activity-screen"><BackHeader title="최근 활동" onBack={() => go('my')}/>
+    <div className="ux-filter-row"><FilterChips className="ux-category-filters activity-chips" options={filters.map((item) => ({ value: item.label, count: item.count }))} selected={filter} onSelect={setFilter}/></div>
+    <div className="ux-board-list">{filtered.length ? filtered.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} onOpen={() => openBoard(board.id)}/>) : <EmptyState title={emptyText[filter]}/>}</div>
+  </AppShell>
 }
 
 export function ProfileEditScreen() {

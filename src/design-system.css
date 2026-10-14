@@ -1161,3 +1161,10 @@ button.title-progress-card:active { background: #f7f8fa; }
 }
 .setting-toggle input[role="switch"]:checked { background: var(--c-accent); }
 .setting-toggle input[role="switch"]:checked::after { transform: translateX(18px); }
+
+/* ---------- 최근 활동: 게시판 목록과 같은 칩·카드, 칩 안에 개수 ---------- */
+.activity-screen .back-header { margin-bottom: 12px; }
+.activity-chips button span { margin-left: 4px; font-variant-numeric: tabular-nums; opacity: .6; }
+.activity-chips button.selected span { opacity: .85; }
+.activity-screen .empty-state { margin-top: 48px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
+.activity-screen .empty-state strong { color: var(--c-mute); font-size: 14px; font-weight: 500; }
