@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
+import { RADIUS, mapSeedBoards } from '../features/map/mapWorld'
 import { myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Report, Screen, User } from '../types/domain'
 
@@ -24,11 +25,14 @@ interface PersistedMockState {
   notificationSettings: NotificationSettings
   locationPermission: LocationPermission
   noticesVersion?: number
+  mapSeed?: number
 }
 
 const STORAGE_KEY = 'wgo-mockup-state-v1'
 // 목업 알림 목록을 바꾸면 올린다. 저장된 알림 버전이 다르면 알림만 새 목업으로 교체한다.
 const NOTICES_VERSION = 5
+// 지도 주변 동네 게시판 목업을 추가할 때 올린다. 저장된 게시판에 없는 목업만 덧붙인다.
+const MAP_SEED = 1
 
 function readPersistedState(): Partial<PersistedMockState> {
   try {
@@ -93,7 +97,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const persisted = useMemo(readPersistedState, [])
   const screen = screenFromPath(location.pathname)
   const [user, setUser] = useState(persisted.user ?? initialUser)
-  const [boards, setBoards] = useState(persisted.boards ?? initialBoards)
+  const [boards, setBoards] = useState<Board[]>(() => {
+    const saved = persisted.boards ?? initialBoards
+    if (persisted.mapSeed === MAP_SEED) return saved
+    const ids = new Set(saved.map((board) => board.id))
+    return [...saved, ...mapSeedBoards.filter((board) => !ids.has(board.id))]
+  })
   const [comments, setComments] = useState(persisted.comments ?? initialComments)
   const [notices, setNotices] = useState(persisted.noticesVersion === NOTICES_VERSION && persisted.notices ? persisted.notices : initialNotices)
   const [reports, setReports] = useState<Report[]>(persisted.reports ?? [])
@@ -108,7 +117,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = useState('')
 
   useEffect(() => {
-    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission }
+    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, mapSeed: MAP_SEED, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission])
 
@@ -118,7 +127,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const go = (next: Screen) => navigate(pathForScreen(next, currentBoardId))
   const back = (fallback: Screen = 'board') => location.key === 'default' ? go(fallback) : navigate(-1)
-  const openBoard = (id: string) => { setCurrentBoardId(id); setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)]); navigate(pathForScreen(inRange ? 'detail' : 'outside', id)) }
+  const openBoard = (id: string) => {
+    setCurrentBoardId(id)
+    setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)])
+    // 150m 밖 게시판은 열람 전용 화면으로 (MAP-F05)
+    const target = boards.find((board) => board.id === id)
+    navigate(pathForScreen(inRange && (target?.distance ?? 0) <= RADIUS ? 'detail' : 'outside', id))
+  }
   // 로그인 흐름: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도 (실제 카카오 인증은 백엔드 연동 때)
   const startLogin = () => go(!user.onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home')
   const agreeTerms = () => go('nickname')

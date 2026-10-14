@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
+import { RotateCw } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
@@ -8,50 +9,50 @@ import { useApp } from '../../context/AppContext'
 import { categoryLabel } from '../../domain/labels'
 import type { Board } from '../../types/domain'
 import { IncidentBottomSheet } from './IncidentBottomSheet'
+import { MapView } from './MapView'
+import { ME, boardPosition, type Point } from './mapWorld'
 
 type MapFilter = '전체' | '긴급/사고' | '도움요청' | 'HOT'
 
 const filters: MapFilter[] = ['전체', '긴급/사고', '도움요청', 'HOT']
 
-function filterBoards(boards: Board[], filter: MapFilter) {
-  const visible = boards.filter((board) => board.status !== '숨김')
+// HOT: 조회수나 댓글이 많이 몰린 진행 중 게시판 (실제 기준은 백엔드 활성도 점수)
+function isHot(board: Board, commentCount: number) {
+  return board.status === '실시간' && (board.views >= 100 || commentCount >= 5)
+}
+
+function filterBoards(boards: Board[], filter: MapFilter, hotIds: Set<string>) {
+  // 종료·숨김 게시판은 지도에서 뺀다
+  const visible = boards.filter((board) => board.status === '실시간')
   if (filter === '긴급/사고') return visible.filter((board) => board.category === '긴급 사고')
   if (filter === '도움요청') return visible.filter((board) => board.category === '도움 요청')
-  if (filter === 'HOT') return [...visible].sort((a, b) => b.views - a.views).slice(0, 2)
+  if (filter === 'HOT') return visible.filter((board) => hotIds.has(board.id))
   return visible
 }
 
-function markerLabel(board: Board) {
-  if (board.id === 'fire') return '화재 신고'
-  if (board.id === 'mask') return '마스크 나눔'
-  if (board.id === 'outage') return '정전 제보'
-  return board.title.slice(0, 8)
-}
-
 export function MapScreen() {
-  const { go, boards, openBoard } = useApp()
+  const { boards, comments, openBoard, showToast } = useApp()
   const [filter, setFilter] = useState<MapFilter>('전체')
   const [selectedBoard, setSelectedBoard] = useState<Board>()
-  const nearby = filterBoards(boards, filter)
+  const [searchCenter, setSearchCenter] = useState<Point>(ME)
+  const [viewCenter, setViewCenter] = useState<Point>(ME)
+  const hotIds = useMemo(() => new Set(boards.filter((board) => isHot(board, comments.filter((comment) => comment.boardId === board.id).length)).map((board) => board.id)), [boards, comments])
+  const nearby = filterBoards(boards, filter, hotIds)
   const selectFilter = (next: MapFilter) => { setFilter(next); setSelectedBoard(undefined) }
+  // 지도를 멀리 옮기면 '이 지역에서 다시 찾기' (MAP-F09, 실제로는 화면 영역으로 게시판을 다시 조회)
+  const movedFar = Math.hypot(viewCenter.x - searchCenter.x, viewCenter.y - searchCenter.y) > 260
+  const searchHere = () => {
+    const count = nearby.filter((board) => { const point = boardPosition(board); return Math.hypot(point.x - viewCenter.x, point.y - viewCenter.y) <= 400 }).length
+    setSearchCenter(viewCenter)
+    showToast(count ? `이 지역 게시판 ${count}개를 찾았어요.` : '이 지역에는 아직 게시판이 없어요.')
+  }
   return <AppShell shellClassName="map-shell" contentClassName="map-screen">
-    <div className="map" onClick={() => setSelectedBoard(undefined)}>
-      <div className="map-water"/>
-      <i className="map-road road-main"/><i className="map-road road-cross"/><i className="map-road road-diagonal"/>
-      <i className="map-road road-small-one"/><i className="map-road road-small-two"/>
-      <div className="map-block block-one"><span>주거 단지</span></div>
-      <div className="map-block block-two"><span>상가</span></div>
-      <div className="map-block block-three"><span>강남초등학교</span></div>
-      <div className="map-block block-four"><span>주민센터</span></div>
-      <div className="map-park"><span>새봄공원</span></div>
-      <span className="map-label label-station">강남역</span><span className="map-label label-road">테헤란로</span>
-      <div className="radius"><b/><small>150m</small></div>
-      {nearby.map((board, index) => <button key={board.id} className={`map-pin marker-${index % 8} ${selectedBoard?.id === board.id ? 'active' : ''}`} data-category={board.category} onClick={(event) => { event.stopPropagation(); setSelectedBoard(board) }}>{markerLabel(board)}</button>)}
-    </div>
+    <MapView boards={nearby} selectedId={selectedBoard?.id} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>
     <div className="map-top-overlay">
       <header><h1>내 주변 지도</h1></header>
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
     </div>
+    {movedFar && !selectedBoard && <button className="map-search-here" onClick={searchHere}><RotateCw size={15}/>이 지역에서 다시 찾기</button>}
     {selectedBoard && <IncidentBottomSheet board={selectedBoard} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
   </AppShell>
 }

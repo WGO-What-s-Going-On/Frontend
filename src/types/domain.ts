@@ -37,6 +37,8 @@ export interface Board {
   imageName?: string
   // 닉네임 대신 익명으로 표시한 게시글 (USR-F08)
   anonymous?: boolean
+  // 목업 지도 좌표 (m 단위). 실제로는 백엔드가 주는 근사 좌표
+  position?: { x: number; y: number }
   // 작성 후 수정한 적이 있으면 true (상세에 '수정됨' 표시)
   edited?: boolean
 }
