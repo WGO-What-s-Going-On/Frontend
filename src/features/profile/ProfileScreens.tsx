@@ -71,12 +71,11 @@ export function ProfileEditScreen() {
     <div className="form-field">
       <span className="form-label">실명</span>
       <input className="form-input" value={realName} onChange={(event) => setRealName(event.target.value)} placeholder="실명을 입력해 주세요" maxLength={20} autoComplete="name"/>
-      <p className="field-message">다른 사용자에게는 공개되지 않아요.</p>
     </div>
     <div className="form-field">
       <span className="form-label">닉네임</span>
-      <div className="input-with-action"><input className="form-input" value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="닉네임 (2~12자)" maxLength={12} autoComplete="nickname"/><button className="check-button" onClick={checkNickname} disabled={!changed || Boolean(formatError) || !trimmed}>중복 확인</button></div>
-      <p className={`field-message ${messageTone}`} aria-live="polite">{message || '게시글과 댓글에 표시되는 이름이에요.'}</p>
+      <div className="input-with-action"><input value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="닉네임 (2~12자)" maxLength={12} autoComplete="nickname"/><button className="check-button" onClick={checkNickname} disabled={!changed || Boolean(formatError) || !trimmed}>중복 확인</button></div>
+      <p className={`field-message ${messageTone}`} aria-live="polite">{message}</p>
     </div>
     <Button className="primary profile-save" disabled={!canSave} onClick={() => updateUser({ nickname: trimmed, realName: realName.trim() })}>저장</Button>
   </AppShell>

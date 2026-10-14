@@ -822,7 +822,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .badge-list small { color: var(--c-mute); font-size: 12px; }
 .badge-list li.earned small { color: var(--c-accent); }
 
-/* ---------- 프로필 수정: 흰 입력칸, 라벨 위·안내 아래, 닉네임 옆 중복 확인 ---------- */
+/* ---------- 프로필 수정: 흰 입력칸, 라벨 위, 닉네임 칸 안에 중복 확인 ---------- */
 .profile-edit-avatar { display: flex; justify-content: center; margin: 4px 0 24px; }
 .form-field { margin-bottom: 22px; }
 .form-label { display: block; margin: 0 0 8px; color: var(--c-body); font-size: 13px; font-weight: 600; }
@@ -840,20 +840,41 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 .form-input::placeholder { color: #b0b5bd; }
 .form-input:focus { border-color: var(--c-accent); }
-.input-with-action { display: flex; gap: 8px; }
-.input-with-action .form-input { flex: 1; min-width: 0; }
-.check-button {
-  flex: none;
+.input-with-action {
+  display: flex;
+  align-items: center;
   min-height: 50px;
-  padding: 0 16px;
-  color: var(--c-accent);
-  border: 1px solid var(--c-accent);
+  padding: 0 6px 0 14px;
+  border: 1px solid #e3e5e8;
   border-radius: 12px;
   background: #fff;
-  font-size: 14px;
+  transition: border-color .15s ease;
+}
+.input-with-action:focus-within { border-color: var(--c-accent); }
+.input-with-action input {
+  flex: 1;
+  min-width: 0;
+  height: 48px;
+  padding: 0;
+  color: var(--c-ink);
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 16px;
+}
+.input-with-action input::placeholder { color: #b0b5bd; }
+.check-button {
+  flex: none;
+  height: 34px;
+  padding: 0 12px;
+  color: var(--c-accent);
+  border: 0;
+  border-radius: 8px;
+  background: var(--c-accent-soft);
+  font-size: 13px;
   font-weight: 700;
 }
-.check-button:disabled { color: #b0b5bd; border-color: #e3e5e8; }
+.check-button:disabled { color: #b0b5bd; background: #f4f5f7; }
 .field-message { min-height: 18px; margin: 8px 2px 0; color: var(--c-mute); font-size: 12px; line-height: 1.5; }
 .field-message.ok { color: var(--c-news); }
 .field-message.error { color: var(--c-urgent); }
