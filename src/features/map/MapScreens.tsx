@@ -45,7 +45,7 @@ export function MapScreen() {
   return <AppShell shellClassName="map-shell" contentClassName="map-screen">
     <MapView boards={nearby} selectedId={selectedBoard?.id} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>
     <div className="map-top-overlay">
-      <header><h1>내 주변 지도</h1></header>
+      <header><h1>내 주변</h1></header>
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
     </div>
     {movedFar && !selectedBoard && <button className="map-search-here" onClick={searchHere}><RotateCw size={15}/>이 지역에서 다시 찾기</button>}

@@ -1168,3 +1168,22 @@ button.title-progress-card:active { background: #f7f8fa; }
 .activity-chips button.selected span { opacity: .85; }
 .activity-screen .empty-state { margin-top: 48px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
 .activity-screen .empty-state strong { color: var(--c-mute); font-size: 14px; font-weight: 500; }
+
+/* ---------- 지도: 화면 맨 위(상태바)까지 지도를 깔고, 제목·필터는 지도 위에 띄운다 ---------- */
+.map-shell .status-bar {
+  position: absolute;
+  z-index: 7;
+  top: 0;
+  right: 0;
+  left: 0;
+  background: transparent;
+}
+.map-screen .map-top-overlay {
+  padding-top: 52px;
+  background: none;
+}
+/* 흰 덮개 대신 글자 둘레에만 옅은 흰 테두리를 줘서 지도 위에서도 읽히게 */
+.map-screen .map-top-overlay h1,
+.map-shell .status-bar { text-shadow: 0 0 2px #fff, 0 0 6px #fff, 0 0 12px rgba(255, 255, 255, .9); }
+.map-screen .map-filters button { box-shadow: 0 1px 4px rgba(17, 19, 24, .12); }
+.map-search-here { top: 164px; }
