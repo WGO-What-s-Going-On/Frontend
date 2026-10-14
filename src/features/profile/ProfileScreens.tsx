@@ -52,5 +52,5 @@ export function ProfileEditScreen() {
 export function AccountSettingsScreen() {
   const { blockedUsers, go, showToast } = useApp()
   const [withdraw, setWithdraw] = useState(false)
-  return <AppShell><BackHeader title="계정 관리" onBack={() => go('my')}/><h4>차단 사용자</h4><div className="notice-box">차단한 사용자 {blockedUsers.length}명</div><h4>계정</h4><button className="menu" onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><Button className="danger-text" onClick={() => setWithdraw(true)}>회원 탈퇴</Button>{withdraw && <ConfirmDialog title="정말 탈퇴할까요?" description="프로토타입에서는 로그인 화면으로 이동합니다." confirmLabel="탈퇴" danger onClose={() => setWithdraw(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>}</AppShell>
+  return <AppShell><BackHeader title="계정 관리" onBack={() => go('my')}/><h4>차단 사용자</h4><div className="notice-box">차단한 사용자 {blockedUsers.length}명</div><h4>계정</h4><button className="menu" onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><Button className="danger-text" onClick={() => setWithdraw(true)}>회원 탈퇴</Button>{withdraw && <ConfirmDialog title="정말 탈퇴할까요?" description="탈퇴 후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdraw(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>}</AppShell>
 }
