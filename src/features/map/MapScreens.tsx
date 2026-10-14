@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Heart, ImageOff, Lock, MapPin, MapPinOff, MessageCircleOff, RotateCw, SmilePlus } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { ArrowLeft, Heart, Lock, MapPin, RotateCw } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
@@ -34,14 +34,6 @@ export function MapScreen() {
   const { boards, comments, openBoard, showToast } = useApp()
   const [filter, setFilter] = useState<MapFilter>('전체')
   const [selectedBoard, setSelectedBoard] = useState<Board>()
-  // 다른 화면에서 '지도에서 위치 보기'로 들어오면 그 게시판 핀을 고른 상태로 연다
-  useEffect(() => {
-    const focusId = sessionStorage.getItem('wgo-map-focus')
-    if (!focusId) return
-    sessionStorage.removeItem('wgo-map-focus')
-    const target = boards.find((board) => board.id === focusId)
-    if (target) setSelectedBoard(target)
-  }, [])
   const [searchCenter, setSearchCenter] = useState<Point>(ME)
   const [viewCenter, setViewCenter] = useState<Point>(ME)
   const hotIds = useMemo(() => new Set(boards.filter((board) => isHot(board, comments.filter((comment) => comment.boardId === board.id).length)).map((board) => board.id)), [boards, comments])
@@ -67,27 +59,17 @@ export function MapScreen() {
 
 // 150m 밖에서 연 게시판 (MAP-F05): 읽기만 가능. 왜 참여할 수 없는지, 얼마나 가까이 가야 하는지 보여준다.
 export function OutsideRangeScreen() {
-  const { currentBoard: board, comments, blockedUsers, locationPermission, back, go } = useApp()
+  const { currentBoard: board, comments, blockedUsers, locationPermission, back } = useApp()
   const [showAll, setShowAll] = useState(false)
   if (!board) return null
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !comment.parentId && !blockedUsers.includes(comment.authorId))
   const replyCount = (id: string) => comments.filter((comment) => comment.parentId === id).length
   const shown = showAll ? boardComments : boardComments.slice(0, 3)
   const permissionOff = board.distance <= RADIUS && locationPermission !== 'granted'
-  const headline = permissionOff ? '위치 권한이 꺼져 있어요' : '참여 범위 밖 게시판이에요'
-  const showOnMap = () => { sessionStorage.setItem('wgo-map-focus', board.id); go('home') }
-  return <AppShell nav={false} contentClassName="outside-screen" bottomContent={<div className="outside-bottom"><div className="outside-readonly-bar"><Lock size={16}/><span>150m 안에서만 댓글 가능</span></div><Button className="outside-map-button" onClick={showOnMap}><MapPin size={16}/>위치 보기</Button></div>}>
+  return <AppShell nav={false} contentClassName="outside-screen" bottomContent={<div className="outside-bottom"><div className="outside-readonly-bar"><Lock size={16}/><span>150m 안에서만 댓글 가능</span></div></div>}>
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('home')}><ArrowLeft size={22}/></IconButton></header>
 
-    <section className="outside-range" aria-label="참여 범위 안내">
-      <div className="outside-range-head"><span className="outside-range-icon"><MapPinOff size={18}/></span><div><strong>{headline}</strong><p>{permissionOff ? '위치를 확인할 수 없어 지금은 읽기만 할 수 있어요.' : '반경 150m 밖에 있는 게시판은 읽기만 할 수 있어요.'}</p></div></div>
-      <ul className="outside-limits" aria-label="할 수 없는 것">
-        <li><MessageCircleOff size={15}/>댓글</li>
-        <li><SmilePlus size={15}/>반응</li>
-        <li><ImageOff size={15}/>사진</li>
-      </ul>
-      {permissionOff && <button className="outside-permission" onClick={() => go('location-permission')}>위치 권한 켜기</button>}
-    </section>
+    <p className="outside-notice">{permissionOff ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '참여 가능한 범위 밖의 게시판이에요'}</p>
 
     <article className="outside-article">
       <span className="outside-category" data-category={board.category}>{categoryLabel[board.category]}</span>

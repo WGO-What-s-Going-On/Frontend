@@ -1068,24 +1068,16 @@ html { -webkit-tap-highlight-color: transparent; }
 .outside-screen { padding: 0 20px 120px; }
 .outside-screen .detail-nav { margin: 0 -8px 4px; }
 
-/* 참여 범위 밖 안내: 상태 + 막힌 기능 */
-.outside-range { padding: 16px; border-radius: 16px; background: #f4f5f7; }
-.outside-range-head { display: flex; align-items: center; gap: 12px; }
-.outside-range-icon { width: 38px; height: 38px; display: grid; flex: none; place-items: center; color: #6b7280; border-radius: 12px; background: #fff; }
-.outside-range strong { display: block; color: var(--c-ink); font-size: 15px; line-height: 1.4; }
-.outside-range p { margin: 2px 0 0; color: #6b7280; font-size: 13px; line-height: 1.5; }
-.outside-limits { display: flex; gap: 6px; margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid #e6e7ea; list-style: none; }
-.outside-limits li { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; color: #8a8f98; border-radius: 999px; background: #fff; font-size: 12px; font-weight: 600; }
-.outside-limits li svg { color: #a3a8b0; }
-.outside-permission { margin-top: 12px; padding: 0; color: var(--c-accent); border: 0; background: none; font-size: 13px; font-weight: 700; }
+/* 참여 범위 밖 안내: 텍스트 한 줄 */
+.outside-notice { margin: 4px 0 0; color: var(--c-mute); font-size: 14px; font-weight: 600; }
 
 /* 게시글 본문: 상세 화면과 같은 정렬 */
-.outside-article { padding: 22px 0 20px; }
+.outside-article { padding: 14px 0 20px; }
 .outside-category { display: inline-block; color: var(--cat, var(--c-mute)); font-size: 13px; font-weight: 700; }
 .outside-article h1 { margin: 6px 0 8px; color: var(--c-ink); font-size: 22px; line-height: 1.35; }
 .outside-article .detail-body { margin-top: 14px; }
 /* 반응은 읽기 전용: 버튼처럼 보이지 않게 아이콘·이름·숫자만 한 줄씩 */
-.outside-reactions { margin-top: 18px; padding-top: 14px; border-top: 1px solid #eee; }
+.outside-reactions { margin-top: 18px; }
 .outside-reactions .post-reactions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 12px; margin: 0; }
 .outside-reactions .post-reactions > span { display: flex; align-items: center; gap: 6px; padding: 0; color: #777; border: 0; background: none; font-size: 13px; }
 .outside-reactions .post-reactions > span svg { flex: none; color: #9a9a9a; }
@@ -1093,7 +1085,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .outside-reactions .post-reactions small { color: var(--c-ink); font-size: 13px; font-weight: 700; }
 
 /* 댓글: 읽기 전용 목록 */
-.outside-comments { margin: 0 -20px; padding: 20px 20px 0; border-top: 8px solid #f3f3f3; }
+.outside-comments { padding-top: 8px; }
 .outside-comments h3 { margin: 0 0 4px; color: var(--c-ink); font-size: 16px; }
 .outside-comments h3 span { margin-left: 4px; color: var(--c-mute); }
 .outside-comments ul { margin: 0; padding: 0; list-style: none; }
