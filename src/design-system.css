@@ -869,3 +869,6 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .dialog-backdrop, .dialog-backdrop .dialog { animation: none; }
 }
+
+/* 계정 관리: 로그아웃 아래 회원 탈퇴 (같은 묶음, 탈퇴만 빨간 글자) */
+.account-actions .account-withdraw { color: var(--c-urgent); }
