@@ -821,3 +821,11 @@ html { -webkit-tap-highlight-color: transparent; }
 .badge-list strong { color: var(--c-ink); font-size: 14px; }
 .badge-list small { color: var(--c-mute); font-size: 12px; }
 .badge-list li.earned small { color: var(--c-accent); }
+
+/* 프로필 수정: 입력칸은 파랑 대신 무채색 */
+.profile-edit-screen .field {
+  color: var(--c-ink);
+  border-color: #e2e2e2;
+  background: #f5f5f5;
+}
+.profile-edit-screen .field:focus { border-color: #cfcfcf; background: #fff; }
