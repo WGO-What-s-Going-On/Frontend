@@ -1072,3 +1072,34 @@ html { -webkit-tap-highlight-color: transparent; }
 .outside-readonly-bar { display: flex; flex: 1; align-items: center; gap: 8px; min-width: 0; min-height: 46px; padding: 0 16px; color: #8a8f98; border-radius: 999px; background: #f3f4f6; font-size: 14px; }
 .outside-readonly-bar span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .outside-readonly-bar svg { flex: none; color: #a3a8b0; }
+
+/* ---------- 글 작성 → 상세 화면 전환 ----------
+   작성 시트는 살짝 떠오르며 사라지고, 상세 화면은 본문 → 반응 → 댓글 순서로 부드럽게 올라온다 */
+.quick-compose-layer.publishing .quick-compose-sheet { animation: compose-out .14s ease-in forwards; }
+.quick-compose-layer.publishing .quick-compose-backdrop { animation: compose-backdrop-out .14s ease-in forwards; }
+@keyframes compose-out { to { opacity: 0; transform: translateY(-16px) scale(.98); } }
+@keyframes compose-backdrop-out { to { opacity: 0; } }
+
+.detail-enter .detail-nav,
+.detail-enter .detail-article > *,
+.detail-enter .comments-section { animation: detail-rise .34s cubic-bezier(.2, .8, .2, 1) both; }
+.detail-enter .detail-article > :nth-child(1) { animation-delay: .02s; }
+.detail-enter .detail-article > :nth-child(2) { animation-delay: .05s; }
+.detail-enter .detail-article > :nth-child(3) { animation-delay: .08s; }
+.detail-enter .detail-article > :nth-child(n+4) { animation-delay: .11s; }
+.detail-enter .comments-section { animation-delay: .15s; }
+.detail-enter-shell .detail-comment-input { animation: composer-rise .32s cubic-bezier(.2, .8, .2, 1) .12s both; }
+@keyframes detail-rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes composer-rise { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .quick-compose-layer.publishing .quick-compose-sheet,
+  .quick-compose-layer.publishing .quick-compose-backdrop,
+  .detail-enter .detail-nav,
+  .detail-enter .detail-article > *,
+  .detail-enter .comments-section,
+  .detail-enter-shell .detail-comment-input { animation: none; }
+}
+
+/* 화면 겹쳐 전환 (View Transition): 이전 화면이 옅어지는 동안 새 화면이 겹쳐 나타난다 */
+::view-transition-old(root),
+::view-transition-new(root) { animation-duration: .26s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }

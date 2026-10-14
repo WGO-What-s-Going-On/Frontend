@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Camera, MapPin, X } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
-import { useApp } from '../../context/AppContext'
+import { canViewTransition, useApp } from '../../context/AppContext'
 import type { Category } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { AuthorToggle } from './AuthorToggle'
@@ -15,16 +15,21 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   const [body, setBody] = useState('')
   const [imageName, setImageName] = useState<string>()
   const [anonymous, setAnonymous] = useState(false)
+  const [publishing, setPublishing] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
   const submit = () => {
     const content = body.trim()
     if (!content) return
     const title = content.split(/\n|[.!?。！？]/)[0].trim().slice(0, 50) || `${category} 상황 공유`
-    createBoard({ category, title, body: content, imageName, anonymous })
+    const publish = () => createBoard({ category, title, body: content, imageName, anonymous })
+    // 겹쳐 전환이 되면 작성 시트에서 바로 상세로 넘어가고, 안 되면 시트를 먼저 살짝 떠오르며 지운다
+    if (canViewTransition()) { publish(); return }
+    setPublishing(true)
+    window.setTimeout(publish, 140)
   }
 
-  return <div className="quick-compose-layer" role="dialog" aria-modal="true" aria-label="빠른 글쓰기">
+  return <div className={`quick-compose-layer ${publishing ? 'publishing' : ''}`} role="dialog" aria-modal="true" aria-label="빠른 글쓰기">
     <button className="quick-compose-backdrop" onClick={onClose} aria-label="글쓰기 닫기"/>
     <section className="quick-compose-sheet">
       <div className="quick-compose-grabber"/>
@@ -35,7 +40,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>
         <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name)}/>
         <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>
-        <Button className="quick-submit" onClick={submit} disabled={!body.trim()}>게시하기</Button>
+        <Button className="quick-submit" onClick={submit} disabled={!body.trim()} pending={publishing}>게시하기</Button>
       </>}
     </section>
   </div>

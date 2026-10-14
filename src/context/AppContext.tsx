@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
@@ -33,6 +34,11 @@ const STORAGE_KEY = 'wgo-mockup-state-v1'
 const NOTICES_VERSION = 5
 // 지도 주변 동네 게시판 목업을 추가할 때 올린다. 저장된 게시판에 없는 목업만 덧붙인다.
 const MAP_SEED = 1
+
+// 화면 겹쳐 전환(View Transition)을 쓸 수 있는지. 지원하지 않거나 동작 줄이기면 바로 바뀐다.
+export function canViewTransition() {
+  return typeof document !== 'undefined' && 'startViewTransition' in document && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
 
 function readPersistedState(): Partial<PersistedMockState> {
   try {
@@ -146,13 +152,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const createBoard = (input: BoardInput) => {
     const id = `board-${Date.now()}`
-    setBoards((items) => [{
-      id, authorId: user.id, authorName: input.anonymous ? '익명' : user.nickname, distance: 0, createdAt: '방금 전', status: '실시간', views: 1,
-      reactions: { '저도 궁금해요': 0, '지금도 그래요': 0, '도움 됐어요': 0, '이제 끝났어요': 0 }, ...input,
-    }, ...items])
-    setCurrentBoardId(id)
+    // 새 글 추가와 화면 이동을 한 번에 반영해야 전환 직전 화면(작성 시트)에서 바로 상세로 겹쳐 넘어간다
+    const open = () => {
+      setBoards((items) => [{
+        id, authorId: user.id, authorName: input.anonymous ? '익명' : user.nickname, distance: 0, createdAt: '방금 전', status: '실시간', views: 1,
+        reactions: { '저도 궁금해요': 0, '지금도 그래요': 0, '도움 됐어요': 0, '이제 끝났어요': 0 }, ...input,
+      }, ...items])
+      setCurrentBoardId(id)
+      navigate(pathForScreen('detail', id), { state: { justCreated: true } })
+    }
+    if (canViewTransition()) document.startViewTransition(() => flushSync(open))
+    else open()
     showToast('게시판이 생성되었습니다.')
-    navigate(pathForScreen('detail', id))
   }
   const updateBoard = (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category'>) => {
     setBoards((items) => items.map((board) => {
