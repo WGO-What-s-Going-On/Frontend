@@ -6,7 +6,7 @@ import { BoardCard } from '../../components/ui/BoardCard'
 import { Button } from '../../components/ui/Button'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { FilterChips } from '../../components/ui/FilterChips'
-import { useApp } from '../../context/AppContext'
+import { useApp, type NotificationSettings } from '../../context/AppContext'
 import { myReactions } from '../../types/domain'
 import { TitleProgressCard } from './TitleProgressCard'
 
@@ -21,11 +21,13 @@ function earnedBadges({ posts, comments, likes, finished }: { posts: number; com
 }
 
 export function ProfileScreen() {
-  const { user, boards, comments, go } = useApp()
+  const { user, boards, comments, go, showToast } = useApp()
+  const [withdrawOpen, setWithdrawOpen] = useState(false)
   const myBoards = boards.filter((board) => board.authorId === user.id)
   const myComments = comments.filter((comment) => comment.authorId === user.id)
   const badges = earnedBadges({ posts: myBoards.length, comments: myComments.length, likes: myComments.reduce((sum, comment) => sum + (comment.likes ?? 0), 0), finished: myBoards.filter((board) => board.status === '종료됨').length })
-  return <AppShell><header><h1>마이페이지</h1></header><TitleProgressCard postCount={myBoards.length} commentCount={myComments.length} name={user.nickname}/><h4>뱃지 <small>{badges.filter((badge) => badge.earned).length}/{badges.length}</small></h4><ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정</h4><div className="menu-group"><button onClick={() => go('profile-edit')}>프로필 수정 <ChevronRight/></button><button onClick={() => go('account-settings')}>계정 관리 <ChevronRight/></button></div></AppShell>
+  const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="탈퇴 후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>
+  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1></header><TitleProgressCard postCount={myBoards.length} commentCount={myComments.length} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>뱃지 <small>{badges.filter((badge) => badge.earned).length}/{badges.length}</small></h4><ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기 <ChevronRight/></button><h4>설정</h4><div className="menu-group"><button onClick={() => go('notification-settings')}>알림 설정 <ChevronRight/></button></div><div className="menu-group account-actions"><button onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
 
 export function ActivityScreen() {
@@ -49,8 +51,22 @@ export function ProfileEditScreen() {
   return <AppShell contentClassName="profile-edit-screen"><BackHeader title="프로필 수정" onBack={() => go('my')}/><label>닉네임</label><input className="field" value={nickname} onChange={(event) => setNickname(event.target.value)} maxLength={12}/><label>한 줄 소개</label><textarea className="field" value={bio} onChange={(event) => setBio(event.target.value)} maxLength={80}/><Button className="primary" disabled={!nickname.trim()} onClick={() => updateUser({ nickname: nickname.trim(), bio: bio.trim() })}>저장</Button></AppShell>
 }
 
-export function AccountSettingsScreen() {
-  const { blockedUsers, go, showToast } = useApp()
-  const [withdraw, setWithdraw] = useState(false)
-  return <AppShell><BackHeader title="계정 관리" onBack={() => go('my')}/><h4>차단 사용자</h4><div className="notice-box">차단한 사용자 {blockedUsers.length}명</div><h4>계정</h4><div className="menu-group account-actions"><button onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdraw(true)}>회원 탈퇴</button></div>{withdraw && <ConfirmDialog title="정말 탈퇴할까요?" description="탈퇴 후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdraw(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>}</AppShell>
+// 알림 설정: 알림 종류별로 받을지 정한다. 게시판 하나하나의 알림은 게시판 목록의 종 아이콘으로 켜고 끈다.
+const notificationOptions: { key: keyof NotificationSettings; title: string; description: string }[] = [
+  { key: 'nearby', title: '내 주변 새 게시판', description: '150m 안에 새 게시판이 생기면 알려드려요' },
+  { key: 'replies', title: '댓글·답글', description: '내 글에 댓글, 내 댓글에 답글이 달리면 알려드려요' },
+  { key: 'reactions', title: '반응·하트', description: '내 글과 댓글에 반응이 달리면 알려드려요' },
+  { key: 'lifecycle', title: '게시판 종료', description: '참여한 게시판이 곧 종료되거나 종료되면 알려드려요' },
+]
+
+export function NotificationSettingsScreen() {
+  const { notificationSettings, updateNotificationSettings, go } = useApp()
+  return <AppShell><BackHeader title="알림 설정" onBack={() => go('my')}/>
+    <div className="menu-group setting-list">{notificationOptions.map((option) => <label key={option.key} className="setting-toggle">
+      <span><strong>{option.title}</strong><small>{option.description}</small></span>
+      <input type="checkbox" role="switch" checked={notificationSettings[option.key]} onChange={(event) => updateNotificationSettings({ ...notificationSettings, [option.key]: event.target.checked })}/>
+    </label>)}</div>
+    <p className="setting-help">게시판별 알림은 게시판 목록에서 종 아이콘으로 켜고 끌 수 있어요.</p>
+  </AppShell>
 }
+

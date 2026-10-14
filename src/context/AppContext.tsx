@@ -9,7 +9,8 @@ import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, R
 
 interface BoardInput { category: Category; title: string; body: string; imageName?: string; anonymous?: boolean }
 export type LocationPermission = 'unknown' | 'granted' | 'denied'
-interface NotificationSettings { nearby: boolean; replies: boolean }
+// 알림 종류별 수신 설정 (NTF 도메인). 게시판별 알림은 alertBoardIds로 따로 관리한다.
+export interface NotificationSettings { nearby: boolean; replies: boolean; reactions: boolean; lifecycle: boolean }
 
 interface PersistedMockState {
   user: User
@@ -118,7 +119,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [blockedUsers, setBlockedUsers] = useState<string[]>(persisted.blockedUsers ?? [])
   const [alertBoardIds, setAlertBoardIds] = useState<string[]>(persisted.alertBoardIds ?? [])
   const [recentBoardIds, setRecentBoardIds] = useState<string[]>(persisted.recentBoardIds ?? [])
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>(persisted.notificationSettings ?? { nearby: true, replies: true })
+  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({ nearby: true, replies: true, reactions: true, lifecycle: true, ...persisted.notificationSettings })
   const [locationPermission, setLocationPermissionState] = useState<LocationPermission>(persisted.locationPermission ?? 'unknown')
   const [toast, setToast] = useState('')
 

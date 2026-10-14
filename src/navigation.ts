@@ -13,7 +13,9 @@ export function screenFromPath(pathname: string): Screen {
   if (pathname === '/my') return 'my'
   if (pathname === '/my/activity') return 'activity'
   if (pathname === '/my/edit') return 'profile-edit'
-  if (pathname === '/my/account') return 'account-settings'
+  if (pathname === '/my/notifications') return 'notification-settings'
+  // 예전 계정 관리 주소는 마이로 (로그아웃·탈퇴는 마이에 있다)
+  if (pathname === '/my/account') return 'my'
   if (pathname === '/my/app-settings' || pathname === '/my/settings') return 'my'
   if (pathname === '/alerts') return 'alerts'
   if (pathname === '/signup/terms') return 'terms'
@@ -35,7 +37,7 @@ export function pathForScreen(screen: Screen, boardId?: string) {
     activity: '/my/activity',
     alerts: '/alerts',
     'profile-edit': '/my/edit',
-    'account-settings': '/my/account',
+    'notification-settings': '/my/notifications',
     outside: `/boards/${encodedBoardId}/outside`,
     terms: '/signup/terms',
     nickname: '/signup/nickname',

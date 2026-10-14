@@ -1,7 +1,7 @@
 export type Screen =
   | 'login' | 'home' | 'board' | 'search' | 'detail'
   | 'edit' | 'my' | 'activity' | 'alerts'
-  | 'profile-edit' | 'account-settings' | 'outside'
+  | 'profile-edit' | 'notification-settings' | 'outside'
   | 'terms' | 'nickname' | 'location-permission'
 
 export type Category = '긴급 사고' | '도움 요청' | '동네 소식' | '일상 불편'
