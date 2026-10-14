@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowLeft, Eye, Heart, MapPin, RotateCw } from 'lucide-react'
+import { ArrowLeft, Heart, ImageOff, Lock, MapPin, MapPinOff, MessageCircleOff, RotateCw, SmilePlus } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
@@ -73,21 +73,20 @@ export function OutsideRangeScreen() {
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !comment.parentId && !blockedUsers.includes(comment.authorId))
   const replyCount = (id: string) => comments.filter((comment) => comment.parentId === id).length
   const shown = showAll ? boardComments : boardComments.slice(0, 3)
-  const tooFar = board.distance > RADIUS
-  const headline = !tooFar && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '현재 참여 범위 밖 게시판이에요'
-  // 거리 막대: 왼쪽 끝이 게시판, 파란 구간이 참여 가능한 150m, 점이 지금 내 위치
-  const meterMax = Math.max(board.distance, RADIUS) * 1.18
+  const permissionOff = board.distance <= RADIUS && locationPermission !== 'granted'
+  const headline = permissionOff ? '위치 권한이 꺼져 있어요' : '참여 범위 밖 게시판이에요'
   const showOnMap = () => { sessionStorage.setItem('wgo-map-focus', board.id); go('home') }
-  return <AppShell nav={false} contentClassName="outside-screen" bottomContent={<div className="outside-bottom"><Button className="primary" onClick={showOnMap}><MapPin size={18}/>지도에서 위치 보기</Button></div>}>
+  return <AppShell nav={false} contentClassName="outside-screen" bottomContent={<div className="outside-bottom"><div className="outside-readonly-bar"><Lock size={16}/><span>150m 안에서만 댓글 가능</span></div><Button className="outside-map-button" onClick={showOnMap}><MapPin size={16}/>위치 보기</Button></div>}>
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('home')}><ArrowLeft size={22}/></IconButton></header>
 
     <section className="outside-range" aria-label="참여 범위 안내">
-      <div className="outside-range-head"><span className="outside-range-icon"><Eye size={18}/></span><div><strong>{headline}</strong><p>지금은 글을 읽을 수만 있어요. 댓글·반응·사진은 게시판 150m 안에서 남길 수 있어요.</p></div></div>
-      {tooFar && <div className="range-meter" role="img" aria-label={`게시판까지 ${board.distance}m, 참여 가능 거리 ${RADIUS}m`}>
-        <div className="range-meter-track"><span className="range-meter-zone" style={{ width: `${RADIUS / meterMax * 100}%` }}/><i className="range-meter-me" style={{ left: `${board.distance / meterMax * 100}%` }}/></div>
-        <div className="range-meter-labels"><span>게시판</span><span style={{ left: `${RADIUS / meterMax * 100}%` }}>150m</span><span className="me" style={{ left: `${board.distance / meterMax * 100}%` }}>나 {board.distance}m</span></div>
-      </div>}
-      {!tooFar && locationPermission !== 'granted' && <button className="outside-permission" onClick={() => go('location-permission')}>위치 권한 켜기</button>}
+      <div className="outside-range-head"><span className="outside-range-icon"><MapPinOff size={18}/></span><div><strong>{headline}</strong><p>{permissionOff ? '위치를 확인할 수 없어 지금은 읽기만 할 수 있어요.' : '반경 150m 밖에 있는 게시판은 읽기만 할 수 있어요.'}</p></div></div>
+      <ul className="outside-limits" aria-label="할 수 없는 것">
+        <li><MessageCircleOff size={15}/>댓글</li>
+        <li><SmilePlus size={15}/>반응</li>
+        <li><ImageOff size={15}/>사진</li>
+      </ul>
+      {permissionOff && <button className="outside-permission" onClick={() => go('location-permission')}>위치 권한 켜기</button>}
     </section>
 
     <article className="outside-article">

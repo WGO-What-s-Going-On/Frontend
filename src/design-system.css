@@ -1068,20 +1068,15 @@ html { -webkit-tap-highlight-color: transparent; }
 .outside-screen { padding: 0 20px 120px; }
 .outside-screen .detail-nav { margin: 0 -8px 4px; }
 
-/* 참여 범위 안내 + 거리 막대 */
-.outside-range { padding: 16px; border-radius: 16px; background: #f4f6fa; }
-.outside-range-head { display: flex; gap: 12px; }
-.outside-range-icon { width: 34px; height: 34px; display: grid; flex: none; place-items: center; color: var(--c-accent); border-radius: 50%; background: #fff; }
+/* 참여 범위 밖 안내: 상태 + 막힌 기능 */
+.outside-range { padding: 16px; border-radius: 16px; background: #f4f5f7; }
+.outside-range-head { display: flex; align-items: center; gap: 12px; }
+.outside-range-icon { width: 38px; height: 38px; display: grid; flex: none; place-items: center; color: #6b7280; border-radius: 12px; background: #fff; }
 .outside-range strong { display: block; color: var(--c-ink); font-size: 15px; line-height: 1.4; }
-.outside-range p { margin: 4px 0 0; color: var(--c-body); font-size: 13px; line-height: 1.5; }
-.range-meter { margin: 18px 4px 4px; }
-.range-meter-track { position: relative; height: 6px; border-radius: 999px; background: #dfe3ea; }
-.range-meter-zone { position: absolute; top: 0; bottom: 0; left: 0; border-radius: 999px; background: var(--c-accent); }
-.range-meter-me { position: absolute; top: 50%; width: 14px; height: 14px; border: 3px solid #fff; border-radius: 50%; background: var(--c-ink); box-shadow: 0 1px 3px rgba(17, 19, 24, .3); transform: translate(-50%, -50%); }
-.range-meter-labels { position: relative; height: 18px; margin-top: 8px; color: var(--c-mute); font-size: 11px; font-weight: 600; }
-.range-meter-labels span { position: absolute; top: 0; white-space: nowrap; transform: translateX(-50%); }
-.range-meter-labels span:first-child { left: 0; transform: none; }
-.range-meter-labels .me { color: var(--c-ink); }
+.outside-range p { margin: 2px 0 0; color: #6b7280; font-size: 13px; line-height: 1.5; }
+.outside-limits { display: flex; gap: 6px; margin: 14px 0 0; padding: 12px 0 0; border-top: 1px solid #e6e7ea; list-style: none; }
+.outside-limits li { display: inline-flex; align-items: center; gap: 5px; padding: 6px 10px; color: #8a8f98; border-radius: 999px; background: #fff; font-size: 12px; font-weight: 600; }
+.outside-limits li svg { color: #a3a8b0; }
 .outside-permission { margin-top: 12px; padding: 0; color: var(--c-accent); border: 0; background: none; font-size: 13px; font-weight: 700; }
 
 /* 게시글 본문: 상세 화면과 같은 정렬 */
@@ -1112,6 +1107,9 @@ html { -webkit-tap-highlight-color: transparent; }
 .outside-comment-meta span { display: inline-flex; align-items: center; gap: 3px; }
 .outside-empty { margin: 12px 0 0; color: var(--c-mute); font-size: 14px; }
 
-/* 아래 고정 버튼 (엄지 영역) */
-.outside-bottom { position: absolute; z-index: 6; right: 0; bottom: 0; left: 0; padding: 12px 20px 24px; border-top: 1px solid #eee; background: #fff; }
-.outside-bottom .primary { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; }
+/* 아래: 댓글 입력창 자리에 읽기 전용 막대 + 위치 보기 (엄지 영역) */
+.outside-bottom { position: absolute; z-index: 6; right: 0; bottom: 0; left: 0; display: flex; align-items: center; gap: 8px; padding: 10px 16px 24px; border-top: 1px solid #eee; background: #fff; }
+.outside-readonly-bar { display: flex; flex: 1; align-items: center; gap: 8px; min-width: 0; min-height: 46px; padding: 0 16px; color: #8a8f98; border-radius: 999px; background: #f3f4f6; font-size: 14px; }
+.outside-readonly-bar span { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.outside-readonly-bar svg { flex: none; color: #a3a8b0; }
+.outside-map-button { display: flex; flex: none; align-items: center; gap: 4px; min-height: 46px; padding: 0 14px; color: var(--c-accent); border: 0; border-radius: 999px; background: var(--c-accent-soft); font-size: 14px; font-weight: 700; }
