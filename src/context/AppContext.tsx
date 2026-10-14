@@ -133,12 +133,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const go = (next: Screen) => navigate(pathForScreen(next, currentBoardId))
   const back = (fallback: Screen = 'board') => location.key === 'default' ? go(fallback) : navigate(-1)
+  // 게시글 열기: 목록·지도·알림·검색·최근 활동 어디서 열어도 같은 전환으로 넘어간다
   const openBoard = (id: string) => {
-    setCurrentBoardId(id)
-    setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)])
-    // 150m 밖 게시판은 열람 전용 화면으로 (MAP-F05)
     const target = boards.find((board) => board.id === id)
-    navigate(pathForScreen(inRange && (target?.distance ?? 0) <= RADIUS ? 'detail' : 'outside', id))
+    const open = () => {
+      setCurrentBoardId(id)
+      setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)])
+      // 150m 밖 게시판은 열람 전용으로 (MAP-F05)
+      navigate(pathForScreen(inRange && (target?.distance ?? 0) <= RADIUS ? 'detail' : 'outside', id), { state: { enter: true } })
+    }
+    if (canViewTransition()) document.startViewTransition(() => flushSync(open))
+    else open()
   }
   // 로그인 흐름: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도 (실제 카카오 인증은 백엔드 연동 때)
   const startLogin = () => go(!user.onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home')
@@ -159,7 +164,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         reactions: { '저도 궁금해요': 0, '지금도 그래요': 0, '도움 됐어요': 0, '이제 끝났어요': 0 }, ...input,
       }, ...items])
       setCurrentBoardId(id)
-      navigate(pathForScreen('detail', id), { state: { justCreated: true } })
+      navigate(pathForScreen('detail', id), { state: { enter: true } })
     }
     if (canViewTransition()) document.startViewTransition(() => flushSync(open))
     else open()
