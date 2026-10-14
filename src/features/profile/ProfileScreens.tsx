@@ -23,7 +23,6 @@ function earnedBadges({ posts, comments, likes, finished }: { posts: number; com
 }
 
 const themeOptions: { value: ThemeMode; label: string }[] = [
-  { value: 'system', label: '시스템' },
   { value: 'light', label: '라이트' },
   { value: 'dark', label: '다크' },
 ]

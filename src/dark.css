@@ -1,15 +1,15 @@
 /* ======================================================================
    다크 모드 — <html data-theme="dark">일 때만 적용된다 (AppContext가 시스템 설정·사용자 선택을 반영).
    라이트 모드와 같은 자리에 같은 역할의 색을 쓰고, 값만 어두운 바탕에 맞게 바꾼다.
-   바탕은 로그인 첫 화면의 밤하늘(#0e1118 계열)과 같은 색이라 첫 화면에서 메인으로 자연스럽게 이어진다.
+   새까만 검정 대신 살짝 밝은 회색빛 다크(#1c1f26)를 써서 눈이 덜 피로하게 한다.
    ====================================================================== */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --c-page: #0e1118;      /* 화면 바탕 */
-  --c-canvas: #171b24;    /* 카드 */
-  --c-raised: #1e232e;    /* 시트 · 팝업 · 입력칸 */
-  --c-surface: #1e232e;   /* 연한 칠 (선택 토글 바탕 등) */
-  --c-line: #262c38;
+  --c-page: #1c1f26;      /* 화면 바탕 */
+  --c-canvas: #252a33;    /* 카드 */
+  --c-raised: #2e3440;    /* 시트 · 팝업 · 입력칸 */
+  --c-surface: #2e3440;   /* 연한 칠 (선택 토글 바탕 등) */
+  --c-line: #3a404c;
   --c-ink: #f1f3f7;
   --c-body: #b4bccb;
   --c-mute: #7e879a;
@@ -61,7 +61,7 @@
 /* 로그인 첫 화면은 원래부터 밤 배경이라 손대지 않는다 */
 :root[data-theme="dark"] :is(.login-night-shell, .login-night-shell .status-bar, .login-night-screen) { background-color: transparent; }
 :root[data-theme="dark"] .login-night-screen .start-card h3 { color: rgba(255, 255, 255, .72); }
-:root[data-theme="dark"] .app-bg { background: #05070b; }
+:root[data-theme="dark"] .app-bg { background: #121419; }
 :root[data-theme="dark"] .bottom-nav { border-color: var(--c-line); background: var(--c-page); }
 :root[data-theme="dark"] .nav-icon-wrap b { border-color: var(--c-page); }
 :root[data-theme="dark"] :is(.ux-board-card, .alert, .menu, .menu-group, .menu-group button, .title-progress-card, .badge-list li, .live-card, .file-field, .setting-list) {
@@ -72,7 +72,7 @@
 :root[data-theme="dark"] button.title-progress-card:active { background: var(--c-raised); }
 :root[data-theme="dark"] .theme-row { border-color: var(--c-line); }
 :root[data-theme="dark"] .author-toggle { background: var(--c-page); }
-:root[data-theme="dark"] .author-toggle button.selected { color: var(--c-ink); background: #2c3341; box-shadow: none; }
+:root[data-theme="dark"] .author-toggle button.selected { color: var(--c-ink); background: #3d4452; box-shadow: none; }
 
 /* 필터 칩: 선택 안 된 칩은 카드보다 한 단계 밝은 칠 */
 :root[data-theme="dark"] .ux-category-filters:not(.map-filters) button:not(.selected) { color: var(--c-body); border-color: var(--c-raised); background: var(--c-raised); }
@@ -84,13 +84,13 @@
   background: var(--c-raised) !important;
   box-shadow: 0 0 0 1px var(--c-line), 0 12px 32px rgba(0, 0, 0, .5) !important;
 }
-:root[data-theme="dark"] .dialog-actions button { color: var(--c-ink); background: #2c3341; }
+:root[data-theme="dark"] .dialog-actions button { color: var(--c-ink); background: #3d4452; }
 :root[data-theme="dark"] .dialog-backdrop { background: rgba(0, 0, 0, .6); }
-:root[data-theme="dark"] :is(.quick-compose-grabber, .sheet-handle span) { background: #3a4252; }
+:root[data-theme="dark"] :is(.quick-compose-grabber, .sheet-handle span) { background: #4b5261; }
 :root[data-theme="dark"] .quick-compose-close { color: var(--c-ink); border-color: var(--c-line); background: var(--c-canvas); }
 :root[data-theme="dark"] .quick-category-grid button:not(.selected) { color: var(--c-ink); border-color: var(--c-line); background: var(--c-canvas); }
 :root[data-theme="dark"] .quick-field textarea { color: var(--c-ink); border-color: var(--c-line); background: var(--c-canvas); }
-:root[data-theme="dark"] .quick-photo-button { border-color: #3a4252; background: transparent; }
+:root[data-theme="dark"] .quick-photo-button { border-color: #4b5261; background: transparent; }
 :root[data-theme="dark"] .ux-sort-menu button[aria-checked="true"] { color: var(--c-accent); }
 
 /* ---------- 입력칸 ---------- */
@@ -100,12 +100,12 @@
 :root[data-theme="dark"] .check-button { color: var(--c-accent); background: var(--c-accent-soft); }
 :root[data-theme="dark"] .check-button:disabled { color: var(--c-mute); background: var(--c-raised); }
 :root[data-theme="dark"] .segment { background: var(--c-canvas); }
-:root[data-theme="dark"] .terms-check { border-color: #3a4252; background: transparent; }
+:root[data-theme="dark"] .terms-check { border-color: #4b5261; background: transparent; }
 
 /* ---------- 게시글 상세 ---------- */
 :root[data-theme="dark"] .detail-article { border-color: var(--c-line); }
 :root[data-theme="dark"] .board-detail-screen .detail-inline-reactions { border-color: var(--c-line); background: transparent; }
-:root[data-theme="dark"] .comments-empty { border-color: #3a4252; }
+:root[data-theme="dark"] .comments-empty { border-color: #4b5261; }
 :root[data-theme="dark"] .board-detail-screen .comment + .comment,
 :root[data-theme="dark"] .board-detail-screen .comment { border-color: var(--c-line); }
 :root[data-theme="dark"] .detail-comment-input { border-color: var(--c-line); background: var(--c-page); }
@@ -118,19 +118,19 @@
 :root[data-theme="dark"] .back-header .icon { color: var(--c-ink); border-color: var(--c-line); background: var(--c-page); }
 
 /* ---------- 지도: 어두운 지도, 내 위치와 150m 원은 은은하게 빛나는 파랑 ---------- */
-:root[data-theme="dark"] :is(.map-shell, .map-shell .status-bar, .map-screen .map, .map-canvas) { background-color: #12161e; }
-:root[data-theme="dark"] .map-ground { fill: #151a23; }
-:root[data-theme="dark"] .map-river { stroke: #16233a; }
-:root[data-theme="dark"] .map-green { fill: #15241d; }
+:root[data-theme="dark"] :is(.map-shell, .map-shell .status-bar, .map-screen .map, .map-canvas) { background-color: #20242c; }
+:root[data-theme="dark"] .map-ground { fill: #23272f; }
+:root[data-theme="dark"] .map-river { stroke: #233249; }
+:root[data-theme="dark"] .map-green { fill: #22352a; }
 :root[data-theme="dark"] .map-road,
-:root[data-theme="dark"] .map-road.major { stroke: #262d3b; filter: none; }
-:root[data-theme="dark"] .map-road.minor { stroke: #1e2430; }
+:root[data-theme="dark"] .map-road.major { stroke: #363d4a; filter: none; }
+:root[data-theme="dark"] .map-road.minor { stroke: #2c323d; }
 :root[data-theme="dark"] .map-road-name { fill: #5f6878; }
 :root[data-theme="dark"] .map-place { fill: #c3cad6; }
 :root[data-theme="dark"] .map-area { fill: #4f5868; }
 :root[data-theme="dark"] .map-park-name { fill: #4f8a63; }
 :root[data-theme="dark"] .map-radius { border-color: rgba(122, 162, 255, .5); background: rgba(122, 162, 255, .08); box-shadow: 0 0 40px rgba(122, 162, 255, .12); }
-:root[data-theme="dark"] .map-me { border-color: #12161e; box-shadow: 0 0 12px rgba(122, 162, 255, .6); }
+:root[data-theme="dark"] .map-me { border-color: #20242c; box-shadow: 0 0 12px rgba(122, 162, 255, .6); }
 :root[data-theme="dark"] .map-me::before { background: rgba(122, 162, 255, .25); }
 :root[data-theme="dark"] .marker-label { color: var(--c-ink); background: var(--c-raised); }
 :root[data-theme="dark"] .map-zoom,
@@ -138,10 +138,10 @@
 :root[data-theme="dark"] .map-locate { color: var(--c-ink); background: var(--c-raised); box-shadow: 0 2px 10px rgba(0, 0, 0, .4); }
 :root[data-theme="dark"] .map-locate { color: var(--c-accent); }
 :root[data-theme="dark"] .map-zoom button + button { box-shadow: inset 0 1px 0 var(--c-line); }
-:root[data-theme="dark"] .map-locate:active { background: #2c3341; }
-:root[data-theme="dark"] .map-screen .map-filters button:not(.selected) { color: var(--c-ink); border-color: var(--c-line); background: rgba(30, 35, 46, .94); box-shadow: 0 1px 4px rgba(0, 0, 0, .4); }
+:root[data-theme="dark"] .map-locate:active { background: #3d4452; }
+:root[data-theme="dark"] .map-screen .map-filters button:not(.selected) { color: var(--c-ink); border-color: var(--c-line); background: rgba(46, 52, 64, .94); box-shadow: 0 1px 4px rgba(0, 0, 0, .4); }
 :root[data-theme="dark"] .map-screen .map-top-overlay h1,
-:root[data-theme="dark"] .map-shell .status-bar { text-shadow: 0 0 2px #12161e, 0 0 6px #12161e, 0 0 12px rgba(18, 22, 30, .9); }
+:root[data-theme="dark"] .map-shell .status-bar { text-shadow: 0 0 2px #20242c, 0 0 6px #20242c, 0 0 12px rgba(32, 36, 44, .9); }
 :root[data-theme="dark"] .map-shell .status-bar { color: var(--c-ink); background: transparent; }
 :root[data-theme="dark"] .map-search-here { color: var(--c-accent); background: var(--c-raised); box-shadow: 0 2px 10px rgba(0, 0, 0, .4); }
 
