@@ -1,7 +1,7 @@
 import { useApp } from './context/AppContext'
 import { LoginScreen } from './features/auth/AuthScreens'
 import { LocationPermissionScreen, NicknameScreen, TermsScreen } from './features/auth/OnboardingScreens'
-import { MapScreen, OutsideRangeScreen } from './features/map/MapScreens'
+import { MapScreen } from './features/map/MapScreens'
 import { BoardListScreen, SearchScreen, BoardDetailScreen, CategoryScreen, CreateBoardScreen, EditBoardScreen } from './features/board/BoardScreens'
 import { NotificationScreen } from './features/notifications/NotificationScreen'
 import { ProfileScreen, ActivityScreen, ProfileEditScreen, AccountSettingsScreen } from './features/profile/ProfileScreens'
@@ -21,7 +21,8 @@ const screens: Record<Screen, React.ComponentType> = {
   alerts: NotificationScreen,
   'profile-edit': ProfileEditScreen,
   'account-settings': AccountSettingsScreen,
-  outside: OutsideRangeScreen,
+  // 150m 밖 게시판도 같은 상세 화면을 쓰고, 화면 안에서 읽기 전용으로 바뀐다
+  outside: BoardDetailScreen,
   terms: TermsScreen,
   nickname: NicknameScreen,
   'location-permission': LocationPermissionScreen,
