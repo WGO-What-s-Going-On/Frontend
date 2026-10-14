@@ -1161,4 +1161,3 @@ button.title-progress-card:active { background: #f7f8fa; }
 }
 .setting-toggle input[role="switch"]:checked { background: var(--c-accent); }
 .setting-toggle input[role="switch"]:checked::after { transform: translateX(18px); }
-.setting-help { margin: 12px 4px 0; color: var(--c-mute); font-size: 13px; line-height: 1.5; }

@@ -66,7 +66,6 @@ export function NotificationSettingsScreen() {
       <span><strong>{option.title}</strong><small>{option.description}</small></span>
       <input type="checkbox" role="switch" checked={notificationSettings[option.key]} onChange={(event) => updateNotificationSettings({ ...notificationSettings, [option.key]: event.target.checked })}/>
     </label>)}</div>
-    <p className="setting-help">게시판별 알림은 게시판 목록에서 종 아이콘으로 켜고 끌 수 있어요.</p>
   </AppShell>
 }
 
