@@ -1069,7 +1069,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .outside-screen .detail-nav { margin: 0 -8px 4px; }
 
 /* 참여 범위 밖 안내: 텍스트 한 줄 */
-.outside-notice { margin: 4px 0 0; color: var(--c-mute); font-size: 14px; font-weight: 600; }
+.outside-notice { margin: 20px 0 0; color: var(--c-urgent); font-size: 14px; font-weight: 600; }
 
 /* 게시글 본문: 상세 화면과 같은 정렬 */
 .outside-article { padding: 14px 0 20px; }
