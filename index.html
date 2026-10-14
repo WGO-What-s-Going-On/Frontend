@@ -7,6 +7,14 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <title>What's Going On?</title>
+    <script>
+      // 첫 화면이 그려지기 전에 화면 모드를 적용한다 (규칙은 AppContext의 resolveTheme과 같다)
+      try {
+        var mode = JSON.parse(localStorage.getItem('wgo-mockup-state-v1') || '{}').themeMode || 'system'
+        var dark = mode === 'dark' || (mode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      } catch (error) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

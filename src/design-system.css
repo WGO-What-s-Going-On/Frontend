@@ -1279,3 +1279,22 @@ button.title-progress-card:active { background: #f7f8fa; }
   border-color: var(--c-accent);
   background: #fff;
 }
+
+/* ---------- 마이 > 설정: 화면 모드 (메뉴 줄과 같은 높이, 오른쪽에 시스템·라이트·다크 선택) ---------- */
+.theme-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  height: 52px;
+  padding: 0 9px 0 16px;
+  color: var(--c-ink);
+  border-bottom: 1px solid var(--c-line);
+  font-size: 16px;
+}
+.theme-row > span { flex: none; }
+.theme-row .author-toggle { flex: none; }
+.theme-row .author-toggle button { padding: 6px 11px; white-space: nowrap; }
+/* 메뉴 줄 버튼 공통 스타일(검정 글자·흰 바탕·밑줄)이 토글 버튼에 덮이지 않게 */
+.menu-group .theme-row .author-toggle button { width: auto; border: 0; }
+.menu-group .theme-row .author-toggle button:not(.selected) { color: var(--c-mute); background: transparent; }

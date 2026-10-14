@@ -9,6 +9,8 @@ import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, R
 
 interface BoardInput { category: Category; title: string; body: string; imageName?: string; anonymous?: boolean }
 export type LocationPermission = 'unknown' | 'granted' | 'denied'
+// 화면 모드: 시스템(휴대폰 설정을 따름) · 라이트 · 다크
+export type ThemeMode = 'system' | 'light' | 'dark'
 // 알림 종류별 수신 설정 (NTF 도메인). 게시판별 알림은 alertBoardIds로 따로 관리한다.
 export interface NotificationSettings { nearby: boolean; replies: boolean; reactions: boolean; lifecycle: boolean }
 
@@ -26,6 +28,7 @@ interface PersistedMockState {
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
   locationPermission: LocationPermission
+  themeMode?: ThemeMode
   noticesVersion?: number
   mapSeed?: number
 }
@@ -39,6 +42,12 @@ const MAP_SEED = 1
 // 화면 겹쳐 전환(View Transition)을 쓸 수 있는지. 지원하지 않거나 동작 줄이기면 바로 바뀐다.
 export function canViewTransition() {
   return typeof document !== 'undefined' && 'startViewTransition' in document && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
+// 실제로 적용할 모드. 시스템이면 휴대폰의 다크 모드 설정을 따른다 (index.html의 첫 화면 스크립트와 같은 규칙)
+function resolveTheme(mode: ThemeMode) {
+  if (mode !== 'system') return mode
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
 function readPersistedState(): Partial<PersistedMockState> {
@@ -63,6 +72,8 @@ interface AppContextValue {
   alertBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
+  themeMode: ThemeMode
+  setThemeMode: (mode: ThemeMode) => void
   locationPermission: LocationPermission
   toast: string
   go: (screen: Screen) => void
@@ -122,12 +133,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [recentBoardIds, setRecentBoardIds] = useState<string[]>(persisted.recentBoardIds ?? [])
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({ nearby: true, replies: true, reactions: true, lifecycle: true, ...persisted.notificationSettings })
   const [locationPermission, setLocationPermissionState] = useState<LocationPermission>(persisted.locationPermission ?? 'unknown')
+  const [themeMode, setThemeMode] = useState<ThemeMode>(persisted.themeMode ?? 'system')
   const [toast, setToast] = useState('')
 
+  // 화면 모드를 <html data-theme>에 반영한다. 시스템 모드면 휴대폰 설정이 바뀔 때 바로 따라간다
   useEffect(() => {
-    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, mapSeed: MAP_SEED, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission }
+    const media = window.matchMedia('(prefers-color-scheme: dark)')
+    const apply = () => {
+      const theme = resolveTheme(themeMode)
+      document.documentElement.dataset.theme = theme
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#0e1118' : '#ffffff')
+    }
+    apply()
+    if (themeMode !== 'system') return
+    media.addEventListener('change', apply)
+    return () => media.removeEventListener('change', apply)
+  }, [themeMode])
+
+  useEffect(() => {
+    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, mapSeed: MAP_SEED, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, themeMode }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
-  }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission])
+  }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, themeMode])
 
   const showToast = (message: string) => {
     setToast(message)
@@ -240,10 +266,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, toast,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, toast])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
