@@ -244,8 +244,9 @@ select:focus-visible,
 /* ---------- 게시글 상세: 다른 화면과 같은 색. 회색 칠 없이 흰 바탕, 누른 반응과 댓글 수만 파랑 ---------- */
 .board-detail-screen .comments-heading span { color: var(--c-accent); background: transparent; }
 .board-detail-screen .comment-image-placeholder { color: var(--c-mute); border-color: var(--c-line); background: #fff; }
-.board-detail-screen .detail-inline-reactions { padding-left: 0; padding-right: 0; border-color: transparent; background: transparent; }
-.board-detail-screen .comments-heading span { min-width: 0; margin-left: 2px; padding: 0; }
+/* 반응 칸: 흰 바탕에 얇은 테두리로 본문과 구분 */
+.board-detail-screen .detail-inline-reactions { border: 1px solid #e8ebf0; border-radius: 12px; background: #fff; }
+.board-detail-screen .comments-heading span { min-width: 0; margin-left: 2px; padding: 0; font-size: 17px; }
 /* 댓글 입력칸: 칩과 같은 연회색, 입력 중에는 흰 바탕 + 파란 테두리 */
 .detail-comment-input .comment-composer-row { border-color: #f2f4f6; background: #f2f4f6; }
 
@@ -1263,9 +1264,6 @@ button.title-progress-card:active { background: #f7f8fa; }
   font-weight: 700;
 }
 
-/* 댓글 하트: 파랑 (안 누른 하트는 테두리만, 숫자는 회색) */
-.comment-like { color: var(--c-accent); }
-.comment-like.liked span { color: var(--c-accent); }
 
 /* 댓글 입력 중: 입력칸 테두리 파랑, 바탕 흰색 */
 .detail-comment-input .comment-composer-row { transition: border-color .15s ease, background-color .15s ease; }
