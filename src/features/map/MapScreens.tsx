@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
-import { RotateCw } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
+import { ArrowLeft, Eye, Heart, MapPin, RotateCw } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
-import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
+import { IconButton } from '../../components/ui/IconButton'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
@@ -10,7 +10,7 @@ import { categoryLabel } from '../../domain/labels'
 import type { Board } from '../../types/domain'
 import { IncidentBottomSheet } from './IncidentBottomSheet'
 import { MapView } from './MapView'
-import { ME, boardPosition, type Point } from './mapWorld'
+import { ME, RADIUS, boardPosition, type Point } from './mapWorld'
 
 type MapFilter = '전체' | '긴급/사고' | '도움요청' | 'HOT'
 
@@ -34,6 +34,14 @@ export function MapScreen() {
   const { boards, comments, openBoard, showToast } = useApp()
   const [filter, setFilter] = useState<MapFilter>('전체')
   const [selectedBoard, setSelectedBoard] = useState<Board>()
+  // 다른 화면에서 '지도에서 위치 보기'로 들어오면 그 게시판 핀을 고른 상태로 연다
+  useEffect(() => {
+    const focusId = sessionStorage.getItem('wgo-map-focus')
+    if (!focusId) return
+    sessionStorage.removeItem('wgo-map-focus')
+    const target = boards.find((board) => board.id === focusId)
+    if (target) setSelectedBoard(target)
+  }, [])
   const [searchCenter, setSearchCenter] = useState<Point>(ME)
   const [viewCenter, setViewCenter] = useState<Point>(ME)
   const hotIds = useMemo(() => new Set(boards.filter((board) => isHot(board, comments.filter((comment) => comment.boardId === board.id).length)).map((board) => board.id)), [boards, comments])
@@ -57,14 +65,47 @@ export function MapScreen() {
   </AppShell>
 }
 
+// 150m 밖에서 연 게시판 (MAP-F05): 읽기만 가능. 왜 참여할 수 없는지, 얼마나 가까이 가야 하는지 보여준다.
 export function OutsideRangeScreen() {
-  const { currentBoard, go, setInRange } = useApp()
-  if (!currentBoard) return null
-  return <AppShell>
-    <BackHeader title="읽기 전용 게시판" onBack={() => go('home')}/>
-    <div className="notice-box"><strong>현재 참여 범위 밖입니다.</strong><p>게시판은 확인할 수 있지만 글, 댓글, 사진, 반응 작성은 제한됩니다.</p></div>
-    <article className="topic"><span className="badge">{categoryLabel[currentBoard.category]}</span><h2>{currentBoard.title}</h2><p>{currentBoard.body}</p><PostReactions board={currentBoard}/></article>
-    <Button className="secondary-button" onClick={() => go('home')}>지도에서 다른 게시판 보기</Button>
-    <button className="text-link" onClick={() => { setInRange(true); go('detail') }}>프로토타입: 150m 안으로 이동</button>
+  const { currentBoard: board, comments, blockedUsers, locationPermission, back, go } = useApp()
+  const [showAll, setShowAll] = useState(false)
+  if (!board) return null
+  const boardComments = comments.filter((comment) => comment.boardId === board.id && !comment.parentId && !blockedUsers.includes(comment.authorId))
+  const replyCount = (id: string) => comments.filter((comment) => comment.parentId === id).length
+  const shown = showAll ? boardComments : boardComments.slice(0, 3)
+  const tooFar = board.distance > RADIUS
+  const headline = tooFar ? `${board.distance - RADIUS}m 더 가까이 가면 참여할 수 있어요` : locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '지금은 참여 범위 밖이에요'
+  // 거리 막대: 왼쪽 끝이 게시판, 파란 구간이 참여 가능한 150m, 점이 지금 내 위치
+  const meterMax = Math.max(board.distance, RADIUS) * 1.18
+  const showOnMap = () => { sessionStorage.setItem('wgo-map-focus', board.id); go('home') }
+  return <AppShell nav={false} contentClassName="outside-screen" bottomContent={<div className="outside-bottom"><Button className="primary" onClick={showOnMap}><MapPin size={18}/>지도에서 위치 보기</Button></div>}>
+    <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('home')}><ArrowLeft size={22}/></IconButton></header>
+
+    <section className="outside-range" aria-label="참여 범위 안내">
+      <div className="outside-range-head"><span className="outside-range-icon"><Eye size={18}/></span><div><strong>{headline}</strong><p>지금은 글을 읽을 수만 있어요. 댓글·반응·사진은 게시판 150m 안에서 남길 수 있어요.</p></div></div>
+      {tooFar && <div className="range-meter" role="img" aria-label={`게시판까지 ${board.distance}m, 참여 가능 거리 ${RADIUS}m`}>
+        <div className="range-meter-track"><span className="range-meter-zone" style={{ width: `${RADIUS / meterMax * 100}%` }}/><i className="range-meter-me" style={{ left: `${board.distance / meterMax * 100}%` }}/></div>
+        <div className="range-meter-labels"><span>게시판</span><span style={{ left: `${RADIUS / meterMax * 100}%` }}>150m</span><span className="me" style={{ left: `${board.distance / meterMax * 100}%` }}>나 {board.distance}m</span></div>
+      </div>}
+      {!tooFar && locationPermission !== 'granted' && <button className="outside-permission" onClick={() => go('location-permission')}>위치 권한 켜기</button>}
+    </section>
+
+    <article className="outside-article">
+      <span className="outside-category" data-category={board.category}>{categoryLabel[board.category]}</span>
+      <h1>{board.title}</h1>
+      <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span><span><MapPin size={12}/>{board.distance}m</span></div>
+      <p className="detail-body">{board.body}</p>
+      <div className="outside-reactions"><PostReactions board={board} fullLabels/></div>
+    </article>
+
+    <section className="outside-comments">
+      <h3>댓글 <span>{boardComments.length}</span></h3>
+      {shown.length ? <ul>{shown.map((comment) => <li key={comment.id}>
+        <div className="outside-comment-head"><strong>{comment.authorName}</strong><small>{comment.createdAt}</small></div>
+        <p>{comment.body}</p>
+        <div className="outside-comment-meta"><span><Heart size={13}/>{comment.likes ?? 0}</span>{replyCount(comment.id) > 0 && <span>답글 {replyCount(comment.id)}</span>}</div>
+      </li>)}</ul> : <p className="outside-empty">아직 댓글이 없어요.</p>}
+      {boardComments.length > 3 && <button className="comments-more" onClick={() => setShowAll(!showAll)}>{showAll ? '접기' : `댓글 ${boardComments.length - 3}개 더 보기`}</button>}
+    </section>
   </AppShell>
 }
