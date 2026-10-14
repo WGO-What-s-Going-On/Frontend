@@ -1,6 +1,6 @@
 export type Screen =
   | 'login' | 'home' | 'board' | 'search' | 'detail'
-  | 'category' | 'create' | 'edit' | 'my' | 'activity' | 'alerts'
+  | 'edit' | 'my' | 'activity' | 'alerts'
   | 'profile-edit' | 'account-settings' | 'outside'
   | 'terms' | 'nickname' | 'location-permission'
 

@@ -5,8 +5,8 @@ export function screenFromPath(pathname: string): Screen {
   if (pathname === '/map') return 'home'
   if (pathname === '/boards') return 'board'
   if (pathname === '/search') return 'search'
-  if (pathname === '/boards/new/category') return 'category'
-  if (pathname === '/boards/new') return 'create'
+  // 예전 작성 화면 주소는 게시판으로 보낸다 (작성은 빠른 작성 시트에서)
+  if (pathname === '/boards/new' || pathname.startsWith('/boards/new/')) return 'board'
   if (/^\/boards\/[^/]+\/edit$/.test(pathname)) return 'edit'
   if (/^\/boards\/[^/]+\/outside$/.test(pathname)) return 'outside'
   if (/^\/boards\/[^/]+$/.test(pathname)) return 'detail'
@@ -30,8 +30,6 @@ export function pathForScreen(screen: Screen, boardId?: string) {
     board: '/boards',
     search: '/search',
     detail: `/boards/${encodedBoardId}`,
-    category: '/boards/new/category',
-    create: '/boards/new',
     edit: `/boards/${encodedBoardId}/edit`,
     my: '/my',
     activity: '/my/activity',
