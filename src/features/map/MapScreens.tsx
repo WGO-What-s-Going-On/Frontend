@@ -74,7 +74,7 @@ export function OutsideRangeScreen() {
   const replyCount = (id: string) => comments.filter((comment) => comment.parentId === id).length
   const shown = showAll ? boardComments : boardComments.slice(0, 3)
   const tooFar = board.distance > RADIUS
-  const headline = tooFar ? `${board.distance - RADIUS}m 더 가까이 가면 참여할 수 있어요` : locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '지금은 참여 범위 밖이에요'
+  const headline = !tooFar && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '현재 참여 범위 밖 게시판이에요'
   // 거리 막대: 왼쪽 끝이 게시판, 파란 구간이 참여 가능한 150m, 점이 지금 내 위치
   const meterMax = Math.max(board.distance, RADIUS) * 1.18
   const showOnMap = () => { sessionStorage.setItem('wgo-map-focus', board.id); go('home') }
