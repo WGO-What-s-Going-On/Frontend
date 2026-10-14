@@ -3,6 +3,7 @@ import type { Board, Comment, Notice, User } from '../types/domain'
 export const initialUser: User = {
   id: 'me',
   nickname: '이현정',
+  realName: '이현정',
   age: 24,
   bio: '현장 인증 활동 회원 · 안전 가이드 준수',
 }

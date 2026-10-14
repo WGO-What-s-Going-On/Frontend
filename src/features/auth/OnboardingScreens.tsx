@@ -4,6 +4,7 @@ import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
 import { useApp } from '../../context/AppContext'
+import { nicknameError } from '../../domain/nickname'
 
 // 필수 약관 (USR-F02)
 const terms = [
@@ -30,14 +31,13 @@ export function TermsScreen() {
 }
 
 // 닉네임 설정 (USR-F05): 중복·금칙어 확인. 실제 확인은 백엔드가 하고, 목업에서는 이미 쓰이는 이름과 예시 금칙어로 확인한다.
-const bannedWords = ['관리자', '운영자', '공식']
 
 export function NicknameScreen() {
   const { boards, comments, user, completeNickname, go } = useApp()
   const [nickname, setNickname] = useState('')
   const trimmed = nickname.trim()
   const taken = new Set([...boards, ...comments].filter((item) => item.authorId !== user.id).map((item) => item.authorName))
-  const error = !trimmed ? '' : trimmed.length < 2 ? '2자 이상 입력해 주세요.' : !/^[가-힣a-zA-Z0-9]+$/.test(trimmed) ? '한글, 영문, 숫자만 쓸 수 있어요.' : bannedWords.some((word) => trimmed.includes(word)) ? '사용할 수 없는 단어가 들어 있어요.' : taken.has(trimmed) ? '이미 사용 중인 닉네임이에요.' : ''
+  const error = nicknameError(trimmed, taken)
   return <AppShell nav={false} contentClassName="onboarding-screen">
     <BackHeader title="" onBack={() => go('terms')}/>
     <h1 className="onboarding-title">어떤 이름으로<br/>활동할까요?</h1>

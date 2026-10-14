@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AppShell } from '../../components/layout/AppShell'
+import { Avatar } from '../../components/ui/Avatar'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
 import { Button } from '../../components/ui/Button'
@@ -7,6 +8,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { useApp, type NotificationSettings } from '../../context/AppContext'
+import { nicknameError, nicknameFormatError } from '../../domain/nickname'
 import { myReactions } from '../../types/domain'
 import { TitleProgressCard } from './TitleProgressCard'
 
@@ -49,12 +51,37 @@ export function ActivityScreen() {
   </AppShell>
 }
 
+// 프로필 수정: 실명(비공개)과 닉네임. 닉네임을 바꾸면 중복 확인을 거쳐야 저장할 수 있다.
 export function ProfileEditScreen() {
-  const { user, updateUser, go } = useApp()
+  const { user, boards, comments, updateUser, go } = useApp()
+  const [realName, setRealName] = useState(user.realName ?? '')
   const [nickname, setNickname] = useState(user.nickname)
-  const [bio, setBio] = useState(user.bio)
-  return <AppShell contentClassName="profile-edit-screen"><BackHeader title="프로필 수정" onBack={() => go('my')}/><label>닉네임</label><input className="field" value={nickname} onChange={(event) => setNickname(event.target.value)} maxLength={12}/><label>한 줄 소개</label><textarea className="field" value={bio} onChange={(event) => setBio(event.target.value)} maxLength={80}/><Button className="primary" disabled={!nickname.trim()} onClick={() => updateUser({ nickname: nickname.trim(), bio: bio.trim() })}>저장</Button></AppShell>
+  const [checked, setChecked] = useState<{ name: string; error: string } | null>(null)
+  const trimmed = nickname.trim()
+  const changed = trimmed !== user.nickname
+  const formatError = nicknameFormatError(trimmed)
+  const result = checked?.name === trimmed ? checked : null
+  const taken = new Set([...boards, ...comments].filter((item) => item.authorId !== user.id).map((item) => item.authorName))
+  const checkNickname = () => setChecked({ name: trimmed, error: nicknameError(trimmed, taken) })
+  const message = !changed ? '' : formatError || (result ? result.error || '사용할 수 있는 닉네임이에요.' : '중복 확인을 해 주세요.')
+  const messageTone = !changed ? '' : formatError || result?.error ? 'error' : result ? 'ok' : 'hint'
+  const canSave = Boolean(realName.trim() && trimmed) && (!changed || (result !== null && !result.error))
+  return <AppShell contentClassName="profile-edit-screen"><BackHeader title="프로필 수정" onBack={() => go('my')}/>
+    <div className="profile-edit-avatar"><Avatar name={trimmed || user.nickname} size={80}/></div>
+    <div className="form-field">
+      <span className="form-label">실명</span>
+      <input className="form-input" value={realName} onChange={(event) => setRealName(event.target.value)} placeholder="실명을 입력해 주세요" maxLength={20} autoComplete="name"/>
+      <p className="field-message">다른 사용자에게는 공개되지 않아요.</p>
+    </div>
+    <div className="form-field">
+      <span className="form-label">닉네임</span>
+      <div className="input-with-action"><input className="form-input" value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="닉네임 (2~12자)" maxLength={12} autoComplete="nickname"/><button className="check-button" onClick={checkNickname} disabled={!changed || Boolean(formatError) || !trimmed}>중복 확인</button></div>
+      <p className={`field-message ${messageTone}`} aria-live="polite">{message || '게시글과 댓글에 표시되는 이름이에요.'}</p>
+    </div>
+    <Button className="primary profile-save" disabled={!canSave} onClick={() => updateUser({ nickname: trimmed, realName: realName.trim() })}>저장</Button>
+  </AppShell>
 }
+
 
 // 알림 설정: 알림 종류별로 받을지 정한다. 게시판 하나하나의 알림은 게시판 목록의 종 아이콘으로 켜고 끈다.
 const notificationOptions: { key: keyof NotificationSettings; title: string; description: string }[] = [

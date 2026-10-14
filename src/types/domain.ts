@@ -14,6 +14,8 @@ export interface User {
   nickname: string
   age: number
   bio: string
+  // 실명 (다른 사용자에게 공개하지 않는다)
+  realName?: string
   // 약관 동의와 닉네임 설정을 마쳤는지
   onboarded?: boolean
 }

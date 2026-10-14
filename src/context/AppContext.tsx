@@ -84,7 +84,7 @@ interface AppContextValue {
   markCommentRead: (id: string) => void
   reactToComment: (id: string, reaction: CommentReaction) => void
   toggleCommentLike: (id: string) => void
-  updateUser: (input: Pick<User, 'nickname' | 'bio'>) => void
+  updateUser: (input: Pick<User, 'nickname' | 'realName'>) => void
   markNoticeRead: (id: string) => void
   markAllNoticesRead: () => void
   deleteNotice: (id: string) => void
@@ -205,7 +205,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (previous !== reaction) reactions[reaction] += 1
     return { ...comment, reactions, reactedByMe: previous === reaction ? undefined : reaction }
   }))
-  const updateUser = (input: Pick<User, 'nickname' | 'bio'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
+  const updateUser = (input: Pick<User, 'nickname' | 'realName'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
   const markNoticeRead = (id: string) => setNotices((items) => items.map((notice) => notice.id === id ? { ...notice, read: true } : notice))
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
   const deleteNotice = (id: string) => setNotices((items) => items.filter((notice) => notice.id !== id))
