@@ -1187,3 +1187,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 .map-shell .status-bar { text-shadow: 0 0 2px #fff, 0 0 6px #fff, 0 0 12px rgba(255, 255, 255, .9); }
 .map-screen .map-filters button { box-shadow: 0 1px 4px rgba(17, 19, 24, .12); }
 .map-search-here { top: 164px; }
+/* 지도 핀: 흰 테두리 없이 카테고리 색 원만 */
+.marker-dot { border: 0; }
+.map-marker.hot .marker-dot::after { inset: 0; }
