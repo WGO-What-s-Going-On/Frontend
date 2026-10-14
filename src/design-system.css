@@ -1118,8 +1118,6 @@ button.title-progress-card {
 }
 button.title-progress-card:active { background: #f7f8fa; }
 .title-progress-arrow { flex: none; color: var(--c-mute); }
-/* 설정: 알림 설정 묶음과 로그아웃·탈퇴 묶음 사이 간격 */
-.menu-group + .menu-group.account-actions { margin-top: 10px; }
 
 /* ---------- 알림 설정: 항목마다 스위치 ---------- */
 .setting-list { display: grid; }
