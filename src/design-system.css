@@ -1149,6 +1149,12 @@ html { -webkit-tap-highlight-color: transparent; }
 /* 화면 겹쳐 전환 (View Transition): 이전 화면이 옅어지는 동안 새 화면이 겹쳐 나타난다 */
 ::view-transition-old(root),
 ::view-transition-new(root) { animation-duration: .26s; animation-timing-function: cubic-bezier(.2, .8, .2, 1); }
+/* 뒤로 가기: 더 짧게, 이전 화면이 왼쪽에서 살짝 밀려 들어오는 느낌 */
+html[data-nav="back"]::view-transition-old(root) { animation: vt-back-out .2s cubic-bezier(.2, .8, .2, 1) both; }
+html[data-nav="back"]::view-transition-new(root) { animation: vt-back-in .2s cubic-bezier(.2, .8, .2, 1) both; }
+html[data-nav="back"]::view-transition-group(root) { animation-duration: .2s; }
+@keyframes vt-back-out { to { opacity: 0; transform: translateX(10px); } }
+@keyframes vt-back-in { from { opacity: 0; transform: translateX(-10px); } }
 
 /* ---------- 마이: 칭호 카드를 누르면 프로필 수정 ---------- */
 button.title-progress-card {

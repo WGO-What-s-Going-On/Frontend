@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
@@ -67,6 +67,7 @@ interface AppContextValue {
   toast: string
   go: (screen: Screen) => void
   back: (fallback?: Screen) => void
+  withBackTransition: (run: () => void) => void
   openBoard: (id: string) => void
   startLogin: () => void
   agreeTerms: () => void
@@ -133,7 +134,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     window.setTimeout(() => setToast(''), 1800)
   }
   const go = (next: Screen) => navigate(pathForScreen(next, currentBoardId))
-  const back = (fallback: Screen = 'board') => location.key === 'default' ? go(fallback) : navigate(-1)
+  // 뒤로 가기 전환: 화면이 실제로 바뀐 뒤(아래 useLayoutEffect)에 겹쳐 전환을 마친다.
+  // 뒤로 가기(navigate(-1))는 바로 반영되지 않아서, 주소가 바뀌는 순간을 기다렸다가 새 화면을 찍는다.
+  const navigationDone = useRef<(() => void) | null>(null)
+  useLayoutEffect(() => {
+    navigationDone.current?.()
+    navigationDone.current = null
+  }, [location.key])
+  const withBackTransition = (run: () => void) => {
+    if (!canViewTransition()) { run(); return }
+    const root = document.documentElement
+    root.dataset.nav = 'back'
+    const transition = document.startViewTransition(() => new Promise<void>((resolve) => {
+      navigationDone.current = resolve
+      // 주소가 그대로면 기다리지 않는다
+      window.setTimeout(resolve, 400)
+      run()
+    }))
+    transition.finished.finally(() => { delete root.dataset.nav })
+  }
+  const back = (fallback: Screen = 'board') => withBackTransition(() => location.key === 'default' ? go(fallback) : navigate(-1))
   // 게시글 열기: 목록·지도·알림·검색·최근 활동 어디서 열어도 같은 전환으로 넘어간다
   const openBoard = (id: string) => {
     const target = boards.find((board) => board.id === id)
@@ -221,7 +241,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, toast,
-    go, back, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
+    go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
