@@ -85,6 +85,7 @@ export function SearchScreen() {
   const { boards, comments, openBoard } = useApp()
   const [query, setQuery] = useState('')
   const [recent, setRecent] = useState(readRecentSearches)
+  const [farOpen, setFarOpen] = useState(false)
   const keyword = query.trim()
   const matched = boards
     .filter((board) => board.status !== '숨김' && (!keyword || `${board.title} ${board.body} ${categoryLabel[board.category]}`.toLowerCase().includes(keyword.toLowerCase())))
@@ -98,6 +99,8 @@ export function SearchScreen() {
     setRecent(next); saveRecentSearches(next)
   }
   const removeRecent = (word: string) => { const next = recent.filter((item) => item !== word); setRecent(next); saveRecentSearches(next) }
+  // 범위 안 결과가 없으면 범위 밖 글을 바로 펼쳐 보여준다
+  const farVisible = farOpen || nearby.length === 0
   const row = (board: Board) => <SearchRow key={board.id} board={board} keyword={keyword} commentCount={commentCount(board.id)} onOpen={() => { remember(keyword); openBoard(board.id) }}/>
   return <AppShell contentClassName="search-screen">
     <form className="search-field" role="search" onSubmit={(event) => { event.preventDefault(); remember(keyword) }}>
@@ -110,11 +113,15 @@ export function SearchScreen() {
       <div className="search-recent">{recent.map((word) => <span key={word} className="search-recent-chip"><button onClick={() => setQuery(word)}>{word}</button><button className="search-recent-remove" onClick={() => removeRecent(word)} aria-label={`${word} 삭제`}><X size={12}/></button></span>)}</div>
     </section>}
     {matched.length === 0 ? <EmptyState title={keyword ? `'${keyword}'에 대한 게시판이 없어요` : '주변에 게시판이 없어요'}/>
-      // 가까운 순서로 한 줄로 이어 보여주고, 150m가 끝나는 자리에만 구분선을 둔다
+      // 참여할 수 있는 글(150m 안)을 먼저 보여주고, 범위 밖 글은 맨 아래 토글을 열어야 보인다
       : <div className="search-rows">
         {nearby.map(row)}
-        {far.length > 0 && <div className="search-divider" role="separator"><span><Lock size={12} aria-hidden="true"/>여기부터 150m 밖 · 열람만</span></div>}
-        <div className="search-far">{far.map(row)}</div>
+        {far.length > 0 && <>
+          <button className={`search-far-toggle ${farVisible ? 'open' : ''}`} onClick={() => setFarOpen(!farVisible)} aria-expanded={farVisible}>
+            <Lock size={14} aria-hidden="true"/><span>범위 밖 게시판 <b>{far.length}</b></span><small>열람만</small><ChevronDown size={18} aria-hidden="true"/>
+          </button>
+          <div className={`search-far ${farVisible ? 'open' : ''}`} aria-hidden={!farVisible}><div>{far.map(row)}</div></div>
+        </>}
       </div>}
   </AppShell>
 }

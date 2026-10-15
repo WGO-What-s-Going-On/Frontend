@@ -1390,16 +1390,32 @@ button.title-progress-card:active { background: #f7f8fa; }
 .search-row-tags { display: flex; align-items: center; gap: 6px; }
 .search-row-category { color: var(--cat); font-size: 12px; font-weight: 700; }
 .search-row strong { overflow: hidden; color: var(--c-ink); font-size: 16px; font-weight: 600; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
-.search-far .search-row strong { color: var(--c-body); } /* 150m 밖 글은 한 톤 옅게 */
-/* 150m가 끝나는 자리: 양옆 얇은 선 사이에 작은 안내 (채팅 날짜 구분선처럼) */
-.search-divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 4px; color: var(--c-mute); font-size: 12px; }
-.search-divider::before,
-.search-divider::after { content: ''; flex: 1; height: 1px; background: var(--c-line); }
-.search-divider span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .search-row mark { color: var(--c-accent); background: none; font-weight: 700; }
 .search-screen .empty-state { margin-top: 48px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
 .search-screen .empty-state strong { color: var(--c-mute); font-size: 14px; font-weight: 500; }
 
-.search-rows > .search-row:has(+ .search-divider),
-.search-rows > .search-row:last-child,
+/* 범위 밖 토글: 목록 맨 아래 한 줄. 누르면 화살표가 돌고 아래로 부드럽게 펼쳐진다 */
+.search-far-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 16px 0;
+  color: var(--c-body);
+  border: 0;
+  background: none;
+  font-size: 14px;
+  text-align: left;
+}
+.search-far-toggle svg:first-child { color: var(--c-mute); }
+.search-far-toggle b { color: var(--c-ink); font-weight: 700; }
+.search-far-toggle small { color: var(--c-mute); font-size: 12px; }
+.search-far-toggle svg:last-child { margin-left: auto; color: var(--c-mute); transition: transform .2s ease; }
+.search-far-toggle.open svg:last-child { transform: rotate(180deg); }
+.search-far { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .24s cubic-bezier(.2, .8, .2, 1), opacity .2s ease; }
+.search-far.open { grid-template-rows: 1fr; opacity: 1; }
+.search-far > div { display: grid; min-height: 0; overflow: hidden; }
+.search-far .search-row strong { color: var(--c-body); } /* 범위 밖 글은 한 톤 옅게 */
+.search-far .search-row:first-child { border-top: 1px solid var(--c-line); }
 .search-far .search-row:last-child { border-bottom: 0; }
+@media (prefers-reduced-motion: reduce) { .search-far, .search-far-toggle svg:last-child { transition: none; } }
