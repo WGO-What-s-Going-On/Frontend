@@ -82,7 +82,7 @@ interface AppContextValue {
   updateComment: (id: string, body: string) => void
   setInRange: (value: boolean) => void
   createBoard: (input: BoardInput) => void
-  updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous'>) => void
+  updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous' | 'imageName'>) => void
   deleteBoard: (id: string) => void
   finishBoard: (id: string) => void
   reactToBoard: (id: string, reaction: PostReaction) => void
@@ -211,11 +211,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     else open()
     showToast('게시판이 생성되었습니다.')
   }
-  const updateBoard = (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous'>) => {
+  const updateBoard = (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous' | 'imageName'>) => {
     setBoards((items) => items.map((board) => {
       if (board.id !== id) return board
       const anonymous = input.anonymous ?? Boolean(board.anonymous)
-      const changed = board.title !== input.title || board.body !== input.body || board.category !== input.category || Boolean(board.anonymous) !== anonymous
+      const changed = board.title !== input.title || board.body !== input.body || board.category !== input.category || Boolean(board.anonymous) !== anonymous || board.imageName !== input.imageName
       // 작성자 표시(닉네임/익명)를 바꾸면 보이는 이름도 함께 바꾼다
       return changed ? { ...board, ...input, anonymous, authorName: anonymous ? '익명' : user.nickname, edited: true } : board
     }))

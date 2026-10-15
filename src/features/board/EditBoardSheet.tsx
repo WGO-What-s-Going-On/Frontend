@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Camera, X } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
 import { useApp } from '../../context/AppContext'
@@ -9,7 +9,7 @@ import { AuthorToggle } from './AuthorToggle'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
-// 게시글 수정: 글쓰기 시트와 같은 모양으로 상세 화면 위에 바로 열린다. 카테고리 · 제목 · 내용 · 작성자 표시를 한 화면에서 고친다.
+// 게시글 수정: 글쓰기 시트와 같은 모양으로 상세 화면 위에 바로 열린다. 카테고리 · 제목 · 내용 · 사진 · 작성자 표시를 한 화면에서 고친다.
 export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canEdit: boolean; onClose: () => void }) {
   const { updateBoard } = useApp()
   const [category, setCategory] = useState<Category>(board.category)
@@ -17,10 +17,12 @@ export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canE
   const [body, setBody] = useState(board.body)
   const wasAnonymous = Boolean(board.anonymous) || board.authorName === '익명'
   const [anonymous, setAnonymous] = useState(wasAnonymous)
-  const changed = title.trim() !== board.title || body.trim() !== board.body || category !== board.category || anonymous !== wasAnonymous
+  const [imageName, setImageName] = useState(board.imageName)
+  const fileRef = useRef<HTMLInputElement>(null)
+  const changed = title.trim() !== board.title || body.trim() !== board.body || category !== board.category || anonymous !== wasAnonymous || imageName !== board.imageName
   const save = () => {
     if (!title.trim() || !body.trim()) return
-    updateBoard(board.id, { title: title.trim(), body: body.trim(), category, anonymous })
+    updateBoard(board.id, { title: title.trim(), body: body.trim(), category, anonymous, imageName })
     onClose()
   }
   return <div className="quick-compose-layer" role="dialog" aria-modal="true" aria-label="게시글 수정">
@@ -32,6 +34,11 @@ export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canE
         <div className="quick-category-grid">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} data-category={item} onClick={() => setCategory(item)}>{categoryLabel[item]}</button>)}</div>
         <label className="quick-field"><span>제목</span><input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={50}/></label>
         <label className="quick-field quick-detail-field"><span>내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={500}/></label>
+        <div className="edit-photo-row">
+          <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>
+          {imageName && <IconButton className="edit-photo-remove" label="첨부 사진 빼기" onClick={() => { setImageName(undefined); if (fileRef.current) fileRef.current.value = '' }}><X size={16}/></IconButton>}
+        </div>
+        <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name ?? imageName)}/>
         <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>
         <Button className="quick-submit" onClick={save} disabled={!changed || !title.trim() || !body.trim()}>수정 완료</Button>
       </>}
