@@ -218,7 +218,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       return changed ? { ...board, ...input, edited: true } : board
     }))
     showToast('게시글을 수정했습니다.')
-    go('detail')
   }
   const deleteBoard = (id: string) => { setBoards((items) => items.filter((board) => board.id !== id)); showToast('게시글을 삭제했습니다.'); go('board') }
   const finishBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '종료됨' } : board)); showToast('게시판을 종료했습니다.') }

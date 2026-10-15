@@ -89,7 +89,7 @@
 :root[data-theme="dark"] :is(.quick-compose-grabber, .sheet-handle span) { background: #5a606c; }
 :root[data-theme="dark"] .quick-compose-close { color: var(--c-ink); border-color: var(--c-line); background: var(--c-canvas); }
 :root[data-theme="dark"] .quick-category-grid button:not(.selected) { color: var(--c-ink); border-color: var(--c-line); background: var(--c-canvas); }
-:root[data-theme="dark"] .quick-field textarea { color: var(--c-ink); border-color: var(--c-line); background: var(--c-canvas); }
+:root[data-theme="dark"] :is(.quick-field textarea, .quick-field input) { color: var(--c-ink); border-color: var(--c-line); background: var(--c-canvas); }
 :root[data-theme="dark"] .quick-photo-button { border-color: #5a606c; background: transparent; }
 :root[data-theme="dark"] .ux-sort-menu button[aria-checked="true"] { color: var(--c-accent); }
 
