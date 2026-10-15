@@ -1505,25 +1505,22 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 댓글 아래: 하트 없이 답글 달기만, 본문 글자와 같은 왼쪽 줄에 */
 .board-detail-screen .comment-actions .comment-reply-button { margin-left: 0; padding-left: 0; font-size: 12px; }
 
-/* 답글 달기: 입력칸 맨 앞에 @닉네임을 연한 파랑 배경으로 (위쪽 '~님에게 댓글 작성 중' 안내 대신). 빈 칸에서 지우기를 누르면 답글 취소 */
-.composer-input-wrap { display: flex; align-items: center; gap: 6px; min-width: 0; }
+/* 답글 달기: 입력칸 위 한 줄 '@닉네임 님에게 답글 · 취소' (배경 없이), 입력칸은 비워 둬서 바로 쓴다 */
+.composer-input-wrap { display: flex; align-items: center; min-width: 0; }
 .composer-input-wrap input { flex: 1; min-width: 0; }
-.reply-mention {
-  flex: none;
-  max-width: 52%;
-  display: inline-flex;
+.detail-comment-input .replying.reply-to {
+  display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 3px 3px 3px 7px;
-  color: var(--c-accent);
-  border-radius: 7px;
-  background: var(--c-accent-soft);
-  font-size: 14px;
-  font-weight: 700;
+  justify-content: space-between;
+  margin: 0 0 8px;
+  padding: 2px 6px 0;
+  color: var(--c-mute);
+  border: 0;
+  background: none;
+  font-size: 13px;
 }
-.reply-mention > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.reply-mention button { width: 18px; height: 18px; display: grid; flex: none; place-items: center; padding: 0; color: inherit; border: 0; border-radius: 50%; background: none; opacity: .7; }
-.reply-mention button:active { opacity: 1; }
+.detail-comment-input .replying.reply-to b { color: var(--c-accent); font-weight: 700; }
+.detail-comment-input .replying.reply-to button { padding: 0; color: var(--c-mute) !important; border: 0; background: none; font-size: 13px; font-weight: 500; }
 
 
 /* 답글 대상 댓글: 닉네임을 입력칸의 @닉네임과 같은 연한 파랑으로 표시해서 누구에게 답하는지 바로 보이게 */
