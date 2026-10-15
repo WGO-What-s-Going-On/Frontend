@@ -1505,3 +1505,20 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 댓글 아래: 하트 없이 답글 달기만, 본문 글자와 같은 왼쪽 줄에 */
 .board-detail-screen .comment-actions .comment-reply-button { margin-left: 0; padding-left: 0; font-size: 12px; }
 
+/* 답글 달기: 입력칸 맨 앞에 @닉네임을 연한 파랑 배경으로 (위쪽 '~님에게 댓글 작성 중' 안내 대신). 빈 칸에서 지우기를 누르면 답글 취소 */
+.composer-input-wrap { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.composer-input-wrap input { flex: 1; min-width: 0; }
+.reply-mention {
+  flex: none;
+  max-width: 48%;
+  overflow: hidden;
+  padding: 3px 7px;
+  color: var(--c-accent);
+  border-radius: 7px;
+  background: var(--c-accent-soft);
+  font-size: 14px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
