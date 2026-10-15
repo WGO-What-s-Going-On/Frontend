@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocation, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Camera, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
@@ -16,6 +16,7 @@ import { isHotBoard } from '../../types/domain'
 import type { Board, Category, Comment } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { RADIUS } from '../map/mapWorld'
+import { pathForScreen } from '../../navigation'
 import { EditBoardSheet } from './EditBoardSheet'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
@@ -169,7 +170,7 @@ function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, 
 export function BoardDetailScreen() {
   // 다른 화면에서 게시글을 열고 들어왔을 때만 들어오는 애니메이션을 쓴다
   const entering = Boolean((useLocation().state as { enter?: boolean } | null)?.enter)
-  const { currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
+  const { screen, currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
   const [body, setBody] = useState('')
   const [commentImageUrl, setCommentImageUrl] = useState('')
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
@@ -177,7 +178,10 @@ export function BoardDetailScreen() {
   const [menu, setMenu] = useState(false)
   const [visibleComments, setVisibleComments] = useState(3)
   const [confirm, setConfirm] = useState<'delete' | 'finish' | null>(null)
-  const [editOpen, setEditOpen] = useState(false)
+  // 예전 수정 주소(/boards/:id/edit)로 들어와도 상세 화면 위에 수정 시트를 연다
+  const [editOpen, setEditOpen] = useState(screen === 'edit')
+  const navigate = useNavigate()
+  const closeEdit = () => { setEditOpen(false); if (screen === 'edit' && board) navigate(pathForScreen('detail', board.id), { replace: true }) }
   const commentFileRef = useRef<HTMLInputElement>(null)
   const commentInputRef = useRef<HTMLInputElement>(null)
   if (!board) return null
@@ -202,7 +206,7 @@ export function BoardDetailScreen() {
   const readOnlyBar = outOfRange ? <div className="outside-bottom"><div className="outside-readonly-bar"><Lock size={16}/><span>150m 안에서만 댓글 가능</span></div></div> : null
   const commentComposer = canParticipate ? <div className="detail-comment-input">{(replyTo || editing) && <div className="replying"><span>{editing ? '댓글 수정 중' : `${replyTo?.authorName}님에게 댓글 작성 중`}</span><button onClick={cancelCompose}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => setCommentImageUrl('')} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><IconButton className="comment-photo-add" label="댓글에 사진 첨부" onClick={() => commentFileRef.current?.click()}><Camera size={20}/></IconButton><input ref={commentInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder="댓글을 입력하세요"/><IconButton className="comment-submit" label={editing ? '댓글 수정' : '댓글 등록'} onClick={submit} disabled={!body.trim() && !commentImageUrl}><Send size={19}/></IconButton></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => addPhoto(event.target.files?.[0])}/></div> : null
   return <AppShell nav={false} contentClassName={`board-detail-screen ${entering ? 'detail-enter' : ''}`} shellClassName={entering ? 'detail-enter-shell' : ''} bottomContent={<>{commentComposer ?? readOnlyBar}
-    {editOpen && <EditBoardSheet board={board} canEdit={!outOfRange} onClose={() => setEditOpen(false)}/>}
+    {editOpen && <EditBoardSheet board={board} canEdit={!outOfRange} onClose={closeEdit}/>}
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="삭제한 게시글은 다시 볼 수 없어요." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
     {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description="종료하면 더 이상 새 댓글과 반응을 받을 수 없어요." confirmLabel="종료" onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>}
   </>}>
@@ -220,18 +224,4 @@ export function BoardDetailScreen() {
 }
 
 // 게시글 수정 (작성은 하단 작성 버튼의 빠른 작성 시트에서 한다)
-export function EditBoardScreen() {
-  const { currentBoard, updateBoard, go, inRange } = useApp()
-  const [category, setCategory] = useState<Category>(currentBoard?.category ?? '긴급 사고')
-  const [title, setTitle] = useState(currentBoard?.title || '')
-  const [body, setBody] = useState(currentBoard?.body || '')
-  const [imageName, setImageName] = useState(currentBoard?.imageName)
-  if (!inRange) return <AppShell><BackHeader title="게시글 수정" onBack={() => go('detail')}/><EmptyState title="150m 밖에서는 게시글을 수정할 수 없습니다." action="지도로 돌아가기" onAction={() => go('home')}/></AppShell>
-  const submit = () => {
-    if (!title.trim() || !body.trim() || !currentBoard) return
-    updateBoard(currentBoard.id, { title: title.trim(), body: body.trim(), category })
-    go('detail')
-  }
-  return <AppShell><BackHeader title="게시글 수정" onBack={() => go('detail')}/><div className="live-card"><small>현재 위치 150m 안</small><strong>참여 가능 38명</strong><p>정확한 상세 위치는 다른 사용자에게 공개되지 않습니다.</p></div><label>카테고리</label><select className="field" value={category} onChange={(event) => setCategory(event.target.value as Category)}>{categories.map((item) => <option key={item} value={item}>{categoryLabel[item]}</option>)}</select><label>제목</label><input className="field" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="무슨 일이 궁금한가요?" maxLength={50}/><small className="counter">{title.length}/50</small><label>상황 설명</label><textarea className="field" value={body} onChange={(event) => setBody(event.target.value)} placeholder="확인한 사실과 궁금한 점을 적어주세요." maxLength={500}/><label className="file-field">현장 사진 첨부<input type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name)}/></label>{imageName && <div className="attachment">{imageName}<button onClick={() => setImageName(undefined)}>삭제</button></div>}<Button className="primary" onClick={submit} disabled={!title.trim() || !body.trim()}>수정 저장</Button></AppShell>
-}
 

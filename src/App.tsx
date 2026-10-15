@@ -2,7 +2,7 @@ import { useApp } from './context/AppContext'
 import { LoginScreen } from './features/auth/AuthScreens'
 import { LocationPermissionScreen, NicknameScreen, TermsScreen } from './features/auth/OnboardingScreens'
 import { MapScreen } from './features/map/MapScreens'
-import { BoardListScreen, SearchScreen, BoardDetailScreen, EditBoardScreen } from './features/board/BoardScreens'
+import { BoardListScreen, SearchScreen, BoardDetailScreen } from './features/board/BoardScreens'
 import { NotificationScreen } from './features/notifications/NotificationScreen'
 import { ProfileScreen, ActivityScreen, ProfileEditScreen, NotificationSettingsScreen } from './features/profile/ProfileScreens'
 import type { Screen } from './types/domain'
@@ -13,7 +13,7 @@ const screens: Record<Screen, React.ComponentType> = {
   board: BoardListScreen,
   search: SearchScreen,
   detail: BoardDetailScreen,
-  edit: EditBoardScreen,
+  edit: BoardDetailScreen,
   my: ProfileScreen,
   activity: ActivityScreen,
   alerts: NotificationScreen,
