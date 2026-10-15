@@ -71,7 +71,6 @@
 }
 :root[data-theme="dark"] .badge-list li.earned { border-color: var(--c-accent-line); background: var(--c-accent-soft); }
 :root[data-theme="dark"] button.title-progress-card:active { background: var(--c-raised); }
-:root[data-theme="dark"] .theme-row { border-color: var(--c-line); }
 :root[data-theme="dark"] .author-toggle { background: var(--c-page); }
 :root[data-theme="dark"] .author-toggle button.selected { color: var(--c-ink); background: #4c525e; box-shadow: none; }
 

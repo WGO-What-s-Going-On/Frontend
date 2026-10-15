@@ -68,6 +68,7 @@ interface AppContextValue {
   notificationSettings: NotificationSettings
   themeMode: ThemeMode
   setThemeMode: (mode: ThemeMode) => void
+  toggleTheme: () => void
   locationPermission: LocationPermission
   toast: string
   go: (screen: Screen) => void
@@ -130,8 +131,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [themeMode, setThemeMode] = useState<ThemeMode>(persisted.themeMode === 'dark' ? 'dark' : 'light')
   const [toast, setToast] = useState('')
 
-  // 화면 모드를 <html data-theme>에 반영한다 (첫 그림 전 적용은 index.html 스크립트가 한다)
-  useEffect(() => {
+  // 화면 모드를 <html data-theme>에 반영한다 (첫 그림 전 적용은 index.html 스크립트가 한다).
+  // 그리기 전에 반영해야 아래 toggleTheme의 겹쳐 전환이 바뀐 색을 찍는다
+  useLayoutEffect(() => {
     document.documentElement.dataset.theme = themeMode
     document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeMode === 'dark' ? '#2a2d34' : '#ffffff')
   }, [themeMode])
@@ -164,6 +166,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       run()
     }))
     transition.finished.finally(() => { delete root.dataset.nav })
+  }
+  // 라이트 ↔ 다크: 색이 툭 바뀌지 않게 짧게 겹쳐 전환한다
+  const toggleTheme = () => {
+    const next: ThemeMode = themeMode === 'dark' ? 'light' : 'dark'
+    if (canViewTransition()) document.startViewTransition(() => flushSync(() => setThemeMode(next)))
+    else setThemeMode(next)
   }
   const back = (fallback: Screen = 'board') => withBackTransition(() => location.key === 'default' ? go(fallback) : navigate(-1))
   // 게시글 열기: 목록·지도·알림·검색·최근 활동 어디서 열어도 같은 전환으로 넘어간다
@@ -252,7 +260,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, locationPermission, toast,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast])
