@@ -155,3 +155,7 @@
 /* 게시판 검색 버튼 */
 :root[data-theme="dark"] .board-search-chip { color: var(--c-body); border-color: var(--c-line); background: var(--c-canvas); }
 
+/* 화면 모드 토글 */
+:root[data-theme="dark"] .theme-switch { background: var(--c-raised); }
+:root[data-theme="dark"] .theme-switch-thumb { background: #4c5260; box-shadow: none; }
+

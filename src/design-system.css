@@ -1275,21 +1275,37 @@ button.title-progress-card:active { background: #f7f8fa; }
   background: #fff;
 }
 
-/* ---------- 마이페이지 오른쪽 위: 화면 모드 아이콘 (지금 모드를 보여줌: 라이트 = 해, 다크 = 달) ---------- */
-.theme-toggle {
-  width: 40px;
-  height: 40px;
-  display: grid;
+/* ---------- 마이페이지 오른쪽 위: 화면 모드 토글 (해 ↔ 달, 손잡이가 미끄러짐) ---------- */
+.theme-switch {
+  position: relative;
+  width: 64px;
+  height: 32px;
+  display: flex;
   flex: none;
-  place-items: center;
-  margin-right: -8px;
-  padding: 0;
-  color: var(--c-ink);
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 2px;
+  color: var(--c-mute);
   border: 0;
-  border-radius: 50%;
-  background: transparent;
+  border-radius: 999px;
+  background: #eef0f3;
 }
-.theme-toggle:active { opacity: .6; }
+.theme-switch svg { position: relative; z-index: 1; transition: color .18s ease; }
+.theme-switch:not(.on) svg:first-of-type,
+.theme-switch.on svg:last-of-type { color: var(--c-ink); }
+.theme-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(17, 19, 24, .16);
+  transition: transform .18s cubic-bezier(.2, .8, .2, 1);
+}
+.theme-switch.on .theme-switch-thumb { transform: translateX(32px); }
+@media (prefers-reduced-motion: reduce) { .theme-switch-thumb { transition: none; } }
 
 /* ---------- 게시판: HOT 태그, 필터 줄 오른쪽 검색 버튼 ----------
    카테고리 칩은 옆으로 밀어서(스와이프) 넘겨 보고, 검색 버튼은 오른쪽 끝에 고정 */
