@@ -74,11 +74,3 @@ npm run dev
 | 검색 | `/search` |
 | 알림 | `/alerts` |
 | 마이 | `/my` |
-
-## API 연동할 곳
-
-| 파일 | 내용 |
-|---|---|
-| `src/data/mockData.ts` | 목업 데이터 (게시글 · 댓글 · 알림) → API 응답으로 교체 |
-| `src/context/AppContext.tsx` | 데이터 읽기·쓰기 함수 모음 (글쓰기, 댓글, 반응 등) → API 호출로 교체 |
-| `src/types/domain.ts` | 데이터 모양 (Board, Comment, User …) |
