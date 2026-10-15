@@ -1504,4 +1504,4 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 
 /* '댓글 ~개 더 보기'는 마지막 댓글과 살짝 더 띄운다 */
-.board-detail-screen .comments-more { margin-top: 16px; }
+.board-detail-screen .comments-more { margin-top: 12px; }
