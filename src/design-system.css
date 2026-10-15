@@ -510,7 +510,8 @@ html { -webkit-tap-highlight-color: transparent; }
   display: flex;
   position: absolute;
   inset: 0 0 0 auto;
-  width: 144px;
+  width: 150px;
+  padding-left: 6px; /* 알림 카드와 살짝 띄운다 */
   visibility: hidden;
 }
 .alert-swipe.revealed .alert-swipe-actions { visibility: visible; }
@@ -521,7 +522,7 @@ html { -webkit-tap-highlight-color: transparent; }
   font-size: 14px;
   font-weight: 700;
 }
-.alert-swipe-read { background: #8b919c; }
+.alert-swipe-read { border-radius: 18px 0 0 18px; background: #8b919c; } /* 왼쪽도 카드처럼 둥글게 (오른쪽 삭제는 바깥 테두리가 둥글게 자름) */
 .alert-swipe-delete { background: var(--c-urgent); }
 .alert-swipe .alert {
   position: relative;

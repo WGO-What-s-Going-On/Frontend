@@ -3,7 +3,7 @@ import { AppShell } from '../../components/layout/AppShell'
 import { useApp } from '../../context/AppContext'
 import type { Notice } from '../../types/domain'
 
-const ACTIONS_WIDTH = 144 // 읽음 72 + 삭제 72
+const ACTIONS_WIDTH = 150 // 알림 카드와 틈 6 + 읽음 72 + 삭제 72
 const OPEN_THRESHOLD = 56
 
 // 알림 한 줄. 왼쪽으로 밀면 오른쪽에 읽음·삭제 버튼이 드러난다.
