@@ -13,12 +13,12 @@
   --c-ink: #f1f3f7;
   --c-body: #c3cad6;
   --c-mute: #949cab;
-  /* 파랑은 라이트 모드와 같은 #2b5ce6 */
-  --c-accent: #2b5ce6;          /* 글자 · 아이콘 파랑 */
-  --c-accent-fill: #2b5ce6;     /* 채운 버튼 파랑 */
-  --c-accent-press: #2b5ce6;
-  --c-accent-soft: rgba(43, 92, 230, .2);
-  --c-accent-line: rgba(43, 92, 230, .5);
+  /* 어두운 바탕에서는 라이트 모드 파랑(#2b5ce6)보다 연한 파랑 */
+  --c-accent: #6f9bff;          /* 글자 · 아이콘 파랑 */
+  --c-accent-fill: #5585f2;     /* 채운 버튼 파랑 (흰 글자가 읽히는 진하기) */
+  --c-accent-press: #8fb1ff;
+  --c-accent-soft: rgba(111, 155, 255, .2);
+  --c-accent-line: rgba(111, 155, 255, .5);
   --c-urgent: #ff6b6e;
   --c-urgent-soft: rgba(255, 107, 110, .15);
   --c-help: #f5a524;
@@ -130,9 +130,9 @@
 :root[data-theme="dark"] .map-place { fill: #c3cad6; }
 :root[data-theme="dark"] .map-area { fill: #4f5868; }
 :root[data-theme="dark"] .map-park-name { fill: #4f8a63; }
-:root[data-theme="dark"] .map-radius { border-color: rgba(43, 92, 230, .5); background: rgba(43, 92, 230, .08); box-shadow: 0 0 40px rgba(43, 92, 230, .12); }
-:root[data-theme="dark"] .map-me { border-color: #2c3038; box-shadow: 0 0 12px rgba(43, 92, 230, .6); }
-:root[data-theme="dark"] .map-me::before { background: rgba(43, 92, 230, .25); }
+:root[data-theme="dark"] .map-radius { border-color: rgba(111, 155, 255, .5); background: rgba(111, 155, 255, .08); box-shadow: 0 0 40px rgba(111, 155, 255, .12); }
+:root[data-theme="dark"] .map-me { border-color: #2c3038; box-shadow: 0 0 12px rgba(111, 155, 255, .6); }
+:root[data-theme="dark"] .map-me::before { background: rgba(111, 155, 255, .25); }
 :root[data-theme="dark"] .marker-label { color: var(--c-ink); background: var(--c-raised); }
 :root[data-theme="dark"] .map-zoom,
 :root[data-theme="dark"] .map-zoom button,
