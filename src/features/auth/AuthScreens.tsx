@@ -15,17 +15,17 @@ const bubbles = [
 ]
 
 // 라이트 모드 첫 화면: 주변에 질문이 올라오면 이웃들이 바로 댓글로 답하는 장면을 짧게 보여준다.
-// 떠 있는 위치 핀 → 알림 → 게시글 → 이웃 댓글(입력 중 … → 말풍선) → 내 답장 → 사라짐을 반복한다.
+// 알림 → 게시글 → 이웃 댓글(입력 중 … → 말풍선) → 내 답장 → 사라짐을 반복한다.
 const dayTimeline = [
-  [1, 700],   // 알림이 내려온다
-  [2, 1400],  // 게시글 카드 (핀은 물러난다)
-  [3, 1900],  // 알림이 올라간다, 첫 이웃 입력 중
-  [4, 2300],  // 첫 댓글
-  [5, 2700],  // 둘째 이웃 입력 중
-  [6, 3100],  // 둘째 댓글
-  [7, 3700],  // 내 답장
-  [8, 6000],  // 모두 사라짐
-  [0, 6700],  // 처음부터 다시
+  [1, 300],   // 알림이 내려온다
+  [2, 1000],  // 게시글 카드
+  [3, 1500],  // 알림이 올라간다, 첫 이웃 입력 중
+  [4, 1900],  // 첫 댓글
+  [5, 2300],  // 둘째 이웃 입력 중
+  [6, 2700],  // 둘째 댓글
+  [7, 3300],  // 내 답장
+  [8, 5600],  // 모두 사라짐
+  [0, 6300],  // 처음부터 다시
 ] as const
 
 function DayScene() {
@@ -42,8 +42,7 @@ function DayScene() {
   }, [reduced])
   const on = (from: number) => step >= from && step < 8 ? 'on' : ''
   return <div className="login-day" aria-hidden="true">
-    <div className={`day-pin ${step < 2 ? 'on' : ''}`}><span><MapPin size={28} strokeWidth={2}/></span><small>150m</small></div>
-    <div className={`day-toast ${step >= 1 && step < 3 ? 'on' : ''}`}><Bell size={15}/><span>주변에 새 글이 올라왔어요</span></div>
+    <div className={`day-toast ${step >= 1 && step < 3 ? 'on' : ''}`}><Bell size={18} strokeWidth={2.2}/><span>주변에 새 글이 올라왔어요</span></div>
     <div className="day-stage">
       <div className={`day-card ${on(2)}`}>
         <div className="day-card-top"><span className="day-category">긴급/사고</span><b className="day-hot">HOT</b><small>24m · 방금 전</small></div>

@@ -1427,58 +1427,31 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 .login-day { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
 
-/* 처음 비어 있을 때: 둥둥 떠 있는 위치 핀 + 150m (게시글이 올라오면 물러난다) */
-.day-pin {
-  position: absolute;
-  top: 380px;
-  left: 50%;
-  display: grid;
-  justify-items: center;
-  gap: 10px;
-  opacity: 0;
-  transform: translate(-50%, 0) scale(.9);
-  transition: opacity .35s ease, transform .4s cubic-bezier(.2, .8, .2, 1);
-}
-.day-pin.on { opacity: 1; transform: translate(-50%, 0); }
-.day-pin span {
-  width: 64px;
-  height: 64px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  border-radius: 50%;
-  background: var(--c-accent);
-  box-shadow: 0 0 0 10px rgba(43, 92, 230, .1), 0 0 0 22px rgba(43, 92, 230, .05), 0 12px 24px rgba(43, 92, 230, .25);
-  animation: day-float 2.4s ease-in-out infinite;
-}
-.day-pin small { color: var(--c-accent); font-size: 13px; font-weight: 700; }
-@keyframes day-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-
 /* 위에서 내려오는 알림 */
 .day-toast {
   position: absolute;
-  top: 210px;
+  top: 232px;
   left: 50%;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px;
-  color: var(--c-body);
-  border: 1px solid var(--c-line);
+  padding: 13px 22px;
+  color: #fff;
   border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 6px 18px rgba(23, 25, 30, .08);
-  font-size: 13px;
+  background: var(--c-accent);
+  box-shadow: 0 10px 24px rgba(43, 92, 230, .28);
+  font-size: 15px;
+  font-weight: 700;
   white-space: nowrap;
   opacity: 0;
   transform: translate(-50%, -14px);
   transition: opacity .3s ease, transform .4s cubic-bezier(.2, .8, .2, 1);
 }
-.day-toast svg { flex: none; color: var(--c-accent); }
+.day-toast svg { flex: none; color: #fff; }
 .day-toast.on { opacity: 1; transform: translate(-50%, 0); }
 
 /* 게시글 카드와 댓글이 놓이는 무대 */
-.day-stage { position: absolute; top: 272px; right: 24px; left: 24px; display: grid; gap: 18px; }
+.day-stage { position: absolute; top: 304px; right: 24px; left: 24px; display: grid; gap: 18px; }
 .day-card {
   display: grid;
   gap: 8px;
@@ -1520,6 +1493,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 @keyframes day-typing { 0%, 60%, 100% { opacity: .35; transform: none; } 30% { opacity: 1; transform: translateY(-3px); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .day-pin span, .day-typing i { animation: none; }
+  .day-typing i { animation: none; }
   .day-toast, .day-card, .day-comment { transition: none; }
 }
