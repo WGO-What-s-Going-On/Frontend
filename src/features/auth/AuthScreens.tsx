@@ -19,18 +19,19 @@ const bubbles = [
 const dayTimeline = [
   [1, 300],   // 알림이 내려온다
   [2, 1000],  // 게시글 카드
-  [3, 1500],  // 첫 이웃 입력 중
-  [4, 1900],  // 첫 댓글
-  [5, 2300],  // 둘째 이웃 입력 중
-  [6, 2700],  // 둘째 댓글
-  [7, 3300],  // 내 답장
-  [8, 5600],  // 모두 사라짐
-  [0, 6300],  // 처음부터 다시
+  [3, 1500],  // 첫 이웃 입력 중 (… 약 0.65초)
+  [4, 2150],  // 첫 댓글
+  [5, 2550],  // 둘째 이웃 입력 중
+  [6, 3200],  // 둘째 댓글
+  [7, 3600],  // 내가 입력 중
+  [8, 4250],  // 내 답장
+  [9, 6500],  // 모두 사라짐
+  [0, 7200],  // 처음부터 다시
 ] as const
 
 function DayScene() {
   const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  const [step, setStep] = useState(reduced ? 7 : 0)
+  const [step, setStep] = useState(reduced ? 8 : 0)
   useEffect(() => {
     if (reduced) return
     let timers: number[] = []
@@ -40,7 +41,7 @@ function DayScene() {
     run()
     return () => timers.forEach((timer) => window.clearTimeout(timer))
   }, [reduced])
-  const on = (from: number) => step >= from && step < 8 ? 'on' : ''
+  const on = (from: number) => step >= from && step < 9 ? 'on' : ''
   return <div className="login-day" aria-hidden="true">
     <div className={`day-toast ${on(1)}`}><Bell size={18} strokeWidth={2.2}/><span>주변에 새 글이 올라왔어요</span></div>
     <div className="day-stage">
@@ -51,7 +52,7 @@ function DayScene() {
       <div className="day-thread">
         <div className={`day-comment ${on(3)}`}><small>현장확인자 · 30m</small>{step === 3 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">편의점 앞에서 불 났어요</span>}</div>
         <div className={`day-comment ${on(5)}`}><small>퇴근길 · 60m</small>{step === 5 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">4번 출구 막혔어요! 2번으로 돌아가세요</span>}</div>
-        <div className={`day-comment mine ${on(7)}`}><span className="day-bubble">감사해요!</span></div>
+        <div className={`day-comment mine ${on(7)}`}>{step === 7 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">감사해요!</span>}</div>
       </div>
     </div>
   </div>
