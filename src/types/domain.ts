@@ -58,6 +58,8 @@ export interface Comment {
   verified: boolean
   parentId?: string
   reactions: Record<CommentReaction, number>
+  // 내가 누른 댓글 공감. 여러 개를 동시에 누를 수 있다 (예전 데이터의 reactedByMe는 myCommentReactions()로 함께 읽는다)
+  myReactions?: CommentReaction[]
   reactedByMe?: CommentReaction
   likedByMe?: boolean
   likes?: number
@@ -89,3 +91,8 @@ export function myReactions(board: Board): PostReaction[] {
 export function isHotBoard(board: Board, commentCount: number) {
   return board.status === '실시간' && (board.views >= 100 || commentCount >= 5)
 }
+
+export function myCommentReactions(comment: Comment): CommentReaction[] {
+  return comment.myReactions ?? (comment.reactedByMe ? [comment.reactedByMe] : [])
+}
+

@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { RADIUS, mapSeedBoards } from '../features/map/mapWorld'
-import { myReactions } from '../types/domain'
+import { myCommentReactions, myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Report, Screen, User } from '../types/domain'
 
 interface BoardInput { category: Category; title: string; body: string; imageName?: string; anonymous?: boolean }
@@ -240,11 +240,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const toggleCommentLike = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, likedByMe: !comment.likedByMe, likes: Math.max(0, (comment.likes ?? 0) + (comment.likedByMe ? -1 : 1)) } : comment))
   const reactToComment = (id: string, reaction: CommentReaction) => setComments((items) => items.map((comment) => {
     if (comment.id !== id) return comment
-    const previous = comment.reactedByMe
-    const reactions = { ...comment.reactions }
-    if (previous) reactions[previous] -= 1
-    if (previous !== reaction) reactions[reaction] += 1
-    return { ...comment, reactions, reactedByMe: previous === reaction ? undefined : reaction }
+    // 공감은 여러 개를 함께 누를 수 있다: 누른 것을 다시 누르면 빠진다
+    const mine = myCommentReactions(comment)
+    const pressed = mine.includes(reaction)
+    const reactions = { ...comment.reactions, [reaction]: Math.max(0, comment.reactions[reaction] + (pressed ? -1 : 1)) }
+    return { ...comment, reactions, myReactions: pressed ? mine.filter((item) => item !== reaction) : [...mine, reaction], reactedByMe: undefined }
   }))
   const updateUser = (input: Pick<User, 'nickname' | 'realName'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
   const markNoticeRead = (id: string) => setNotices((items) => items.map((notice) => notice.id === id ? { ...notice, read: true } : notice))
