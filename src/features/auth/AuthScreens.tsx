@@ -1,4 +1,5 @@
-import { MapPin } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Bell, CircleHelp, MapPin } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { Button } from '../../components/ui/Button'
 import { useApp } from '../../context/AppContext'
@@ -13,8 +14,59 @@ const bubbles = [
   { id: 'team', text: <>근처에 같이<br/>팀플할 사람 있나?</> },
 ]
 
+// 라이트 모드 첫 화면: 주변에 질문이 올라오면 이웃들이 바로 댓글로 답하는 장면을 짧게 보여준다.
+// 알림 → 게시글 → 이웃 댓글(입력 중 … → 말풍선) → 내 답장 → 사라짐을 반복한다.
+const dayTimeline = [
+  [1, 300],   // 알림이 내려온다
+  [2, 1100],  // 게시글 카드
+  [3, 1900],  // 알림이 올라간다, 첫 이웃 입력 중
+  [4, 2700],  // 첫 댓글
+  [5, 3500],  // 둘째 이웃 입력 중
+  [6, 4300],  // 둘째 댓글 (HOT)
+  [7, 5300],  // 내 답장
+  [8, 7600],  // 모두 사라짐
+  [0, 8300],  // 처음부터 다시
+] as const
+
+function DayScene() {
+  const reduced = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  const [step, setStep] = useState(reduced ? 7 : 0)
+  useEffect(() => {
+    if (reduced) return
+    let timers: number[] = []
+    const run = () => {
+      timers = dayTimeline.map(([next, at]) => window.setTimeout(() => { setStep(next); if (next === 0) run() }, at))
+    }
+    run()
+    return () => timers.forEach((timer) => window.clearTimeout(timer))
+  }, [reduced])
+  const on = (from: number) => step >= from && step < 8 ? 'on' : ''
+  const curious = 12 + (step >= 4 && step < 8 ? 1 : 0) + (step >= 6 && step < 8 ? 2 : 0)
+  return <div className="login-day" aria-hidden="true">
+    <div className="day-rings"><i/><i/><i/></div>
+    <div className={`day-toast ${step >= 1 && step < 3 ? 'on' : ''}`}><Bell size={15}/><span><b>내 주변 150m</b>에 새 질문이 올라왔어요</span></div>
+    <div className="day-stage">
+      <div className={`day-card ${on(2)}`}>
+        <div className="day-card-top"><span className="day-category">긴급/사고</span>{step >= 6 && step < 8 && <b className="day-hot">HOT</b>}<small>24m · 방금 전</small></div>
+        <strong>강남역 사거리 사이렌, 무슨 일이에요?</strong>
+        <span className="day-reaction"><CircleHelp size={14}/>저도 궁금해요 <b key={curious} className="day-count">{curious}</b></span>
+      </div>
+      <div className="day-thread">
+        <div className={`day-comment ${on(3)}`}><small>현장확인자 · 30m</small>{step === 3 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">편의점 앞에서 불 났어요. 연기 많이 나요</span>}</div>
+        <div className={`day-comment ${on(5)}`}><small>퇴근길 · 60m</small>{step === 5 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">4번 출구 막혔어요! 2번으로 돌아가세요</span>}</div>
+        <div className={`day-comment mine ${on(7)}`}><span className="day-bubble">덕분에 돌아갔어요, 감사해요</span></div>
+      </div>
+    </div>
+  </div>
+}
+
 export function LoginScreen() {
-  const { startLogin } = useApp()
+  const { startLogin, themeMode } = useApp()
+  if (themeMode !== 'dark') return <AppShell nav={false} contentClassName="login-screen login-day-screen" shellClassName="login-shell login-day-shell">
+    <p className="eyebrow blue">What’s Going On?</p><h1 className="hero">주변에서 일어나는 일을<br/>즉시 확인하세요</h1>
+    <DayScene/>
+    <div className="start-card"><h3>간편하게 시작하기</h3><Button className="kakao" onClick={startLogin}>카카오로 계속하기</Button></div>
+  </AppShell>
   return <AppShell nav={false} contentClassName="login-screen login-night-screen" shellClassName="login-shell login-night-shell">
     <p className="eyebrow blue">What’s Going On?</p><h1 className="hero">주변에서 일어나는 일을<br/>즉시 확인하세요</h1>
     <div className="login-night" aria-hidden="true">
