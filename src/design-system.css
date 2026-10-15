@@ -439,7 +439,10 @@ select:focus-visible,
   border-radius: 50%;
   background: transparent;
 }
-.detail-title-menu:active { background: var(--c-surface); }
+/* 댓글 ⋯ 버튼처럼 누르거나 마우스를 올려도 배경을 칠하지 않는다 */
+.detail-title-menu:hover,
+.detail-title-menu:active,
+.detail-title-menu[aria-expanded="true"] { background: transparent; }
 .detail-title-menu-wrap .detail-menu { top: calc(100% + 4px); right: 0; left: auto; }
 /* 게시글 ⋯ 메뉴는 제목 줄 오른쪽 끝, 댓글 ⋯ 메뉴와 같은 세로줄에 둔다 */
 .detail-title-row h1 { flex: 1 1 auto; }
