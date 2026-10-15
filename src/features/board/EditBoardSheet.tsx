@@ -5,19 +5,22 @@ import { IconButton } from '../../components/ui/IconButton'
 import { useApp } from '../../context/AppContext'
 import { categoryLabel } from '../../domain/labels'
 import type { Board, Category } from '../../types/domain'
+import { AuthorToggle } from './AuthorToggle'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
-// 게시글 수정: 글쓰기 시트와 같은 모양으로 상세 화면 위에 바로 열린다. 카테고리 · 제목 · 내용을 한 화면에서 고친다.
+// 게시글 수정: 글쓰기 시트와 같은 모양으로 상세 화면 위에 바로 열린다. 카테고리 · 제목 · 내용 · 작성자 표시를 한 화면에서 고친다.
 export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canEdit: boolean; onClose: () => void }) {
   const { updateBoard } = useApp()
   const [category, setCategory] = useState<Category>(board.category)
   const [title, setTitle] = useState(board.title)
   const [body, setBody] = useState(board.body)
-  const changed = title.trim() !== board.title || body.trim() !== board.body || category !== board.category
+  const wasAnonymous = Boolean(board.anonymous) || board.authorName === '익명'
+  const [anonymous, setAnonymous] = useState(wasAnonymous)
+  const changed = title.trim() !== board.title || body.trim() !== board.body || category !== board.category || anonymous !== wasAnonymous
   const save = () => {
     if (!title.trim() || !body.trim()) return
-    updateBoard(board.id, { title: title.trim(), body: body.trim(), category })
+    updateBoard(board.id, { title: title.trim(), body: body.trim(), category, anonymous })
     onClose()
   }
   return <div className="quick-compose-layer" role="dialog" aria-modal="true" aria-label="게시글 수정">
@@ -29,6 +32,7 @@ export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canE
         <div className="quick-category-grid">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} data-category={item} onClick={() => setCategory(item)}>{categoryLabel[item]}</button>)}</div>
         <label className="quick-field"><span>제목</span><input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={50}/></label>
         <label className="quick-field quick-detail-field"><span>내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={500}/></label>
+        <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>
         <Button className="quick-submit" onClick={save} disabled={!changed || !title.trim() || !body.trim()}>수정 완료</Button>
       </>}
     </section>
