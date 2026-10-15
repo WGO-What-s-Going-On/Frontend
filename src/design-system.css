@@ -1502,13 +1502,3 @@ button.title-progress-card:active { background: #f7f8fa; }
 .edit-photo-row .quick-photo-button { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .edit-photo-remove { width: 44px; height: 44px; display: grid; flex: none; place-items: center; margin-top: 12px; padding: 0; color: var(--c-mute); border: 1px solid var(--c-line); border-radius: 13px; background: transparent; }
 
-
-/* '댓글 ~개 더 보기': 댓글이 화면을 넘치면 댓글 입력창 바로 위(6px)에 붙어 있다가, 끝까지 내리면 마지막 댓글 아래 제자리로 */
-.board-detail-screen .comments-more {
-  position: sticky;
-  z-index: 3;
-  bottom: -29px; /* 스크롤 영역 아래 여백(108px) 안쪽 기준: 입력창 79px에 바로 붙임 (79 - 108) */
-  margin-top: 0;
-  padding: 22px 0 2px;
-  background: linear-gradient(rgba(255, 255, 255, 0), var(--c-page) 60%); /* 뒤로 지나가는 댓글은 위쪽에서 흐려진다 */
-}
