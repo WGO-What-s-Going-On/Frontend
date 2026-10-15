@@ -452,31 +452,85 @@ select:focus-visible,
 /* 댓글 ⋯ 메뉴는 게시글 메뉴보다 한 단계 연하게 */
 .board-detail-screen .comment-icon-button { color: #b4b4b4; }
 
-/* 댓글 아래: 공감 3종(도움돼요 · 맞아요 · 정보가 달라요)과 답글 달기. 고른 공감만 파랑 */
+/* 댓글 아래: 받은 공감만 아이콘+숫자 칩으로 (카톡 반응처럼), 그 옆 답글 달기. 내가 고른 공감은 파랑 */
 .board-detail-screen .comment-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 2px 12px;
-  margin-top: 4px;
+  gap: 6px;
+  margin-top: 6px;
   margin-bottom: -2px;
 }
-.comment-reaction {
+.comment-reaction-chip {
+  height: 26px;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 4px 0;
-  color: var(--c-mute);
+  gap: 4px;
+  padding: 0 9px;
+  color: var(--c-body);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #f2f4f6;
+  font-size: 12px;
+  transition: transform .15s ease;
+}
+.comment-reaction-chip b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.comment-reaction-chip.selected { color: var(--c-accent); border-color: rgba(43, 92, 230, .3); background: var(--c-accent-soft); }
+.comment-reaction-chip:active { transform: scale(.94); }
+.comment-reaction-chip:disabled { cursor: default; }
+.board-detail-screen .comment-actions .comment-reply-button { margin-left: 2px; }
+
+/* 댓글 머리 오른쪽: 공감 남기기(웃는 얼굴+) · ⋯ */
+.comment-head-actions { display: flex; flex: none; align-items: center; }
+.board-detail-screen .comment-react-button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  margin: -8px 0;
+  padding: 0;
+  color: #b4b4b4;
   border: 0;
   background: transparent;
-  font-size: 13px;
-  font-weight: 500;
-  transition: color .15s ease, transform .15s ease;
 }
-.comment-reaction b { font-weight: 600; font-variant-numeric: tabular-nums; }
-.comment-reaction.selected { color: var(--c-accent); font-weight: 700; }
-.comment-reaction:active { transform: scale(.94); }
-.comment-reaction:disabled { opacity: 1; cursor: default; }
+.board-detail-screen .comment-react-button[aria-expanded="true"] { color: var(--c-accent); }
+
+/* 공감 고르기: 웃는 얼굴을 누르거나 댓글을 꾹 누르면 뜨는 작은 판 */
+.board-detail-screen .comment-reaction-picker {
+  position: absolute;
+  z-index: 12;
+  top: 34px;
+  right: 34px;
+  display: flex;
+  gap: 2px;
+  width: auto;
+  margin: 0;
+  padding: 6px;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(23, 25, 30, .06), 0 8px 24px rgba(23, 25, 30, .14);
+  transform-origin: top right;
+  animation: popover-in .16s cubic-bezier(.2, .8, .2, 1);
+}
+.comment-reaction-picker button {
+  width: 76px;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 9px 4px 7px;
+  color: var(--c-body);
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.comment-reaction-picker button:active { background: #f2f4f6; }
+.comment-reaction-picker button.selected { color: var(--c-accent); background: var(--c-accent-soft); }
+/* 꾹 누를 때 휴대폰 기본 메뉴(복사 등)가 뜨지 않게 */
+.board-detail-screen .comment { -webkit-touch-callout: none; }
 .comment-reply-button {
   padding: 4px 2px;
   color: #999;
