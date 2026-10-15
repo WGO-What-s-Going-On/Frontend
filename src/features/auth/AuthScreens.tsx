@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Bell, CircleHelp, MapPin } from 'lucide-react'
+import { Bell, MapPin } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { Button } from '../../components/ui/Button'
 import { useApp } from '../../context/AppContext'
@@ -15,17 +15,17 @@ const bubbles = [
 ]
 
 // 라이트 모드 첫 화면: 주변에 질문이 올라오면 이웃들이 바로 댓글로 답하는 장면을 짧게 보여준다.
-// 알림 → 게시글 → 이웃 댓글(입력 중 … → 말풍선) → 내 답장 → 사라짐을 반복한다.
+// 떠 있는 위치 핀 → 알림 → 게시글 → 이웃 댓글(입력 중 … → 말풍선) → 내 답장 → 사라짐을 반복한다.
 const dayTimeline = [
-  [1, 300],   // 알림이 내려온다
-  [2, 1100],  // 게시글 카드
+  [1, 700],   // 알림이 내려온다
+  [2, 1400],  // 게시글 카드 (핀은 물러난다)
   [3, 1900],  // 알림이 올라간다, 첫 이웃 입력 중
-  [4, 2700],  // 첫 댓글
-  [5, 3500],  // 둘째 이웃 입력 중
-  [6, 4300],  // 둘째 댓글 (HOT)
-  [7, 5300],  // 내 답장
-  [8, 7600],  // 모두 사라짐
-  [0, 8300],  // 처음부터 다시
+  [4, 2300],  // 첫 댓글
+  [5, 2700],  // 둘째 이웃 입력 중
+  [6, 3100],  // 둘째 댓글
+  [7, 3700],  // 내 답장
+  [8, 6000],  // 모두 사라짐
+  [0, 6700],  // 처음부터 다시
 ] as const
 
 function DayScene() {
@@ -41,20 +41,18 @@ function DayScene() {
     return () => timers.forEach((timer) => window.clearTimeout(timer))
   }, [reduced])
   const on = (from: number) => step >= from && step < 8 ? 'on' : ''
-  const curious = 12 + (step >= 4 && step < 8 ? 1 : 0) + (step >= 6 && step < 8 ? 2 : 0)
   return <div className="login-day" aria-hidden="true">
-    <div className="day-rings"><i/><i/><i/></div>
-    <div className={`day-toast ${step >= 1 && step < 3 ? 'on' : ''}`}><Bell size={15}/><span><b>내 주변 150m</b>에 새 질문이 올라왔어요</span></div>
+    <div className={`day-pin ${step < 2 ? 'on' : ''}`}><span><MapPin size={28} strokeWidth={2}/></span><small>150m</small></div>
+    <div className={`day-toast ${step >= 1 && step < 3 ? 'on' : ''}`}><Bell size={15}/><span>주변에 새 글이 올라왔어요</span></div>
     <div className="day-stage">
       <div className={`day-card ${on(2)}`}>
-        <div className="day-card-top"><span className="day-category">긴급/사고</span>{step >= 6 && step < 8 && <b className="day-hot">HOT</b>}<small>24m · 방금 전</small></div>
-        <strong>강남역 사거리 사이렌, 무슨 일이에요?</strong>
-        <span className="day-reaction"><CircleHelp size={14}/>저도 궁금해요 <b key={curious} className="day-count">{curious}</b></span>
+        <div className="day-card-top"><span className="day-category">긴급/사고</span><b className="day-hot">HOT</b><small>24m · 방금 전</small></div>
+        <strong>강남역에 구급차, 무슨 일인가요?</strong>
       </div>
       <div className="day-thread">
-        <div className={`day-comment ${on(3)}`}><small>현장확인자 · 30m</small>{step === 3 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">편의점 앞에서 불 났어요. 연기 많이 나요</span>}</div>
+        <div className={`day-comment ${on(3)}`}><small>현장확인자 · 30m</small>{step === 3 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">편의점 앞에서 불 났어요</span>}</div>
         <div className={`day-comment ${on(5)}`}><small>퇴근길 · 60m</small>{step === 5 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">4번 출구 막혔어요! 2번으로 돌아가세요</span>}</div>
-        <div className={`day-comment mine ${on(7)}`}><span className="day-bubble">덕분에 돌아갔어요, 감사해요</span></div>
+        <div className={`day-comment mine ${on(7)}`}><span className="day-bubble">감사해요</span></div>
       </div>
     </div>
   </div>
