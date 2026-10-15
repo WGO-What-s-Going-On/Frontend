@@ -22,12 +22,16 @@ function filterBoards(boards: Board[], filter: MapFilter, hotIds: Set<string>) {
   return visible
 }
 
+// 게시글을 보러 갔다가 돌아와도 보던 지도 상태(필터·고른 핀·검색 기준)를 그대로 보여주기 위한 기억 (새로고침하면 처음부터)
+const mapMemory: { filter: MapFilter; selectedId?: string; searchCenter: Point; viewCenter: Point } = { filter: '전체', searchCenter: ME, viewCenter: ME }
+
 export function MapScreen() {
   const { boards, comments, openBoard, showToast } = useApp()
-  const [filter, setFilter] = useState<MapFilter>('전체')
-  const [selectedBoard, setSelectedBoard] = useState<Board>()
-  const [searchCenter, setSearchCenter] = useState<Point>(ME)
-  const [viewCenter, setViewCenter] = useState<Point>(ME)
+  const [filter, setFilter] = useState<MapFilter>(mapMemory.filter)
+  const [selectedBoard, setSelectedBoard] = useState<Board | undefined>(() => boards.find((board) => board.id === mapMemory.selectedId))
+  const [searchCenter, setSearchCenter] = useState<Point>(mapMemory.searchCenter)
+  const [viewCenter, setViewCenter] = useState<Point>(mapMemory.viewCenter)
+  Object.assign(mapMemory, { filter, selectedId: selectedBoard?.id, searchCenter, viewCenter })
   const hotIds = useMemo(() => new Set(boards.filter((board) => isHotBoard(board, comments.filter((comment) => comment.boardId === board.id).length)).map((board) => board.id)), [boards, comments])
   const nearby = filterBoards(boards, filter, hotIds)
   const selectFilter = (next: MapFilter) => { setFilter(next); setSelectedBoard(undefined) }
