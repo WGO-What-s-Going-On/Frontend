@@ -1331,17 +1331,13 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 카테고리 칩을 살짝 왼쪽으로: 칩 안 글자가 아래 제목 글자와 얼추 같은 줄에 오도록 */
 .ux-board-card-top > span[data-category] { margin-left: -4px; }
 
-/* ---------- 게시판 검색 화면: 뒤로 + 회색 검색창, 결과는 참여 가능 / 열람만 가능으로 나눔 ---------- */
-.search-bar { display: flex; align-items: center; gap: 10px; margin: 4px 0 22px; }
-.search-bar .icon { flex: none; }
+/* ---------- 게시판 검색 화면: 위에는 검색창만, 아래 범위 칩, 결과는 제목 위주의 가벼운 목록 ---------- */
 .search-field {
-  flex: 1;
-  min-width: 0;
   height: 44px;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0;
+  margin: 4px 0 14px;
   padding: 0 12px;
   color: var(--c-mute);
   border-radius: 12px;
@@ -1358,7 +1354,6 @@ button.title-progress-card:active { background: #f7f8fa; }
   font-size: 16px;
 }
 .search-field input::placeholder { color: #9aa1ad; }
-.search-field input::-webkit-search-cancel-button { display: none; }
 .search-clear {
   width: 20px;
   height: 20px;
@@ -1371,16 +1366,38 @@ button.title-progress-card:active { background: #f7f8fa; }
   border-radius: 50%;
   background: #b6bbc4;
 }
-.search-section { margin-bottom: 24px; }
-.search-section h4 { margin: 0 0 12px; color: var(--c-ink); font-size: 15px; font-weight: 700; }
+.search-screen .search-scope { margin-bottom: 22px; padding-right: 0; }
+.search-section { margin-bottom: 26px; }
+.search-section h4 { margin: 0 0 4px; color: var(--c-ink); font-size: 15px; font-weight: 700; }
 .search-section h4 small { margin-left: 6px; color: var(--c-mute); font-size: 13px; font-weight: 500; }
 .search-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .search-section-head h4 { margin: 0; }
 .search-clear-all { padding: 0; color: var(--c-mute); border: 0; background: none; font-size: 13px; }
 .search-recent { display: flex; flex-wrap: wrap; gap: 8px; }
-.search-recent-chip { display: inline-flex; align-items: center; gap: 2px; padding: 0 6px 0 12px; height: 34px; border-radius: 999px; background: #f2f4f6; }
+.search-recent-chip { display: inline-flex; align-items: center; gap: 2px; height: 34px; padding: 0 6px 0 12px; border-radius: 999px; background: #f2f4f6; }
 .search-recent-chip button { padding: 0; color: var(--c-body); border: 0; background: none; font-size: 14px; }
 .search-recent-chip .search-recent-remove { width: 22px; height: 22px; display: grid; place-items: center; color: var(--c-mute); }
-.search-screen .empty-state { margin-top: 56px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
+/* 결과 한 줄: 카테고리 · 제목 · (본문에서 찾았으면 그 부분) · 거리와 시간 */
+.search-rows { display: grid; }
+.search-row {
+  display: grid;
+  gap: 5px;
+  padding: 14px 0;
+  color: inherit;
+  border: 0;
+  border-bottom: 1px solid var(--c-line);
+  background: none;
+  text-align: left;
+}
+.search-row:last-child { border-bottom: 0; }
+.search-row-tags { display: flex; align-items: center; gap: 6px; }
+.search-row-category { color: var(--cat); font-size: 12px; font-weight: 700; }
+.search-row strong { overflow: hidden; color: var(--c-ink); font-size: 16px; font-weight: 600; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.search-row-snippet { overflow: hidden; color: var(--c-body); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.search-row small { color: var(--c-mute); font-size: 12px; }
+.search-row mark { color: var(--c-accent); background: none; font-weight: 700; }
+.search-screen .empty-state { margin-top: 48px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
 .search-screen .empty-state strong { color: var(--c-mute); font-size: 14px; font-weight: 500; }
-.search-hint { margin: 8px 2px; color: var(--c-mute); font-size: 14px; }
+
+.search-scope button span { margin-left: 4px; font-variant-numeric: tabular-nums; opacity: .6; }
+.search-scope button.selected span { opacity: .85; }
