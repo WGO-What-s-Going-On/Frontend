@@ -1643,3 +1643,34 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comment-reactions .comment-reaction-chip.mine { color: var(--c-urgent); }
 .comment-reaction-picker button.selected { color: var(--c-urgent); background: var(--c-urgent-soft); }
 .board-detail-screen .comment-tools .comment-react-button[aria-expanded="true"] { color: var(--c-urgent); }
+
+/* ---------- 게시판 정렬(거리 ⌄) 메뉴: 게시글 ⋯ 메뉴와 같은 크기·모양·등장 ---------- */
+.ux-board-header .ux-sort-menu {
+  top: calc(100% + 4px);
+  display: grid;
+  width: auto;
+  min-width: 128px;
+  padding: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(23, 25, 30, .06), 0 8px 24px rgba(23, 25, 30, .14);
+  transform-origin: top right;
+  animation: popover-in .16s cubic-bezier(.2, .8, .2, 1);
+}
+.ux-board-header .ux-sort-menu button {
+  width: 100%;
+  padding: 9px 12px;
+  color: var(--c-ink);
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+  text-align: left;
+  white-space: nowrap;
+}
+.ux-board-header .ux-sort-menu button:active { background: #f3f3f3; }
+.ux-board-header .ux-sort-menu button[aria-checked="true"] { color: var(--c-accent); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .ux-board-header .ux-sort-menu { animation: none; } }
