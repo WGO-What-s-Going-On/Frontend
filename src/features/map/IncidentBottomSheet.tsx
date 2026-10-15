@@ -20,6 +20,7 @@ export function IncidentBottomSheet({ board, onClose, onOpen }: IncidentBottomSh
       <span className="preview-road"/>
       <span className="preview-marker"><MapPin size={20}/></span>
     </div>
+    {(board.imagePlaceholder || board.imageName) && <div className="board-image-placeholder sheet-image">[이미지]</div>}
     <span className="sheet-category" data-category={board.category}>{categoryLabel[board.category]}</span>
     <h2>{board.title}</h2>
     <p>{board.body}</p>

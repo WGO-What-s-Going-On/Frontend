@@ -43,6 +43,7 @@ function seedBoard(input: Omit<Board, 'distance' | 'status'> & { position: Point
 
 // 지도를 움직이면 보이는 주변 동네의 게시판 (150m 밖은 열람만 가능)
 export const mapSeedBoards: Board[] = [
+  seedBoard({ id: 'map-tree', authorId: 'user-27', authorName: '역삼출근러', category: '긴급 사고', title: '강남대로 가로수가 쓰러졌어요', body: '바람에 가로수가 넘어져서 인도 절반을 막고 있어요. 지나갈 때 조심하세요. 구청에 신고는 해 뒀어요.', createdAt: '6분 전', views: 74, imagePlaceholder: true, reactions: zeroReactions(8, 5, 2, 0), position: { x: 1074, y: 1062 } }),
   seedBoard({ id: 'map-umbrella', authorId: 'user-21', authorName: '퇴근길', category: '도움 요청', title: '우산 빌려주실 분 계신가요?', body: '역 출구 앞인데 비가 갑자기 와요. 잠깐만 빌려주시면 바로 돌려드릴게요.', createdAt: '5분 전', views: 41, reactions: zeroReactions(4, 6, 1, 0), position: { x: 1086, y: 1176 } }),
   seedBoard({ id: 'map-construction', authorId: 'user-22', authorName: '선릉로주민', category: '일상 불편', title: '선릉로 공사로 차선 통제 중이에요', body: '2차선이 막혀 있어서 버스가 많이 밀려요. 우회하세요.', createdAt: '12분 전', views: 96, reactions: zeroReactions(6, 19, 11, 0), position: { x: 1312, y: 1148 } }),
   seedBoard({ id: 'map-dog', authorId: 'user-23', authorName: '말티즈아빠', category: '도움 요청', title: '흰색 말티즈를 찾고 있어요', body: '논현로 쪽에서 산책 중에 놓쳤어요. 빨간 목줄을 하고 있어요.', createdAt: '20분 전', views: 133, reactions: zeroReactions(22, 9, 3, 0), position: { x: 706, y: 824 } }),

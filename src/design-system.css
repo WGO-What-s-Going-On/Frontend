@@ -1674,3 +1674,20 @@ button.title-progress-card:active { background: #f7f8fa; }
 .ux-board-header .ux-sort-menu button:active { background: #f3f3f3; }
 .ux-board-header .ux-sort-menu button[aria-checked="true"] { color: var(--c-accent); font-weight: 700; }
 @media (prefers-reduced-motion: reduce) { .ux-board-header .ux-sort-menu { animation: none; } }
+
+/* 게시글 사진 자리 (목업: 실제 사진 대신 [이미지] 상자). 지도 시트는 작게, 상세는 크게 */
+.board-image-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--c-mute);
+  border: 1px dashed var(--c-line);
+  border-radius: 14px;
+  background: #f7f8fa;
+  font-size: 13px;
+  font-weight: 700;
+}
+.board-image-placeholder.sheet-image { height: 120px; margin: 4px 0 12px; }
+.board-image-placeholder.detail-image { height: 200px; margin: 14px 0 4px; }
+/* 지도 시트의 본문은 한 줄만 보이고 '…'로 끊는다 (나머지는 자세히 보기에서) */
+.map-bottom-sheet p { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+

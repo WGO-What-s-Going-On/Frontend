@@ -37,7 +37,7 @@ const STORAGE_KEY = 'wgo-mockup-state-v1'
 // 목업 알림 목록을 바꾸면 올린다. 저장된 알림 버전이 다르면 알림만 새 목업으로 교체한다.
 const NOTICES_VERSION = 5
 // 지도 주변 동네 게시판 목업을 추가할 때 올린다. 저장된 게시판에 없는 목업만 덧붙인다.
-const MAP_SEED = 1
+const MAP_SEED = 2
 
 // 화면 겹쳐 전환(View Transition)을 쓸 수 있는지. 지원하지 않거나 동작 줄이기면 바로 바뀐다.
 export function canViewTransition() {
