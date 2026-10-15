@@ -1468,7 +1468,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 .day-card-top { display: flex; align-items: center; gap: 6px; }
 .day-category { padding: 4px 8px; color: var(--c-urgent); border-radius: 10px; background: var(--c-urgent-soft); font-size: 11px; font-weight: 800; }
 .day-hot { padding: 4px 7px; color: #fff; border-radius: 8px; background: var(--c-urgent); font-size: 10px; font-weight: 800; }
-.day-card-top small { margin-left: auto; color: var(--c-mute); font-size: 12px; }
 .day-card strong { color: var(--c-ink); font-size: 18px; font-weight: 700; line-height: 1.35; }
 
 /* 이웃 댓글: 이름 한 줄 + 회색 말풍선, 내 답장은 오른쪽 파란 말풍선 */
@@ -1485,9 +1484,9 @@ button.title-progress-card:active { background: #f7f8fa; }
 .day-comment small { padding-left: 4px; color: var(--c-mute); font-size: 11px; }
 .day-bubble { max-width: 88%; padding: 11px 15px; color: var(--c-ink); border-radius: 4px 18px 18px 18px; background: #f1f3f6; font-size: 15px; line-height: 1.4; }
 .day-comment.mine { justify-items: end; }
-.day-comment.mine .day-bubble { color: var(--c-ink); border-radius: 18px 4px 18px 18px; background: #e4e7ec; } /* 내 답장: 이웃 말풍선보다 한 톤 진한 회색 */
+.day-comment.mine .day-bubble { border-radius: 18px 4px 18px 18px; } /* 내 답장: 이웃 말풍선과 같은 색, 오른쪽 정렬 */
 .day-typing { display: inline-flex; gap: 4px; padding: 13px 14px; border-radius: 4px 16px 16px 16px; background: #f1f3f6; }
-.day-comment.mine .day-typing { border-radius: 18px 4px 18px 18px; background: #e4e7ec; }
+.day-comment.mine .day-typing { border-radius: 18px 4px 18px 18px; }
 .day-typing i { width: 6px; height: 6px; border-radius: 50%; background: #a3a9b3; animation: day-typing 1s ease-in-out infinite; }
 .day-typing i:nth-child(2) { animation-delay: .15s; }
 .day-typing i:nth-child(3) { animation-delay: .3s; }

@@ -46,7 +46,7 @@ function DayScene() {
     <div className={`day-toast ${on(1)}`}><Bell size={18} strokeWidth={2.2}/><span>주변에 새 글이 올라왔어요</span></div>
     <div className="day-stage">
       <div className={`day-card ${on(2)}`}>
-        <div className="day-card-top"><span className="day-category">긴급/사고</span><b className="day-hot">HOT</b><small>24m · 방금 전</small></div>
+        <div className="day-card-top"><span className="day-category">긴급/사고</span><b className="day-hot">HOT</b></div>
         <strong>강남역에 구급차, 무슨 일인가요?</strong>
       </div>
       <div className="day-thread">
