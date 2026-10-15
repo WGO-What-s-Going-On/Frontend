@@ -37,7 +37,7 @@ const STORAGE_KEY = 'wgo-mockup-state-v1'
 // 목업 알림 목록을 바꾸면 올린다. 저장된 알림 버전이 다르면 알림만 새 목업으로 교체한다.
 const NOTICES_VERSION = 5
 // 지도 주변 동네 게시판 목업을 추가할 때 올린다. 저장된 게시판에 없는 목업만 덧붙인다.
-const MAP_SEED = 2
+const MAP_SEED = 3
 
 // 화면 겹쳐 전환(View Transition)을 쓸 수 있는지. 지원하지 않거나 동작 줄이기면 바로 바뀐다.
 export function canViewTransition() {
@@ -115,7 +115,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const saved = persisted.boards ?? initialBoards
     if (persisted.mapSeed === MAP_SEED) return saved
     const ids = new Set(saved.map((board) => board.id))
-    return [...saved, ...mapSeedBoards.filter((board) => !ids.has(board.id))]
+    // 이미 저장된 목업 게시판도 새 예시(사진 자리·긴 본문)로 맞춘다. 사용자가 고친 글은 그대로 둔다
+    const latest = new Map([...initialBoards, ...mapSeedBoards].map((board) => [board.id, board]))
+    const patched = saved.map((board) => { const seed = latest.get(board.id); return seed && !board.edited ? { ...board, body: seed.body, imagePlaceholder: seed.imagePlaceholder } : board })
+    return [...patched, ...mapSeedBoards.filter((board) => !ids.has(board.id))]
   })
   const [comments, setComments] = useState(persisted.comments ?? initialComments)
   const [notices, setNotices] = useState(persisted.noticesVersion === NOTICES_VERSION && persisted.notices ? persisted.notices : initialNotices)

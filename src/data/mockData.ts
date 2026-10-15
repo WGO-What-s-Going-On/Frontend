@@ -12,7 +12,7 @@ export const initialBoards: Board[] = [
   {
     id: 'fire', authorId: 'user-1', authorName: '익명탐정', category: '긴급 사고',
     title: '동네에 불 났어! 어디 대피해야 돼?', body: '강남역 4번 출구 앞에서 연기가 보여요. 주변 분들은 우회해주세요.',
-    distance: 24, createdAt: '2분 전', status: '실시간', views: 142,
+    distance: 24, createdAt: '2분 전', status: '실시간', views: 142, imagePlaceholder: true,
     reactions: { '저도 궁금해요': 18, '지금도 그래요': 32, '도움 됐어요': 12, '이제 끝났어요': 3 },
   },
   {
@@ -23,7 +23,7 @@ export const initialBoards: Board[] = [
   },
   {
     id: 'outage', authorId: 'user-2', authorName: '현장지킴이', category: '일상 불편',
-    title: '정전이야! 1시간 넘는데 복구 될까?', body: '혹시 아파트 전체 정전인가요? 상황 공유 부탁드려요.',
+    title: '정전이야! 1시간 넘는데 복구 될까?', body: '혹시 아파트 전체 정전인가요? 30분 전부터 101동부터 104동까지 불이 다 나갔고 엘리베이터도 멈췄어요. 관리사무소는 계속 통화 중이라 상황 아시는 분 공유 부탁드려요.',
     distance: 140, createdAt: '30분 전', status: '실시간', views: 88,
     reactions: { '저도 궁금해요': 12, '지금도 그래요': 23, '도움 됐어요': 8, '이제 끝났어요': 1 },
   },

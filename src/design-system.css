@@ -1698,3 +1698,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .detail-inline-reactions .post-reactions button b { font-size: 13px; }
 .board-detail-screen .detail-inline-reactions .post-reactions button span { font-size: 12px; }
 .board-detail-screen .detail-inline-reactions .post-reactions button svg { width: 17px; height: 17px; }
+
+/* 지도 필터: 칩이 넘치면 화면 오른쪽 끝까지 이어지고 옆으로 밀어 넘긴다 (그림자가 잘리지 않게 아래 여백) */
+.map-screen .map-top-overlay .map-filters { margin-right: -20px; padding: 2px 20px 6px 0; }
+
