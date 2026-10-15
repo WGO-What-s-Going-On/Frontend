@@ -56,8 +56,9 @@ export function BoardListScreen() {
   </AppShell>
 }
 
-// 게시판 검색: 제목·내용·카테고리에서 찾는다. 입력 전에는 주변 게시판 제목을 보여줘서 무엇을 찾을지 감을 준다.
-// 범위 칩으로 참여 가능(150m 안) · 열람만 가능(150m 밖)을 거른다.
+// 게시판 검색: "이 일에 대한 글이 이미 있나, 아직 진행 중인가"를 빨리 확인하는 화면.
+// 입력 전에는 최근 검색과 지금 진행 중인 주변 소식, 입력하면 검색어와 잘 맞는 순서(제목 > 카테고리·본문) → 진행 중 → 가까운 순.
+// 범위는 결과를 나누지 않고, 150m 밖 글에만 오른쪽에 작은 자물쇠로 표시한다.
 const RECENT_SEARCH_KEY = 'wgo-recent-searches'
 function readRecentSearches(): string[] {
   try { return JSON.parse(localStorage.getItem(RECENT_SEARCH_KEY) || '[]') } catch { return [] }
@@ -74,10 +75,22 @@ function Highlight({ text, keyword }: { text: string; keyword: string }) {
   return <>{text.slice(0, at)}<mark>{text.slice(at, at + keyword.length)}</mark>{text.slice(at + keyword.length)}</>
 }
 
+// 검색어와 얼마나 맞는지: 제목 2, 카테고리·본문 1, 없으면 0
+function matchScore(board: Board, keyword: string) {
+  const word = keyword.toLowerCase()
+  if (board.title.toLowerCase().includes(word)) return 2
+  return `${board.body} ${categoryLabel[board.category]}`.toLowerCase().includes(word) ? 1 : 0
+}
+
 function SearchRow({ board, keyword, commentCount, onOpen }: { board: Board; keyword: string; commentCount: number; onOpen: () => void }) {
-  return <button className="search-row" onClick={onOpen}>
-    <span className="search-row-tags"><span className="search-row-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, commentCount) && <b className="board-tag tag-hot">HOT</b>}</span>
-    <strong><Highlight text={board.title} keyword={keyword}/></strong>
+  const ended = board.status !== '실시간'
+  const outside = board.distance > RADIUS
+  return <button className={`search-row ${ended ? 'ended' : ''}`} onClick={onOpen}>
+    <span className="search-row-text">
+      <span className="search-row-tags"><span className="search-row-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, commentCount) && <b className="board-tag tag-hot">HOT</b>}{ended && <b className="board-tag tag-ended">종료</b>}</span>
+      <strong><Highlight text={board.title} keyword={keyword}/></strong>
+    </span>
+    {outside && <Lock className="search-row-lock" size={14} aria-label="150m 밖, 열람만 가능"/>}
   </button>
 }
 
@@ -85,13 +98,15 @@ export function SearchScreen() {
   const { boards, comments, openBoard } = useApp()
   const [query, setQuery] = useState('')
   const [recent, setRecent] = useState(readRecentSearches)
-  const [farOpen, setFarOpen] = useState(false)
   const keyword = query.trim()
-  const matched = boards
-    .filter((board) => board.status !== '숨김' && (!keyword || `${board.title} ${board.body} ${categoryLabel[board.category]}`.toLowerCase().includes(keyword.toLowerCase())))
-    .sort((a, b) => a.distance - b.distance)
-  const nearby = matched.filter((board) => board.distance <= RADIUS)
-  const far = matched.filter((board) => board.distance > RADIUS)
+  const visible = boards.filter((board) => board.status !== '숨김')
+  const results = keyword ? visible
+    .map((board) => ({ board, score: matchScore(board, keyword) }))
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || Number(b.board.status === '실시간') - Number(a.board.status === '실시간') || a.board.distance - b.board.distance)
+    .map((item) => item.board) : []
+  // 입력 전: 지금 진행 중인 주변 소식 (가까운 순)
+  const live = visible.filter((board) => board.status === '실시간').sort((a, b) => a.distance - b.distance)
   const commentCount = (id: string) => comments.filter((comment) => comment.boardId === id).length
   const remember = (word: string) => {
     if (!word) return
@@ -99,30 +114,22 @@ export function SearchScreen() {
     setRecent(next); saveRecentSearches(next)
   }
   const removeRecent = (word: string) => { const next = recent.filter((item) => item !== word); setRecent(next); saveRecentSearches(next) }
-  // 범위 안 결과가 없으면 범위 밖 글을 바로 펼쳐 보여준다
-  const farVisible = farOpen || nearby.length === 0
-  const row = (board: Board) => <SearchRow key={board.id} board={board} keyword={keyword} commentCount={commentCount(board.id)} onOpen={() => { remember(keyword); openBoard(board.id) }}/>
+  const list = (items: Board[]) => <div className="search-rows">{items.map((board) => <SearchRow key={board.id} board={board} keyword={keyword} commentCount={commentCount(board.id)} onOpen={() => { remember(keyword); openBoard(board.id) }}/>)}</div>
   return <AppShell contentClassName="search-screen">
     <form className="search-field" role="search" onSubmit={(event) => { event.preventDefault(); remember(keyword) }}>
       <Search size={17} aria-hidden="true"/>
       <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="장소, 사건, 질문 검색" aria-label="게시판 검색" enterKeyHint="search" autoFocus/>
       {query && <button type="button" className="search-clear" onClick={() => setQuery('')} aria-label="검색어 지우기"><X size={12} strokeWidth={3}/></button>}
     </form>
-    {!keyword && recent.length > 0 && <section className="search-section">
-      <div className="search-section-head"><h4>최근 검색</h4><button className="search-clear-all" onClick={() => { setRecent([]); saveRecentSearches([]) }}>전체 삭제</button></div>
-      <div className="search-recent">{recent.map((word) => <span key={word} className="search-recent-chip"><button onClick={() => setQuery(word)}>{word}</button><button className="search-recent-remove" onClick={() => removeRecent(word)} aria-label={`${word} 삭제`}><X size={12}/></button></span>)}</div>
-    </section>}
-    {matched.length === 0 ? <EmptyState title={keyword ? `'${keyword}'에 대한 게시판이 없어요` : '주변에 게시판이 없어요'}/>
-      // 참여할 수 있는 글(150m 안)을 먼저 보여주고, 범위 밖 글은 맨 아래 토글을 열어야 보인다
-      : <div className="search-rows">
-        {nearby.map(row)}
-        {far.length > 0 && <>
-          <button className={`search-far-toggle ${farVisible ? 'open' : ''}`} onClick={() => setFarOpen(!farVisible)} aria-expanded={farVisible}>
-            <Lock size={14} aria-hidden="true"/><span>범위 밖 게시판 <b>{far.length}</b></span><small>열람만</small><ChevronDown size={18} aria-hidden="true"/>
-          </button>
-          <div className={`search-far ${farVisible ? 'open' : ''}`} aria-hidden={!farVisible}><div>{far.map(row)}</div></div>
-        </>}
-      </div>}
+    {!keyword ? <>
+      {recent.length > 0 && <section className="search-section">
+        <div className="search-section-head"><h4>최근 검색</h4><button className="search-clear-all" onClick={() => { setRecent([]); saveRecentSearches([]) }}>전체 삭제</button></div>
+        <div className="search-recent">{recent.map((word) => <span key={word} className="search-recent-chip"><button onClick={() => setQuery(word)}>{word}</button><button className="search-recent-remove" onClick={() => removeRecent(word)} aria-label={`${word} 삭제`}><X size={12}/></button></span>)}</div>
+      </section>}
+      {live.length > 0 && <section className="search-section"><h4>지금 주변 소식</h4>{list(live)}</section>}
+    </>
+    : results.length > 0 ? list(results)
+    : <div className="search-empty"><strong>'{keyword}' 관련 글이 아직 없어요</strong><p>지금 보고 있는 일이라면 먼저 알려주세요.</p></div>}
   </AppShell>
 }
 
