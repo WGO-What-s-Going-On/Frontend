@@ -1314,3 +1314,5 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-tag { padding: 4px 7px; border-radius: 8px; font-size: 10px; font-weight: 800; letter-spacing: .02em; }
 .tag-hot { color: #fff; background: var(--c-urgent); }
 
+/* 카테고리 칩을 살짝 왼쪽으로: 칩 안 글자가 아래 제목 글자와 얼추 같은 줄에 오도록 */
+.ux-board-card-top > span[data-category] { margin-left: -4px; }
