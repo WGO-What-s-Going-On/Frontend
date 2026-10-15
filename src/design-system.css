@@ -1503,7 +1503,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .edit-photo-remove { width: 44px; height: 44px; display: grid; flex: none; place-items: center; margin-top: 12px; padding: 0; color: var(--c-mute); border: 1px solid var(--c-line); border-radius: 13px; background: transparent; }
 
 
-/* ---------- 댓글 공감: 문장 끝(오른쪽 아래)에 받은 공감 아이콘+숫자와 작은 웃는 얼굴 ----------
+/* ---------- 댓글 공감: 문장 끝(오른쪽 아래)에 작은 웃는 얼굴, 받은 공감은 그 오른쪽에 아이콘+숫자 ----------
    웃는 얼굴을 누르거나 꾹 누르면 공감 고르기 판이 그 아래에 열린다 */
 .comment-react-inline { display: inline-flex; align-items: center; gap: 8px; margin-left: 6px; vertical-align: -2px; white-space: nowrap; }
 .comment-react-count {
@@ -1526,7 +1526,7 @@ button.title-progress-card:active { background: #f7f8fa; }
   height: 22px;
   display: inline-grid;
   place-items: center;
-  margin: -4px -4px -4px -2px;
+  margin: -4px -2px -4px -4px;
   padding: 0;
   color: #b4b4b4;
   border: 0;
