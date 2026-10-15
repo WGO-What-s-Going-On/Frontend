@@ -38,6 +38,20 @@ npm run dev
 
 > 항상 `main` 브랜치 기준으로 보면 됩니다.
 
+## 브랜치 안내
+
+**보면 되는 건 `main` 하나입니다.** 최신 화면이 전부 여기에 모여 있어요.
+
+| 브랜치 | 상태 | 볼 필요 |
+|---|---|---|
+| `main` | 최신 화면 (모든 작업이 합쳐진 곳) | ✅ 이것만 보면 됨 |
+| `experiment/claude-sort-menu`<br>`experiment/claude-readonly-label`<br>`fix/board-card-hierarchy`<br>`fix/mockup-navigation-state`<br>`prototype/flow-only`<br>`prototype/ux-exploration`<br>`design/blue-signal` | 작업용 브랜치. 내용이 이미 `main`에 모두 들어감 | ❌ |
+| `design/coral-neighborhood`<br>`design/mint-community` | 예전 색상 시안 (코랄 · 민트). 채택 안 함 | ❌ |
+| `experiment/claude-ux-prototype` | 초기 화면 구성 실험 | ❌ |
+| `experiment/claude-spec-complete` | 기능명세서 항목을 한꺼번에 넣어 본 참고용. 필요한 것만 `main`에 옮김 | ❌ (참고용) |
+
+> 새 작업은 `experiment/…`, `fix/…` 브랜치에서 하고 끝나면 `main`에 합칩니다. 브랜치가 늘어나도 `main`만 받으면 돼요.
+
 ## 화면 볼 때 팁
 
 - **모바일 크기로 보기**: 크롬 개발자 도구(F12) → 기기 툴바(Mac `Cmd+Shift+M` / Windows `Ctrl+Shift+M`) → 폭 `402`
