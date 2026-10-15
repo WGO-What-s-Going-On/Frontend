@@ -1368,16 +1368,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 }
 .search-section { margin-bottom: 24px; }
 .search-section h4 { margin: 0 0 4px; color: var(--c-ink); font-size: 15px; font-weight: 700; }
-/* 묶음: 머리글은 상자 밖 작은 글자, 게시글은 둥근 상자 하나에 (마이페이지 메뉴 묶음과 같은 방식) */
-.search-section h4.search-group {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin: 0 0 8px 4px;
-  color: var(--c-mute);
-  font-size: 13px;
-  font-weight: 600;
-}
 .search-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .search-section-head h4 { margin: 0; }
 .search-clear-all { padding: 0; color: var(--c-mute); border: 0; background: none; font-size: 13px; }
@@ -1386,7 +1376,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .search-recent-chip button { padding: 0; color: var(--c-body); border: 0; background: none; font-size: 14px; }
 .search-recent-chip .search-recent-remove { width: 22px; height: 22px; display: grid; place-items: center; color: var(--c-mute); }
 /* 결과 한 줄: 카테고리 · 제목 · (본문에서 찾았으면 그 부분) · 거리와 시간 */
-.search-rows { display: grid; padding: 0 16px; border: 1px solid var(--c-line); border-radius: 16px; background: var(--c-canvas); }
+.search-rows, .search-far { display: grid; }
 .search-row {
   display: grid;
   gap: 5px;
@@ -1397,12 +1387,19 @@ button.title-progress-card:active { background: #f7f8fa; }
   background: none;
   text-align: left;
 }
-.search-row:last-child { border-bottom: 0; }
 .search-row-tags { display: flex; align-items: center; gap: 6px; }
 .search-row-category { color: var(--cat); font-size: 12px; font-weight: 700; }
 .search-row strong { overflow: hidden; color: var(--c-ink); font-size: 16px; font-weight: 600; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
-.search-section-out .search-row strong { color: var(--c-body); } /* 열람만 가능한 글은 한 톤 옅게 */
+.search-far .search-row strong { color: var(--c-body); } /* 150m 밖 글은 한 톤 옅게 */
+/* 150m가 끝나는 자리: 양옆 얇은 선 사이에 작은 안내 (채팅 날짜 구분선처럼) */
+.search-divider { display: flex; align-items: center; gap: 10px; margin: 18px 0 4px; color: var(--c-mute); font-size: 12px; }
+.search-divider::before,
+.search-divider::after { content: ''; flex: 1; height: 1px; background: var(--c-line); }
+.search-divider span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
 .search-row mark { color: var(--c-accent); background: none; font-weight: 700; }
 .search-screen .empty-state { margin-top: 48px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
 .search-screen .empty-state strong { color: var(--c-mute); font-size: 14px; font-weight: 500; }
 
+.search-rows > .search-row:has(+ .search-divider),
+.search-rows > .search-row:last-child,
+.search-far .search-row:last-child { border-bottom: 0; }

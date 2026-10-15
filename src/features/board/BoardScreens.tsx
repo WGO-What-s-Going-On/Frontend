@@ -98,12 +98,7 @@ export function SearchScreen() {
     setRecent(next); saveRecentSearches(next)
   }
   const removeRecent = (word: string) => { const next = recent.filter((item) => item !== word); setRecent(next); saveRecentSearches(next) }
-  const rows = (items: Board[]) => <div className="search-rows">{items.map((board) => <SearchRow key={board.id} board={board} keyword={keyword} commentCount={commentCount(board.id)} onOpen={() => { remember(keyword); openBoard(board.id) }}/>)}</div>
-  // 묶음: 작은 머리글은 상자 밖 위에, 그 묶음의 게시글은 둥근 상자 하나에 모은다 (열람만 가능은 자물쇠)
-  const group = (kind: 'in' | 'out', items: Board[]) => items.length > 0 && <section className={`search-section search-section-${kind}`}>
-    <h4 className="search-group">{kind === 'out' && <Lock size={13} aria-hidden="true"/>}{kind === 'in' ? '참여 가능' : '열람만 가능'}</h4>
-    {rows(items)}
-  </section>
+  const row = (board: Board) => <SearchRow key={board.id} board={board} keyword={keyword} commentCount={commentCount(board.id)} onOpen={() => { remember(keyword); openBoard(board.id) }}/>
   return <AppShell contentClassName="search-screen">
     <form className="search-field" role="search" onSubmit={(event) => { event.preventDefault(); remember(keyword) }}>
       <Search size={17} aria-hidden="true"/>
@@ -114,7 +109,13 @@ export function SearchScreen() {
       <div className="search-section-head"><h4>최근 검색</h4><button className="search-clear-all" onClick={() => { setRecent([]); saveRecentSearches([]) }}>전체 삭제</button></div>
       <div className="search-recent">{recent.map((word) => <span key={word} className="search-recent-chip"><button onClick={() => setQuery(word)}>{word}</button><button className="search-recent-remove" onClick={() => removeRecent(word)} aria-label={`${word} 삭제`}><X size={12}/></button></span>)}</div>
     </section>}
-    {matched.length === 0 ? <EmptyState title={keyword ? `'${keyword}'에 대한 게시판이 없어요` : '주변에 게시판이 없어요'}/> : <>{group('in', nearby)}{group('out', far)}</>}
+    {matched.length === 0 ? <EmptyState title={keyword ? `'${keyword}'에 대한 게시판이 없어요` : '주변에 게시판이 없어요'}/>
+      // 가까운 순서로 한 줄로 이어 보여주고, 150m가 끝나는 자리에만 구분선을 둔다
+      : <div className="search-rows">
+        {nearby.map(row)}
+        {far.length > 0 && <div className="search-divider" role="separator"><span><Lock size={12} aria-hidden="true"/>여기부터 150m 밖 · 열람만</span></div>}
+        <div className="search-far">{far.map(row)}</div>
+      </div>}
   </AppShell>
 }
 
