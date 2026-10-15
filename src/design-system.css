@@ -1401,3 +1401,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 .search-empty { margin-top: 48px; text-align: center; }
 .search-empty strong { display: block; color: var(--c-body); font-size: 15px; font-weight: 600; }
 .search-empty p { margin: 6px 0 0; color: var(--c-mute); font-size: 13px; }
+
+/* 답글의 ⋯ 메뉴가 열리면 그 답글을 품은 댓글도 위로 올린다. 안 그러면 다음 댓글이 메뉴 위에 그려진다 */
+.board-detail-screen .comment:has(.comment-menu-open) { position: relative; z-index: 20; }
