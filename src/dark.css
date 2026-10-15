@@ -165,3 +165,4 @@
 :root[data-theme="dark"] .search-recent-chip { background: var(--c-raised); }
 :root[data-theme="dark"] .search-field input::placeholder { color: var(--c-mute); }
 :root[data-theme="dark"] .search-clear { color: var(--c-page); background: var(--c-mute); }
+:root[data-theme="dark"] .search-section h4.search-group { color: var(--c-body); background: var(--c-canvas); }

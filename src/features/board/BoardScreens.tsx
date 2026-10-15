@@ -65,7 +65,7 @@ function readRecentSearches(): string[] {
 function saveRecentSearches(items: string[]) {
   try { localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(items)) } catch { /* 저장 못 해도 검색은 된다 */ }
 }
-type SearchScope = '전체' | '150m 안' | '150m 밖'
+type SearchScope = '전체' | '범위 안' | '범위 밖'
 
 // 검색어와 같은 부분만 파랗게
 function Highlight({ text, keyword }: { text: string; keyword: string }) {
@@ -75,21 +75,10 @@ function Highlight({ text, keyword }: { text: string; keyword: string }) {
   return <>{text.slice(0, at)}<mark>{text.slice(at, at + keyword.length)}</mark>{text.slice(at + keyword.length)}</>
 }
 
-// 본문에서만 찾았을 때 검색어 근처 한 줄
-function bodySnippet(body: string, keyword: string) {
-  const at = body.toLowerCase().indexOf(keyword.toLowerCase())
-  if (at < 0) return ''
-  const start = Math.max(0, at - 12)
-  return `${start > 0 ? '…' : ''}${body.slice(start)}`
-}
-
 function SearchRow({ board, keyword, commentCount, onOpen }: { board: Board; keyword: string; commentCount: number; onOpen: () => void }) {
-  const snippet = keyword && !board.title.toLowerCase().includes(keyword.toLowerCase()) ? bodySnippet(board.body, keyword) : ''
   return <button className="search-row" onClick={onOpen}>
     <span className="search-row-tags"><span className="search-row-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, commentCount) && <b className="board-tag tag-hot">HOT</b>}</span>
     <strong><Highlight text={board.title} keyword={keyword}/></strong>
-    {snippet && <span className="search-row-snippet"><Highlight text={snippet} keyword={keyword}/></span>}
-    <small>{board.distance}m · {board.createdAt} · 댓글 {commentCount}</small>
   </button>
 }
 
@@ -112,22 +101,26 @@ export function SearchScreen() {
   }
   const removeRecent = (word: string) => { const next = recent.filter((item) => item !== word); setRecent(next); saveRecentSearches(next) }
   const rows = (items: Board[]) => <div className="search-rows">{items.map((board) => <SearchRow key={board.id} board={board} keyword={keyword} commentCount={commentCount(board.id)} onOpen={() => { remember(keyword); openBoard(board.id) }}/>)}</div>
-  const group = (title: string, note: string, items: Board[]) => items.length > 0 && <section className="search-section"><h4>{title} <small>{note} · {items.length}</small></h4>{rows(items)}</section>
-  const shown = scope === '150m 안' ? nearby : scope === '150m 밖' ? far : matched
+  // 묶음 머리: 게시글 줄과 헷갈리지 않게 회색 띠 + 아이콘 (참여 가능 = 파란 점, 열람만 가능 = 자물쇠)
+  const group = (kind: 'in' | 'out', items: Board[]) => items.length > 0 && <section className="search-section">
+    <h4 className={`search-group search-group-${kind}`}>{kind === 'in' ? <i aria-hidden="true"/> : <Lock size={13} aria-hidden="true"/>}{kind === 'in' ? '참여 가능' : '열람만 가능'}</h4>
+    {rows(items)}
+  </section>
+  const shown = scope === '범위 안' ? nearby : scope === '범위 밖' ? far : matched
   return <AppShell contentClassName="search-screen">
     <form className="search-field" role="search" onSubmit={(event) => { event.preventDefault(); remember(keyword) }}>
       <Search size={17} aria-hidden="true"/>
       <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="장소, 사건, 질문 검색" aria-label="게시판 검색" enterKeyHint="search" autoFocus/>
       {query && <button type="button" className="search-clear" onClick={() => setQuery('')} aria-label="검색어 지우기"><X size={12} strokeWidth={3}/></button>}
     </form>
-    <FilterChips className="ux-category-filters search-scope" options={(['전체', '150m 안', '150m 밖'] as const).map((item) => ({ value: item, count: item === '전체' ? matched.length : item === '150m 안' ? nearby.length : far.length }))} selected={scope} onSelect={setScope}/>
+    <FilterChips className="ux-category-filters search-scope" options={['전체', '범위 안', '범위 밖'] as const} selected={scope} onSelect={setScope}/>
     {!keyword && recent.length > 0 && <section className="search-section">
       <div className="search-section-head"><h4>최근 검색</h4><button className="search-clear-all" onClick={() => { setRecent([]); saveRecentSearches([]) }}>전체 삭제</button></div>
       <div className="search-recent">{recent.map((word) => <span key={word} className="search-recent-chip"><button onClick={() => setQuery(word)}>{word}</button><button className="search-recent-remove" onClick={() => removeRecent(word)} aria-label={`${word} 삭제`}><X size={12}/></button></span>)}</div>
     </section>}
     {shown.length === 0 ? <EmptyState title={keyword && matched.length === 0 ? `'${keyword}'에 대한 게시판이 없어요` : `${scope}에는 ${keyword ? `'${keyword}' ` : ''}게시판이 없어요`}/>
-      : scope === '전체' ? <>{group('참여 가능', '150m 안', nearby)}{group('열람만 가능', '150m 밖', far)}</>
-      : group(scope === '150m 안' ? '참여 가능' : '열람만 가능', scope, shown)}
+      : scope === '전체' ? <>{group('in', nearby)}{group('out', far)}</>
+      : group(scope === '범위 안' ? 'in' : 'out', shown)}
   </AppShell>
 }
 

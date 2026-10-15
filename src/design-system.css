@@ -1369,7 +1369,21 @@ button.title-progress-card:active { background: #f7f8fa; }
 .search-screen .search-scope { margin-bottom: 22px; padding-right: 0; }
 .search-section { margin-bottom: 26px; }
 .search-section h4 { margin: 0 0 4px; color: var(--c-ink); font-size: 15px; font-weight: 700; }
-.search-section h4 small { margin-left: 6px; color: var(--c-mute); font-size: 13px; font-weight: 500; }
+/* 묶음 머리: 연한 회색 띠 안에 작은 글자 + 아이콘 → 게시글 줄과 바로 구분된다 */
+.search-section h4.search-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 2px;
+  padding: 8px 12px;
+  color: var(--c-body);
+  border-radius: 10px;
+  background: #f4f5f7;
+  font-size: 13px;
+  font-weight: 700;
+}
+.search-group-in i { width: 7px; height: 7px; border-radius: 50%; background: var(--c-accent); }
+.search-group-out svg { color: var(--c-mute); }
 .search-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .search-section-head h4 { margin: 0; }
 .search-clear-all { padding: 0; color: var(--c-mute); border: 0; background: none; font-size: 13px; }
@@ -1393,11 +1407,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .search-row-tags { display: flex; align-items: center; gap: 6px; }
 .search-row-category { color: var(--cat); font-size: 12px; font-weight: 700; }
 .search-row strong { overflow: hidden; color: var(--c-ink); font-size: 16px; font-weight: 600; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
-.search-row-snippet { overflow: hidden; color: var(--c-body); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
-.search-row small { color: var(--c-mute); font-size: 12px; }
 .search-row mark { color: var(--c-accent); background: none; font-weight: 700; }
 .search-screen .empty-state { margin-top: 48px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
 .search-screen .empty-state strong { color: var(--c-mute); font-size: 14px; font-weight: 500; }
 
-.search-scope button span { margin-left: 4px; font-variant-numeric: tabular-nums; opacity: .6; }
-.search-scope button.selected span { opacity: .85; }
