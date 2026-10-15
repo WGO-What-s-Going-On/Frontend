@@ -3,6 +3,7 @@ import { RotateCw } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { useApp } from '../../context/AppContext'
+import { isHotBoard } from '../../types/domain'
 import type { Board } from '../../types/domain'
 import { IncidentBottomSheet } from './IncidentBottomSheet'
 import { MapView } from './MapView'
@@ -11,11 +12,6 @@ import { ME, boardPosition, type Point } from './mapWorld'
 type MapFilter = '전체' | '긴급/사고' | '도움요청' | 'HOT'
 
 const filters: MapFilter[] = ['전체', '긴급/사고', '도움요청', 'HOT']
-
-// HOT: 조회수나 댓글이 많이 몰린 진행 중 게시판 (실제 기준은 백엔드 활성도 점수)
-function isHot(board: Board, commentCount: number) {
-  return board.status === '실시간' && (board.views >= 100 || commentCount >= 5)
-}
 
 function filterBoards(boards: Board[], filter: MapFilter, hotIds: Set<string>) {
   // 종료·숨김 게시판은 지도에서 뺀다
@@ -32,7 +28,7 @@ export function MapScreen() {
   const [selectedBoard, setSelectedBoard] = useState<Board>()
   const [searchCenter, setSearchCenter] = useState<Point>(ME)
   const [viewCenter, setViewCenter] = useState<Point>(ME)
-  const hotIds = useMemo(() => new Set(boards.filter((board) => isHot(board, comments.filter((comment) => comment.boardId === board.id).length)).map((board) => board.id)), [boards, comments])
+  const hotIds = useMemo(() => new Set(boards.filter((board) => isHotBoard(board, comments.filter((comment) => comment.boardId === board.id).length)).map((board) => board.id)), [boards, comments])
   const nearby = filterBoards(boards, filter, hotIds)
   const selectFilter = (next: MapFilter) => { setFilter(next); setSelectedBoard(undefined) }
   // 지도를 멀리 옮기면 '이 지역에서 다시 찾기' (MAP-F09, 실제로는 화면 영역으로 게시판을 다시 조회)

@@ -84,3 +84,8 @@ export interface Report {
 export function myReactions(board: Board): PostReaction[] {
   return board.myReactions ?? (board.reactedByMe ? [board.reactedByMe] : [])
 }
+
+// HOT: 조회수나 댓글이 많이 몰린 진행 중 게시판 (실제 기준은 백엔드 활성도 점수). 지도 HOT 필터와 게시판 HOT 태그가 같이 쓴다.
+export function isHotBoard(board: Board, commentCount: number) {
+  return board.status === '실시간' && (board.views >= 100 || commentCount >= 5)
+}

@@ -152,3 +152,7 @@
 /* 빈 화면 안내는 본문보다 한 단계 옅게 (라이트 모드의 회색 안내와 같은 역할) */
 :root[data-theme="dark"] .empty-state strong { color: var(--c-body); }
 :root[data-theme="dark"] .secondary-button { color: var(--c-ink); border-color: var(--c-line); background: var(--c-canvas); }
+
+/* 게시판 검색 버튼 */
+:root[data-theme="dark"] .board-search-chip { color: var(--c-body); border-color: var(--c-line); background: var(--c-canvas); }
+
