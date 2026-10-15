@@ -1525,3 +1525,12 @@ button.title-progress-card:active { background: #f7f8fa; }
 .reply-mention button { width: 18px; height: 18px; display: grid; flex: none; place-items: center; padding: 0; color: inherit; border: 0; border-radius: 50%; background: none; opacity: .7; }
 .reply-mention button:active { opacity: 1; }
 
+
+/* 답글 대상 댓글: 닉네임을 입력칸의 @닉네임과 같은 연한 파랑으로 표시해서 누구에게 답하는지 바로 보이게 */
+.board-detail-screen .comment-head strong { padding: 1px 0; border-radius: 6px; transition: background-color .18s ease, color .18s ease, padding .18s ease, margin .18s ease; }
+.board-detail-screen .comment.reply-target > .comment-head strong {
+  margin: 0 -2px 0 -6px;
+  padding: 1px 6px;
+  color: var(--c-accent);
+  background: var(--c-accent-soft);
+}

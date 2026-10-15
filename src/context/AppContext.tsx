@@ -145,7 +145,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const showToast = (message: string) => {
     setToast(message)
-    window.setTimeout(() => setToast(''), 1800)
+    window.setTimeout(() => setToast(''), 1200)
   }
   const go = (next: Screen) => navigate(pathForScreen(next, currentBoardId))
   // 뒤로 가기 전환: 화면이 실제로 바뀐 뒤(아래 useLayoutEffect)에 겹쳐 전환을 마친다.
