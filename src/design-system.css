@@ -1613,3 +1613,25 @@ button.title-progress-card:active { background: #f7f8fa; }
 }
 .comment-reaction-chip.mine { color: var(--c-accent); font-weight: 700; }
 .comment-reaction-chip:disabled { cursor: default; }
+
+/* 댓글 배치: 닉네임 옆에 공감, 아래 줄에 시간 · 답글 달기 */
+.board-detail-screen .comment-reactions { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 0 8px; }
+.board-detail-screen .comment-actions { gap: 10px; }
+.board-detail-screen .comment-time { color: var(--c-mute); font-size: 12px; font-variant-numeric: tabular-nums; }
+.board-detail-screen .comment-actions .comment-reply-button { font-size: 12px; }
+/* 닉네임 줄의 기본 버튼 모양(테두리·배경)이 공감 표시에 씌워지지 않게 */
+.board-detail-screen .comment-reactions .comment-reaction-chip {
+  width: auto;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  font-size: 12px;
+  line-height: 1;
+}
+.board-detail-screen .comment-identity > div { align-items: center; }
+.board-detail-screen .comment-reactions .comment-reaction-chip { color: var(--c-mute); font-weight: 500; }
+.board-detail-screen .comment-reactions .comment-reaction-chip.mine { color: var(--c-accent); font-weight: 700; }
