@@ -19,7 +19,7 @@ const bubbles = [
 const dayTimeline = [
   [1, 300],   // 알림이 내려온다
   [2, 1000],  // 게시글 카드
-  [3, 1500],  // 알림이 올라간다, 첫 이웃 입력 중
+  [3, 1500],  // 첫 이웃 입력 중
   [4, 1900],  // 첫 댓글
   [5, 2300],  // 둘째 이웃 입력 중
   [6, 2700],  // 둘째 댓글
@@ -42,7 +42,7 @@ function DayScene() {
   }, [reduced])
   const on = (from: number) => step >= from && step < 8 ? 'on' : ''
   return <div className="login-day" aria-hidden="true">
-    <div className={`day-toast ${step >= 1 && step < 3 ? 'on' : ''}`}><Bell size={18} strokeWidth={2.2}/><span>주변에 새 글이 올라왔어요</span></div>
+    <div className={`day-toast ${on(1)}`}><Bell size={18} strokeWidth={2.2}/><span>주변에 새 글이 올라왔어요</span></div>
     <div className="day-stage">
       <div className={`day-card ${on(2)}`}>
         <div className="day-card-top"><span className="day-category">긴급/사고</span><b className="day-hot">HOT</b><small>24m · 방금 전</small></div>
@@ -51,7 +51,7 @@ function DayScene() {
       <div className="day-thread">
         <div className={`day-comment ${on(3)}`}><small>현장확인자 · 30m</small>{step === 3 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">편의점 앞에서 불 났어요</span>}</div>
         <div className={`day-comment ${on(5)}`}><small>퇴근길 · 60m</small>{step === 5 ? <span className="day-typing"><i/><i/><i/></span> : <span className="day-bubble">4번 출구 막혔어요! 2번으로 돌아가세요</span>}</div>
-        <div className={`day-comment mine ${on(7)}`}><span className="day-bubble">감사해요</span></div>
+        <div className={`day-comment mine ${on(7)}`}><span className="day-bubble">감사해요!</span></div>
       </div>
     </div>
   </div>
