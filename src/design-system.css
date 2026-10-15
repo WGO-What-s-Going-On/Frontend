@@ -1691,3 +1691,10 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 지도 시트의 본문은 한 줄만 보이고 '…'로 끊는다 (나머지는 자세히 보기에서) */
 .map-bottom-sheet p { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
 
+
+/* 게시글 반응 칸: 글자·아이콘 한 단계 크게, 여백은 그대로 촘촘하게 */
+.board-detail-screen .detail-inline-reactions { padding: 8px 12px; }
+.board-detail-screen .detail-inline-reactions .post-reactions button { gap: 5px; padding: 4px 0; font-size: 13px; }
+.board-detail-screen .detail-inline-reactions .post-reactions button b { font-size: 13px; }
+.board-detail-screen .detail-inline-reactions .post-reactions button span { font-size: 12px; }
+.board-detail-screen .detail-inline-reactions .post-reactions button svg { width: 17px; height: 17px; }
