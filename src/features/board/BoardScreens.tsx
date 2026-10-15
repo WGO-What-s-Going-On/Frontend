@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Camera, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, X } from 'lucide-react'
+import { ArrowLeft, Camera, Check, CircleAlert, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
@@ -13,7 +13,7 @@ import { IconButton } from '../../components/ui/IconButton'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
 import { isHotBoard } from '../../types/domain'
-import type { Board, Category, Comment } from '../../types/domain'
+import type { Board, Category, Comment, CommentReaction } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { RADIUS } from '../map/mapWorld'
 import { pathForScreen } from '../../navigation'
@@ -135,33 +135,57 @@ export function SearchScreen() {
   </AppShell>
 }
 
+// 댓글 공감 (카톡 반응처럼): 문장 끝 작은 아이콘을 누르거나 꾹 누르면 고르기 판이 열리고, 받은 공감은 그 앞에 아이콘+숫자로 작게
+const commentReactionList: CommentReaction[] = ['도움돼요', '맞아요', '정보가 달라요']
+const commentReactionIcon: Record<CommentReaction, typeof ThumbsUp> = { '도움돼요': ThumbsUp, '맞아요': Check, '정보가 달라요': CircleAlert }
+const PICKER_WIDTH = 236
+
 function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, replyTargetId, readOnly = false }: { comment: Comment; replies?: Comment[]; onReply: (comment: Comment) => void; onEdit: (comment: Comment) => void; isReply?: boolean; replyTargetId?: string; readOnly?: boolean }) {
-  const { user, deleteComment, reportTarget, blockUser, toggleCommentLike } = useApp()
+  const { user, deleteComment, reportTarget, blockUser, toggleCommentLike, reactToComment } = useApp()
   const [menu, setMenu] = useState<'actions' | 'report' | null>(null)
+  const [picker, setPicker] = useState<{ top: number; left: number } | null>(null)
+  const pickerRef = useRef<HTMLDivElement>(null)
+  const addRef = useRef<HTMLButtonElement>(null)
+  const pressTimer = useRef<number | null>(null)
+  const longPressed = useRef(false)
   const [photoOpen, setPhotoOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const articleRef = useRef<HTMLElement>(null)
   const reportReasons = ['부정확한 정보', '광고·홍보', '욕설·비방', '개인정보 노출']
 
   useEffect(() => {
-    if (!menu) return
-    // 메뉴 바깥을 누르면 닫는다. 이 댓글의 ⋯ 버튼은 제외: 버튼 자체가 열고 닫기를 맡는다 (안 그러면 닫혔다가 바로 다시 열림)
+    if (!menu && !picker) return
+    // 메뉴·공감 판 바깥을 누르면 닫는다. 이 댓글의 여는 버튼은 제외: 버튼 자체가 열고 닫기를 맡는다 (안 그러면 닫혔다가 바로 다시 열림)
     const closeMenu = (event: PointerEvent) => {
       const target = event.target as Element
-      if (menuRef.current?.contains(target)) return
-      const trigger = target.closest('.comment-icon-button')
+      if (menuRef.current?.contains(target) || pickerRef.current?.contains(target)) return
+      const trigger = target.closest('.comment-icon-button, .comment-react-add')
       if (trigger && trigger.closest('.comment') === articleRef.current) return
-      setMenu(null)
+      setMenu(null); setPicker(null)
     }
     document.addEventListener('pointerdown', closeMenu)
     return () => document.removeEventListener('pointerdown', closeMenu)
-  }, [menu])
+  }, [menu, picker])
 
-  return <article ref={articleRef} className={`comment comment-clickable ${isReply ? 'reply-comment' : ''} ${menu ? 'comment-menu-open' : ''} ${replyTargetId === comment.id ? 'reply-target' : ''}`} tabIndex={0} aria-label={`${comment.authorName} 댓글에 댓글 작성`} onClick={(event) => { const target = event.target as HTMLElement; if (target.closest('.comment') !== event.currentTarget || target.closest('button, a, input, textarea, select, .context-menu') || window.getSelection()?.toString()) return; event.stopPropagation(); onReply(comment) }} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onReply(comment) } }}>
-    <div className="comment-head"><div className="comment-identity"><div><strong>{comment.authorName}</strong><small>{comment.createdAt}{comment.edited && <span className="comment-edited">수정됨</span>}</small></div></div><IconButton className="comment-icon-button" label="댓글 메뉴" onClick={() => setMenu(menu ? null : 'actions')} expanded={Boolean(menu)}><MoreHorizontal size={18}/></IconButton></div>
-    {comment.body && <p>{comment.body}</p>}{comment.imagePlaceholder && <div className="comment-image-placeholder">[이미지]</div>}{comment.imageUrl && <button className="comment-photo" onClick={() => setPhotoOpen(true)} aria-label="댓글 사진 크게 보기"><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></button>}
+  // 공감 판은 문장 끝 아이콘 바로 아래에 열고, 댓글 폭 밖으로 넘치지 않게 좌우를 맞춘다
+  const openPicker = () => {
+    const button = addRef.current?.getBoundingClientRect()
+    const article = articleRef.current?.getBoundingClientRect()
+    if (!button || !article) return
+    const left = Math.min(Math.max(button.right - PICKER_WIDTH + 8, 0), article.width - PICKER_WIDTH)
+    setMenu(null)
+    setPicker({ top: button.bottom - article.top + 6, left })
+  }
+  const startPress = () => { longPressed.current = false; pressTimer.current = window.setTimeout(() => { longPressed.current = true; openPicker(); navigator.vibrate?.(8) }, 400) }
+  const endPress = () => { if (pressTimer.current) window.clearTimeout(pressTimer.current); pressTimer.current = null }
+  const reacted = commentReactionList.filter((reaction) => comment.reactions[reaction] > 0 || comment.reactedByMe === reaction)
+
+  return <article ref={articleRef} className={`comment comment-clickable ${isReply ? 'reply-comment' : ''} ${menu || picker ? 'comment-menu-open' : ''} ${replyTargetId === comment.id ? 'reply-target' : ''}`} tabIndex={0} aria-label={`${comment.authorName} 댓글에 댓글 작성`} onClick={(event) => { const target = event.target as HTMLElement; if (target.closest('.comment') !== event.currentTarget || target.closest('button, a, input, textarea, select, .context-menu') || window.getSelection()?.toString()) return; event.stopPropagation(); onReply(comment) }} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onReply(comment) } }}>
+    <div className="comment-head"><div className="comment-identity"><div><strong>{comment.authorName}</strong><small>{comment.createdAt}{comment.edited && <span className="comment-edited">수정됨</span>}</small></div></div><IconButton className="comment-icon-button" label="댓글 메뉴" onClick={() => { setPicker(null); setMenu(menu ? null : 'actions') }} expanded={Boolean(menu)}><MoreHorizontal size={18}/></IconButton></div>
+    {comment.body && <p>{comment.body}<span className="comment-react-inline">{reacted.map((reaction) => { const Icon = commentReactionIcon[reaction]; return <button key={reaction} className={`comment-react-count ${comment.reactedByMe === reaction ? 'selected' : ''}`} onClick={() => reactToComment(comment.id, reaction)} disabled={readOnly} aria-pressed={comment.reactedByMe === reaction} aria-label={`${reaction} ${comment.reactions[reaction]}`}><Icon size={12} strokeWidth={2.2}/>{comment.reactions[reaction]}</button> })}{!readOnly && <button ref={addRef} className={`comment-react-add ${picker ? 'open' : ''}`} aria-label="공감 남기기" aria-expanded={Boolean(picker)} onPointerDown={startPress} onPointerUp={endPress} onPointerLeave={endPress} onPointerCancel={endPress} onContextMenu={(event) => event.preventDefault()} onClick={() => { if (longPressed.current) { longPressed.current = false; return } if (picker) setPicker(null); else openPicker() }}><SmilePlus size={15}/></button>}</span></p>}{comment.imagePlaceholder && <div className="comment-image-placeholder">[이미지]</div>}{comment.imageUrl && <button className="comment-photo" onClick={() => setPhotoOpen(true)} aria-label="댓글 사진 크게 보기"><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></button>}
     <div className="comment-actions"><button className={`comment-like ${comment.likedByMe ? 'liked' : ''}`} onClick={() => toggleCommentLike(comment.id)} disabled={readOnly} aria-label={`좋아요 ${comment.likes ?? 0}개`} aria-pressed={Boolean(comment.likedByMe)}><HeartIcon size={17} filled={comment.likedByMe}/><span>{comment.likes ?? 0}</span></button>{!readOnly && <button className="comment-reply-button" onClick={() => onReply(comment)}>답글 달기</button>}</div>
     {!isReply && replies.length > 0 && <div className="comment-replies">{replies.map((reply) => <CommentItem key={reply.id} comment={reply} onReply={onReply} onEdit={onEdit} isReply replyTargetId={replyTargetId} readOnly={readOnly}/>)}</div>}
+    {picker && <div ref={pickerRef} className="context-menu comment-reaction-picker" style={{ top: picker.top, left: picker.left }} role="menu" aria-label="공감 고르기">{commentReactionList.map((reaction) => { const Icon = commentReactionIcon[reaction]; return <button key={reaction} role="menuitemradio" aria-checked={comment.reactedByMe === reaction} className={comment.reactedByMe === reaction ? 'selected' : ''} onClick={() => { reactToComment(comment.id, reaction); setPicker(null) }}><Icon size={20} strokeWidth={2}/><span>{reaction}</span></button> })}</div>}
     {menu && <div ref={menuRef} className={`context-menu comment-context-menu ${menu === 'report' ? 'comment-report-menu' : ''}`} role="menu" aria-label={menu === 'report' ? '댓글 신고 사유' : '댓글 메뉴'}>{comment.authorId === user.id ? <><button onClick={() => { onEdit(comment); setMenu(null) }}>수정</button><button onClick={() => deleteComment(comment.id)}>삭제</button></> : menu === 'actions' ? <><button onClick={() => setMenu('report')}>신고</button><button onClick={() => { blockUser(comment.authorId); setMenu(null) }}>차단</button></> : <><strong>신고 사유</strong>{reportReasons.map((reason) => <button key={reason} onClick={() => { reportTarget('댓글', comment.id, reason); setMenu(null) }}>{reason}</button>)}<button className="comment-report-back" onClick={() => setMenu('actions')}>뒤로</button></>}</div>}
     {photoOpen && comment.imageUrl && <div className="comment-photo-modal" role="dialog" aria-label="현장 사진 보기" onClick={() => setPhotoOpen(false)}><button aria-label="사진 닫기"><X size={22}/></button><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></div>}
   </article>
