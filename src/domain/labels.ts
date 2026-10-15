@@ -15,7 +15,7 @@ export const categoryLabel: Record<Category, string> = {
 export const reactionLabel: Record<PostReaction, { full: string; short: string }> = {
   '저도 궁금해요': { full: '저도 궁금해요', short: '궁금' },
   '지금도 그래요': { full: '아직 진행 중이에요', short: '진행 중' },
-  '도움 됐어요': { full: '도움됐어요', short: '도움됨' },
+  '도움 됐어요': { full: '유익해요', short: '유익함' },
   '이제 끝났어요': { full: '끝났어요', short: '끝남' },
 }
 
