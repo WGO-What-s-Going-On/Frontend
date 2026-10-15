@@ -166,3 +166,9 @@
 :root[data-theme="dark"] .search-field input::placeholder { color: var(--c-mute); }
 :root[data-theme="dark"] .search-clear { color: var(--c-page); background: var(--c-mute); }
 :root[data-theme="dark"] .tag-ended { background: var(--c-raised); }
+
+/* 댓글 [공감 | ⋯] 상자와 공감 판 */
+:root[data-theme="dark"] .comment-tools { background: var(--c-canvas); }
+:root[data-theme="dark"] .comment-tools > i { background: var(--c-line); }
+:root[data-theme="dark"] .board-detail-screen .comment-reaction-picker { background: var(--c-raised); box-shadow: 0 0 0 1px var(--c-line), 0 12px 32px rgba(0, 0, 0, .5); }
+:root[data-theme="dark"] .comment-reaction-picker button:active { background: #4c525e; }

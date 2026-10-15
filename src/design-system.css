@@ -1531,3 +1531,87 @@ button.title-progress-card:active { background: #f7f8fa; }
   color: var(--c-accent);
   background: var(--c-accent-soft);
 }
+
+/* ---------- 댓글 오른쪽 위 작은 상자: [공감 | ⋯] ----------
+   공감을 누르면 아래에 고르기 판, 고른 공감은 댓글 아래 '답글 달기' 옆에 파란 테두리로 붙는다 */
+.comment-tools {
+  display: flex;
+  flex: none;
+  align-items: center;
+  height: 26px;
+  margin: -4px 0;
+  padding: 0 2px;
+  border-radius: 8px;
+  background: #f2f4f6;
+}
+.comment-tools > i { width: 1px; height: 10px; background: #d5d9df; }
+.board-detail-screen .comment-tools .comment-react-button,
+.board-detail-screen .comment-tools .comment-icon-button {
+  width: 28px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  color: #9aa1ad;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+.board-detail-screen .comment-tools .comment-react-button[aria-expanded="true"] { color: var(--c-accent); }
+.board-detail-screen .comments-section > .comment > .comment-head .comment-tools .comment-icon-button { margin-right: 0; }
+.board-detail-screen .comments-section > .comment > .comment-head .comment-tools { margin-right: 4px; }
+
+/* 공감 고르기 판 (상자 바로 아래, 오른쪽 맞춤) */
+.board-detail-screen .comment-reaction-picker {
+  position: absolute;
+  z-index: 12;
+  top: 30px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+  width: 236px;
+  margin: 0;
+  padding: 6px;
+  border: 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(23, 25, 30, .06), 0 8px 24px rgba(23, 25, 30, .14);
+  transform-origin: top right;
+  animation: popover-in .16s cubic-bezier(.2, .8, .2, 1);
+}
+.comment-reaction-picker button {
+  flex: 1;
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+  padding: 9px 2px 7px;
+  color: var(--c-body);
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.comment-reaction-picker button:active { background: #f2f4f6; }
+.comment-reaction-picker button.selected { color: var(--c-accent); background: var(--c-accent-soft); }
+
+/* 내가 고른 공감: 답글 달기 옆 파란 테두리 칩 (누르면 취소) */
+.board-detail-screen .comment-actions { gap: 10px; }
+.comment-reaction-chip {
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 8px;
+  color: var(--c-accent);
+  border: 1px solid var(--c-accent);
+  border-radius: 999px;
+  background: transparent;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  animation: popover-in .16s cubic-bezier(.2, .8, .2, 1);
+}
+.comment-reaction-chip:disabled { cursor: default; }
