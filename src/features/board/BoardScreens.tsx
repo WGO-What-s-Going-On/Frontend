@@ -65,7 +65,6 @@ function readRecentSearches(): string[] {
 function saveRecentSearches(items: string[]) {
   try { localStorage.setItem(RECENT_SEARCH_KEY, JSON.stringify(items)) } catch { /* 저장 못 해도 검색은 된다 */ }
 }
-type SearchScope = '전체' | '범위 안' | '범위 밖'
 
 // 검색어와 같은 부분만 파랗게
 function Highlight({ text, keyword }: { text: string; keyword: string }) {
@@ -85,7 +84,6 @@ function SearchRow({ board, keyword, commentCount, onOpen }: { board: Board; key
 export function SearchScreen() {
   const { boards, comments, openBoard } = useApp()
   const [query, setQuery] = useState('')
-  const [scope, setScope] = useState<SearchScope>('전체')
   const [recent, setRecent] = useState(readRecentSearches)
   const keyword = query.trim()
   const matched = boards
@@ -101,26 +99,22 @@ export function SearchScreen() {
   }
   const removeRecent = (word: string) => { const next = recent.filter((item) => item !== word); setRecent(next); saveRecentSearches(next) }
   const rows = (items: Board[]) => <div className="search-rows">{items.map((board) => <SearchRow key={board.id} board={board} keyword={keyword} commentCount={commentCount(board.id)} onOpen={() => { remember(keyword); openBoard(board.id) }}/>)}</div>
-  // 묶음 머리: 게시글 줄과 헷갈리지 않게 회색 띠 + 아이콘 (참여 가능 = 파란 점, 열람만 가능 = 자물쇠)
-  const group = (kind: 'in' | 'out', items: Board[]) => items.length > 0 && <section className="search-section">
-    <h4 className={`search-group search-group-${kind}`}>{kind === 'in' ? <i aria-hidden="true"/> : <Lock size={13} aria-hidden="true"/>}{kind === 'in' ? '참여 가능' : '열람만 가능'}</h4>
+  // 묶음: 작은 머리글은 상자 밖 위에, 그 묶음의 게시글은 둥근 상자 하나에 모은다 (열람만 가능은 자물쇠)
+  const group = (kind: 'in' | 'out', items: Board[]) => items.length > 0 && <section className={`search-section search-section-${kind}`}>
+    <h4 className="search-group">{kind === 'out' && <Lock size={13} aria-hidden="true"/>}{kind === 'in' ? '참여 가능' : '열람만 가능'}</h4>
     {rows(items)}
   </section>
-  const shown = scope === '범위 안' ? nearby : scope === '범위 밖' ? far : matched
   return <AppShell contentClassName="search-screen">
     <form className="search-field" role="search" onSubmit={(event) => { event.preventDefault(); remember(keyword) }}>
       <Search size={17} aria-hidden="true"/>
       <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="장소, 사건, 질문 검색" aria-label="게시판 검색" enterKeyHint="search" autoFocus/>
       {query && <button type="button" className="search-clear" onClick={() => setQuery('')} aria-label="검색어 지우기"><X size={12} strokeWidth={3}/></button>}
     </form>
-    <FilterChips className="ux-category-filters search-scope" options={['전체', '범위 안', '범위 밖'] as const} selected={scope} onSelect={setScope}/>
     {!keyword && recent.length > 0 && <section className="search-section">
       <div className="search-section-head"><h4>최근 검색</h4><button className="search-clear-all" onClick={() => { setRecent([]); saveRecentSearches([]) }}>전체 삭제</button></div>
       <div className="search-recent">{recent.map((word) => <span key={word} className="search-recent-chip"><button onClick={() => setQuery(word)}>{word}</button><button className="search-recent-remove" onClick={() => removeRecent(word)} aria-label={`${word} 삭제`}><X size={12}/></button></span>)}</div>
     </section>}
-    {shown.length === 0 ? <EmptyState title={keyword && matched.length === 0 ? `'${keyword}'에 대한 게시판이 없어요` : `${scope}에는 ${keyword ? `'${keyword}' ` : ''}게시판이 없어요`}/>
-      : scope === '전체' ? <>{group('in', nearby)}{group('out', far)}</>
-      : group(scope === '범위 안' ? 'in' : 'out', shown)}
+    {matched.length === 0 ? <EmptyState title={keyword ? `'${keyword}'에 대한 게시판이 없어요` : '주변에 게시판이 없어요'}/> : <>{group('in', nearby)}{group('out', far)}</>}
   </AppShell>
 }
 

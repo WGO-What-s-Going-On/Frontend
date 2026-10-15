@@ -1337,7 +1337,7 @@ button.title-progress-card:active { background: #f7f8fa; }
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 4px 0 14px;
+  margin: 4px 0 22px;
   padding: 0 12px;
   color: var(--c-mute);
   border-radius: 12px;
@@ -1366,24 +1366,18 @@ button.title-progress-card:active { background: #f7f8fa; }
   border-radius: 50%;
   background: #b6bbc4;
 }
-.search-screen .search-scope { margin-bottom: 22px; padding-right: 0; }
-.search-section { margin-bottom: 26px; }
+.search-section { margin-bottom: 24px; }
 .search-section h4 { margin: 0 0 4px; color: var(--c-ink); font-size: 15px; font-weight: 700; }
-/* 묶음 머리: 연한 회색 띠 안에 작은 글자 + 아이콘 → 게시글 줄과 바로 구분된다 */
+/* 묶음: 머리글은 상자 밖 작은 글자, 게시글은 둥근 상자 하나에 (마이페이지 메뉴 묶음과 같은 방식) */
 .search-section h4.search-group {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin: 0 0 2px;
-  padding: 8px 12px;
-  color: var(--c-body);
-  border-radius: 10px;
-  background: #f4f5f7;
+  gap: 5px;
+  margin: 0 0 8px 4px;
+  color: var(--c-mute);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 600;
 }
-.search-group-in i { width: 7px; height: 7px; border-radius: 50%; background: var(--c-accent); }
-.search-group-out svg { color: var(--c-mute); }
 .search-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .search-section-head h4 { margin: 0; }
 .search-clear-all { padding: 0; color: var(--c-mute); border: 0; background: none; font-size: 13px; }
@@ -1392,7 +1386,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .search-recent-chip button { padding: 0; color: var(--c-body); border: 0; background: none; font-size: 14px; }
 .search-recent-chip .search-recent-remove { width: 22px; height: 22px; display: grid; place-items: center; color: var(--c-mute); }
 /* 결과 한 줄: 카테고리 · 제목 · (본문에서 찾았으면 그 부분) · 거리와 시간 */
-.search-rows { display: grid; }
+.search-rows { display: grid; padding: 0 16px; border: 1px solid var(--c-line); border-radius: 16px; background: var(--c-canvas); }
 .search-row {
   display: grid;
   gap: 5px;
@@ -1407,6 +1401,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .search-row-tags { display: flex; align-items: center; gap: 6px; }
 .search-row-category { color: var(--cat); font-size: 12px; font-weight: 700; }
 .search-row strong { overflow: hidden; color: var(--c-ink); font-size: 16px; font-weight: 600; line-height: 1.4; text-overflow: ellipsis; white-space: nowrap; }
+.search-section-out .search-row strong { color: var(--c-body); } /* 열람만 가능한 글은 한 톤 옅게 */
 .search-row mark { color: var(--c-accent); background: none; font-weight: 700; }
 .search-screen .empty-state { margin-top: 48px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
 .search-screen .empty-state strong { color: var(--c-mute); font-size: 14px; font-weight: 500; }
