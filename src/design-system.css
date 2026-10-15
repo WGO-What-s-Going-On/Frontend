@@ -1507,8 +1507,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comments-more {
   position: sticky;
   z-index: 3;
-  bottom: -23px; /* 스크롤 영역 아래 여백(108px) 안쪽 기준: 입력창 79px + 6px - 108px */
+  bottom: -29px; /* 스크롤 영역 아래 여백(108px) 안쪽 기준: 입력창 79px에 바로 붙임 (79 - 108) */
   margin-top: 0;
-  padding: 22px 0 8px;
+  padding: 22px 0 2px;
   background: linear-gradient(rgba(255, 255, 255, 0), var(--c-page) 60%); /* 뒤로 지나가는 댓글은 위쪽에서 흐려진다 */
 }
