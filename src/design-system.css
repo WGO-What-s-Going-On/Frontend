@@ -452,33 +452,34 @@ select:focus-visible,
 /* 댓글 ⋯ 메뉴는 게시글 메뉴보다 한 단계 연하게 */
 .board-detail-screen .comment-icon-button { color: #b4b4b4; }
 
-/* 댓글 아래: 받은 공감만 아이콘+숫자 칩으로 (카톡 반응처럼), 그 옆 답글 달기. 내가 고른 공감은 파랑 */
+/* 댓글 아래 한 줄: 왼쪽 답글 달기, 오른쪽 끝(웃는 얼굴 버튼 아래)에 받은 공감을 작은 아이콘+숫자로만. 내가 고른 공감은 파랑 */
 .board-detail-screen .comment-actions {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
-  margin-top: 6px;
+  min-height: 24px;
+  margin-top: 4px;
   margin-bottom: -2px;
 }
+.comment-reaction-summary { display: flex; align-items: center; gap: 10px; margin-left: auto; margin-right: 8px; }
 .comment-reaction-chip {
-  height: 22px;
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 0 7px;
-  color: var(--c-body);
-  border: 1px solid transparent;
-  border-radius: 999px;
-  background: #f2f4f6;
-  font-size: 11px;
+  padding: 2px 0;
+  color: var(--c-mute);
+  border: 0;
+  background: none;
+  font-size: 12px;
   transition: transform .15s ease;
 }
-.comment-reaction-chip b { font-weight: 600; font-variant-numeric: tabular-nums; }
-.comment-reaction-chip.selected { color: var(--c-accent); border-color: rgba(43, 92, 230, .3); background: var(--c-accent-soft); }
-.comment-reaction-chip:active { transform: scale(.94); }
+.comment-reaction-chip b { font-weight: 500; font-variant-numeric: tabular-nums; }
+.comment-reaction-chip.selected { color: var(--c-accent); }
+.comment-reaction-chip.selected b { font-weight: 700; }
+.comment-reaction-chip:active { transform: scale(.9); }
 .comment-reaction-chip:disabled { cursor: default; }
-.board-detail-screen .comment-actions .comment-reply-button { margin-left: 2px; }
+/* '댓글 ~개 더 보기'는 마지막 댓글과 살짝 더 띄운다 */
+.board-detail-screen .comments-more { margin-top: 16px; }
 
 /* 댓글 머리 오른쪽: 공감 남기기(웃는 얼굴+) · ⋯ */
 .comment-head-actions { display: flex; flex: none; align-items: center; }
