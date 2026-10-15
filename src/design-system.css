@@ -452,86 +452,28 @@ select:focus-visible,
 /* 댓글 ⋯ 메뉴는 게시글 메뉴보다 한 단계 연하게 */
 .board-detail-screen .comment-icon-button { color: #b4b4b4; }
 
-/* 댓글 아래 한 줄: 왼쪽 답글 달기, 오른쪽 끝(웃는 얼굴 버튼 아래)에 받은 공감을 작은 아이콘+숫자로만. 내가 고른 공감은 파랑 */
+/* 댓글 아래 하트와 답글 달기 */
 .board-detail-screen .comment-actions {
   display: flex;
   align-items: center;
-  gap: 6px;
-  min-height: 24px;
-  margin-top: 4px;
-  margin-bottom: -2px;
+  gap: 4px;
+  margin-top: 2px;
+  margin-bottom: -4px;
 }
-.comment-reaction-summary { display: flex; align-items: center; gap: 10px; margin-left: auto; margin-right: 8px; }
-.comment-reaction-chip {
+.comment-like {
+  height: 28px;
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 2px 0;
-  color: var(--c-mute);
+  margin-left: -4px;
+  padding: 0 4px;
+  color: var(--c-urgent);
   border: 0;
-  background: none;
-  font-size: 12px;
+  border-radius: 50%;
+  background: transparent;
   transition: transform .15s ease;
 }
-.comment-reaction-chip b { font-weight: 500; font-variant-numeric: tabular-nums; }
-.comment-reaction-chip.selected { color: var(--c-accent); }
-.comment-reaction-chip.selected b { font-weight: 700; }
-.comment-reaction-chip:active { transform: scale(.9); }
-.comment-reaction-chip:disabled { cursor: default; }
-/* '댓글 ~개 더 보기'는 마지막 댓글과 살짝 더 띄운다 */
-.board-detail-screen .comments-more { margin-top: 16px; }
-
-/* 댓글 머리 오른쪽: 공감 남기기(웃는 얼굴+) · ⋯ */
-.comment-head-actions { display: flex; flex: none; align-items: center; }
-.board-detail-screen .comment-react-button {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  margin: -8px 0;
-  padding: 0;
-  color: #b4b4b4;
-  border: 0;
-  background: transparent;
-}
-.board-detail-screen .comment-react-button[aria-expanded="true"] { color: var(--c-accent); }
-
-/* 공감 고르기: 웃는 얼굴을 누르거나 댓글을 꾹 누르면 뜨는 작은 판 */
-.board-detail-screen .comment-reaction-picker {
-  position: absolute;
-  z-index: 12;
-  top: 34px;
-  right: 34px;
-  display: flex;
-  gap: 2px;
-  width: auto;
-  margin: 0;
-  padding: 6px;
-  border: 0;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 0 0 1px rgba(23, 25, 30, .06), 0 8px 24px rgba(23, 25, 30, .14);
-  transform-origin: top right;
-  animation: popover-in .16s cubic-bezier(.2, .8, .2, 1);
-}
-.comment-reaction-picker button {
-  width: 76px;
-  display: grid;
-  justify-items: center;
-  gap: 5px;
-  padding: 9px 4px 7px;
-  color: var(--c-body);
-  border: 0;
-  border-radius: 12px;
-  background: transparent;
-  font-size: 11px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-.comment-reaction-picker button:active { background: #f2f4f6; }
-.comment-reaction-picker button.selected { color: var(--c-accent); background: var(--c-accent-soft); }
-/* 꾹 누를 때 휴대폰 기본 메뉴(복사 등)가 뜨지 않게 */
-.board-detail-screen .comment { -webkit-touch-callout: none; }
+.comment-like:active { transform: scale(.88); }
 .comment-reply-button {
   padding: 4px 2px;
   color: #999;
@@ -548,6 +490,8 @@ select:focus-visible,
 .board-detail-screen .comment-replies .reply-comment:hover,
 .board-detail-screen .comment-replies .reply-comment:focus-visible { background: transparent; }
 .board-detail-screen .comment-clickable:focus-visible { outline: 2px solid var(--c-accent); outline-offset: -2px; }
+.comment-like span { color: #999; font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.comment-like.liked span { color: var(--c-urgent); }
 
 /* 휴대폰에서 누를 때 브라우저가 기본으로 덮는 회색(파랑) 탭 하이라이트를 끈다. 누름 반응은 각 요소가 직접 보여준다 */
 html { -webkit-tap-highlight-color: transparent; }
@@ -1558,3 +1502,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 .edit-photo-row .quick-photo-button { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .edit-photo-remove { width: 44px; height: 44px; display: grid; flex: none; place-items: center; margin-top: 12px; padding: 0; color: var(--c-mute); border: 1px solid var(--c-line); border-radius: 13px; background: transparent; }
 
+
+/* '댓글 ~개 더 보기'는 마지막 댓글과 살짝 더 띄운다 */
+.board-detail-screen .comments-more { margin-top: 16px; }

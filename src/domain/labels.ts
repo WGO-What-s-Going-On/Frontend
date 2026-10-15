@@ -1,4 +1,4 @@
-import type { Category, CommentReaction, PostReaction } from '../types/domain'
+import type { Category, PostReaction } from '../types/domain'
 
 // 화면에 보이는 문구 모음. 저장·전송되는 값(타입)과 화면 문구를 분리해 둔다.
 // 백엔드 연동 후에는 서버 코드값(예: EMERGENCY) → 문구 변환도 여기서 한다.
@@ -18,7 +18,3 @@ export const reactionLabel: Record<PostReaction, { full: string; short: string }
   '도움 됐어요': { full: '유익해요', short: '유익함' },
   '이제 끝났어요': { full: '끝났어요', short: '끝남' },
 }
-
-// 댓글 공감 (투표 후보를 고르는 기준): 한 사람이 하나만 고를 수 있다
-export const commentReactions: CommentReaction[] = ['도움돼요', '맞아요', '정보가 달라요']
-

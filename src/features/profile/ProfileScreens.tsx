@@ -19,7 +19,7 @@ function earnedBadges({ posts, comments, likes, finished }: { posts: number; com
   return [
     { name: '첫 소식', hint: '게시판 1개 만들기', earned: posts >= 1 },
     { name: '해결사', hint: '내 게시판 1개 마무리', earned: finished >= 1 },
-    { name: '탐정', hint: '댓글 도움돼요 10개 받기', earned: likes >= 10 },
+    { name: '탐정', hint: '댓글 하트 10개 받기', earned: likes >= 10 },
     { name: '단골 이웃', hint: '댓글 10개 쓰기', earned: comments >= 10 },
   ]
 }
@@ -47,7 +47,7 @@ export function ProfileScreen() {
   const [withdrawOpen, setWithdrawOpen] = useState(false)
   const myBoards = boards.filter((board) => board.authorId === user.id)
   const myComments = comments.filter((comment) => comment.authorId === user.id)
-  const badges = earnedBadges({ posts: myBoards.length, comments: myComments.length, likes: myComments.reduce((sum, comment) => sum + comment.reactions['도움돼요'], 0), finished: myBoards.filter((board) => board.status === '종료됨').length })
+  const badges = earnedBadges({ posts: myBoards.length, comments: myComments.length, likes: myComments.reduce((sum, comment) => sum + (comment.likes ?? 0), 0), finished: myBoards.filter((board) => board.status === '종료됨').length })
   const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="탈퇴 후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>
   return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard postCount={myBoards.length} commentCount={myComments.length} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>뱃지 <small>{badges.filter((badge) => badge.earned).length}/{badges.length}</small></h4><ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
@@ -106,7 +106,7 @@ export function ProfileEditScreen() {
 const notificationOptions: { key: keyof NotificationSettings; title: string; description: string }[] = [
   { key: 'nearby', title: '내 주변 새 게시판', description: '150m 안에 새 게시판이 생기면 알려드려요' },
   { key: 'replies', title: '댓글·답글', description: '내 글에 댓글, 내 댓글에 답글이 달리면 알려드려요' },
-  { key: 'reactions', title: '반응·공감', description: '내 글과 댓글에 반응이 달리면 알려드려요' },
+  { key: 'reactions', title: '반응·하트', description: '내 글과 댓글에 반응이 달리면 알려드려요' },
   { key: 'lifecycle', title: '게시판 종료', description: '참여한 게시판이 곧 종료되거나 종료되면 알려드려요' },
 ]
 
