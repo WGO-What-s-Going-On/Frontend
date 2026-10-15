@@ -1635,3 +1635,11 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comment-identity > div { align-items: center; }
 .board-detail-screen .comment-reactions .comment-reaction-chip { color: var(--c-mute); font-weight: 500; }
 .board-detail-screen .comment-reactions .comment-reaction-chip.mine { color: var(--c-accent); font-weight: 700; }
+
+/* [공감 | ⋯] 상자는 댓글·답글 모두 같은 오른쪽 끝에 고정 (답글은 오른쪽 안쪽 여백 10px이 있어서 그만큼 밖으로) */
+.board-detail-screen .comment-replies .reply-comment > .comment-head .comment-tools { margin-right: -6px; }
+
+/* 공감 색: 파랑 대신 빨강 (내가 누른 공감, 고르기 판의 선택, 판이 열린 아이콘) */
+.board-detail-screen .comment-reactions .comment-reaction-chip.mine { color: var(--c-urgent); }
+.comment-reaction-picker button.selected { color: var(--c-urgent); background: var(--c-urgent-soft); }
+.board-detail-screen .comment-tools .comment-react-button[aria-expanded="true"] { color: var(--c-urgent); }
