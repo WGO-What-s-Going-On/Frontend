@@ -85,6 +85,7 @@ interface AppContextValue {
   updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous' | 'imageName'>) => void
   deleteBoard: (id: string) => void
   finishBoard: (id: string) => void
+  reopenBoard: (id: string) => void
   reactToBoard: (id: string, reaction: PostReaction) => void
   addComment: (body: string, parentId?: string, imageUrl?: string) => void
   deleteComment: (id: string) => void
@@ -225,6 +226,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast('게시글을 수정했습니다.')
   }
   const deleteBoard = (id: string) => { setBoards((items) => items.filter((board) => board.id !== id)); showToast('게시글을 삭제했습니다.'); go('board') }
+  const reopenBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '실시간' } : board)); showToast('게시판을 다시 열었어요.') }
   const finishBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '종료됨' } : board)); showToast('게시판을 종료했습니다.') }
   const reactToBoard = (id: string, reaction: PostReaction) => setBoards((items) => items.map((board) => {
     if (board.id !== id) return board
@@ -265,7 +267,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
-    go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
+    go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
