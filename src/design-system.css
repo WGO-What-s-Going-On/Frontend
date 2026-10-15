@@ -1330,3 +1330,57 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 카테고리 칩을 살짝 왼쪽으로: 칩 안 글자가 아래 제목 글자와 얼추 같은 줄에 오도록 */
 .ux-board-card-top > span[data-category] { margin-left: -4px; }
+
+/* ---------- 게시판 검색 화면: 뒤로 + 회색 검색창, 결과는 참여 가능 / 열람만 가능으로 나눔 ---------- */
+.search-bar { display: flex; align-items: center; gap: 10px; margin: 4px 0 22px; }
+.search-bar .icon { flex: none; }
+.search-field {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0 12px;
+  color: var(--c-mute);
+  border-radius: 12px;
+  background: #f2f4f6;
+}
+.search-field input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  color: var(--c-ink);
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 16px;
+}
+.search-field input::placeholder { color: #9aa1ad; }
+.search-field input::-webkit-search-cancel-button { display: none; }
+.search-clear {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  flex: none;
+  place-items: center;
+  padding: 0;
+  color: #fff;
+  border: 0;
+  border-radius: 50%;
+  background: #b6bbc4;
+}
+.search-section { margin-bottom: 24px; }
+.search-section h4 { margin: 0 0 12px; color: var(--c-ink); font-size: 15px; font-weight: 700; }
+.search-section h4 small { margin-left: 6px; color: var(--c-mute); font-size: 13px; font-weight: 500; }
+.search-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.search-section-head h4 { margin: 0; }
+.search-clear-all { padding: 0; color: var(--c-mute); border: 0; background: none; font-size: 13px; }
+.search-recent { display: flex; flex-wrap: wrap; gap: 8px; }
+.search-recent-chip { display: inline-flex; align-items: center; gap: 2px; padding: 0 6px 0 12px; height: 34px; border-radius: 999px; background: #f2f4f6; }
+.search-recent-chip button { padding: 0; color: var(--c-body); border: 0; background: none; font-size: 14px; }
+.search-recent-chip .search-recent-remove { width: 22px; height: 22px; display: grid; place-items: center; color: var(--c-mute); }
+.search-screen .empty-state { margin-top: 56px; padding: 0; border: 0; background: none; box-shadow: none; text-align: center; }
+.search-screen .empty-state strong { color: var(--c-mute); font-size: 14px; font-weight: 500; }
+.search-hint { margin: 8px 2px; color: var(--c-mute); font-size: 14px; }

@@ -159,3 +159,9 @@
 :root[data-theme="dark"] .theme-switch { background: var(--c-raised); }
 :root[data-theme="dark"] .theme-switch-thumb { background: #4c5260; box-shadow: none; }
 
+
+/* 게시판 검색 */
+:root[data-theme="dark"] .search-field,
+:root[data-theme="dark"] .search-recent-chip { background: var(--c-raised); }
+:root[data-theme="dark"] .search-field input::placeholder { color: var(--c-mute); }
+:root[data-theme="dark"] .search-clear { color: var(--c-page); background: var(--c-mute); }
