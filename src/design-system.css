@@ -1779,16 +1779,10 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-title { margin-top: 2px; font-size: 17px; font-weight: 700; line-height: 1.35; }
 .feed-body { display: -webkit-box; overflow: hidden; color: var(--c-body); font-size: 14px; line-height: 1.55; word-break: keep-all; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .feed-screen .feed-image { display: grid; place-items: center; height: 170px; margin-top: 4px; }
-.feed-reactions { margin-top: 10px; }
-.feed-reactions .post-reactions { display: flex; flex-wrap: wrap; gap: 6px; }
-.feed-screen .feed-reactions .post-reactions > *,
-.feed-screen .feed-reactions .post-reactions button {
-  display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 10px;
-  color: var(--c-body); font-size: 12px; border: 1px solid #e8ebf0; border-radius: 999px; background: #fff;
-}
-.feed-screen .feed-reactions .post-reactions b { color: inherit; font-size: 12px; font-weight: 600; }
-.feed-screen .feed-reactions .post-reactions :is(button span, span small) { color: inherit; font-size: 12px; font-weight: 700; }
-.feed-screen .feed-reactions .post-reactions button.selected { color: var(--c-accent); border-color: var(--c-accent); background: var(--c-accent-soft); }
-.feed-screen .feed-footer { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; color: var(--c-mute); font-size: 13px; }
-.feed-footer em { margin-left: 4px; color: var(--c-accent); font-style: normal; font-weight: 600; }
-.feed-footer em::before { content: '· '; color: var(--c-mute); font-weight: 400; }
+.feed-actions { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.feed-screen .feed-actions button { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; color: var(--c-ink); }
+.feed-screen .feed-actions button:disabled { opacity: 1; cursor: default; }
+.feed-actions button span { color: var(--c-body); font-size: 14px; font-weight: 500; }
+.feed-screen .feed-actions button.selected,
+.feed-actions button.selected span { color: var(--c-accent); }
+.feed-actions em { margin-left: auto; color: var(--c-accent); font-size: 12px; font-style: normal; font-weight: 600; white-space: nowrap; }

@@ -1,10 +1,10 @@
 import { MessageCircle } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { NoticeBell } from '../../components/ui/NoticeBell'
-import { PostReactions } from '../../components/ui/PostReactions'
+import { reactionOptions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
-import { categoryLabel } from '../../domain/labels'
-import { isHotBoard } from '../../types/domain'
+import { categoryLabel, reactionLabel } from '../../domain/labels'
+import { isHotBoard, myReactions } from '../../types/domain'
 import type { Board, Comment } from '../../types/domain'
 import { minutesSince, voteStatus } from '../board/commentVote'
 import { RADIUS } from '../map/mapWorld'
@@ -23,8 +23,15 @@ function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
       <span className="feed-body">{board.body}</span>
       {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder feed-image">[이미지]</span>}
     </button>
-    <div className="feed-reactions"><PostReactions board={board} interactive={canReact} onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
-    <button className="feed-footer" onClick={open}><MessageCircle size={14}/>댓글 {comments.length}개{voting && <em>댓글 투표 중</em>}</button>
+    {/* 인스타처럼 한 줄: 아이콘 + 숫자만. 반응 이름은 길게 누르거나 상세에서 본다. 내가 누른 반응만 파랑 */}
+    <div className="feed-actions">
+      {reactionOptions.map(({ label, icon: Icon }) => {
+        const pressed = myReactions(board).includes(label)
+        return <button key={label} className={pressed ? 'selected' : ''} disabled={!canReact} aria-pressed={pressed} aria-label={`${reactionLabel[label].full} ${board.reactions[label]}`} title={reactionLabel[label].full} onClick={() => reactToBoard(board.id, label)}><Icon size={21} strokeWidth={1.8}/><span>{board.reactions[label]}</span></button>
+      })}
+      <button onClick={open} aria-label={`댓글 ${comments.length}개`}><MessageCircle size={21} strokeWidth={1.8}/><span>{comments.length}</span></button>
+      {voting && <em>댓글 투표 중</em>}
+    </div>
   </article>
 }
 

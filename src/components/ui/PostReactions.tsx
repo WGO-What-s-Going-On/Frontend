@@ -4,7 +4,7 @@ import { myReactions } from '../../types/domain'
 import type { Board, PostReaction } from '../../types/domain'
 
 export const reactionLabels: PostReaction[] = ['저도 궁금해요', '지금도 그래요', '도움 됐어요', '이제 끝났어요']
-const reactionOptions = [
+export const reactionOptions = [
   { label: '저도 궁금해요', icon: CircleHelp },
   { label: '지금도 그래요', icon: Radio },
   { label: '도움 됐어요', icon: Lightbulb },
