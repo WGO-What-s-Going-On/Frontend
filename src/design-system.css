@@ -1769,7 +1769,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 :where(.feed-screen .feed-item) button { margin: 0; padding: 0; color: inherit; font-size: inherit; text-align: left; border: 0; border-radius: 0; background: none; box-shadow: none; }
 .feed-main { display: grid; gap: 6px; width: 100%; color: var(--c-ink); }
 .feed-meta { display: flex; align-items: center; gap: 6px; min-width: 0; }
-.feed-meta small { overflow: hidden; color: var(--c-mute); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
 /* 게시판 카드의 카테고리 태그와 같은 크기 */
 .feed-category { flex-shrink: 0; padding: 5px 8px; color: var(--cat, var(--c-mute)); font-size: 10px; font-weight: 800; border-radius: 10px; background: var(--cat-soft, var(--c-surface)); }
 .feed-category[data-category="긴급 사고"] { --cat: var(--c-urgent); --cat-soft: var(--c-urgent-soft); }
@@ -1785,7 +1784,9 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-actions button span { color: var(--c-body); font-size: 14px; font-weight: 500; }
 .feed-screen .feed-actions button.selected,
 .feed-actions button.selected span { color: var(--c-accent); }
-.feed-actions em { margin-left: auto; color: var(--c-accent); font-size: 12px; font-style: normal; font-weight: 600; white-space: nowrap; }
+.feed-side { display: flex; align-items: center; gap: 8px; margin-left: auto; white-space: nowrap; }
+.feed-side em { color: var(--c-accent); font-size: 12px; font-style: normal; font-weight: 600; }
+.feed-side small { color: var(--c-mute); font-size: 12px; }
 
 /* 피드 반응 판: 반응 버튼 바로 아래, 4가지 반응과 각각의 수 */
 .feed-screen .feed-reaction-picker {
