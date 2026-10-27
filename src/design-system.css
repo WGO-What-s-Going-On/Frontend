@@ -1779,10 +1779,26 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-title { margin-top: 2px; font-size: 17px; font-weight: 700; line-height: 1.35; }
 .feed-body { display: -webkit-box; overflow: hidden; color: var(--c-body); font-size: 14px; line-height: 1.55; word-break: keep-all; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
 .feed-screen .feed-image { display: grid; place-items: center; height: 170px; margin-top: 4px; }
-.feed-actions { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.feed-actions { position: relative; display: flex; align-items: center; gap: 16px; margin-top: 12px; }
 .feed-screen .feed-actions button { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; color: var(--c-ink); }
 .feed-screen .feed-actions button:disabled { opacity: 1; cursor: default; }
 .feed-actions button span { color: var(--c-body); font-size: 14px; font-weight: 500; }
 .feed-screen .feed-actions button.selected,
 .feed-actions button.selected span { color: var(--c-accent); }
 .feed-actions em { margin-left: auto; color: var(--c-accent); font-size: 12px; font-style: normal; font-weight: 600; white-space: nowrap; }
+
+/* 피드 반응 판: 반응 버튼 바로 아래, 4가지 반응과 각각의 수 */
+.feed-screen .feed-reaction-picker {
+  position: absolute; z-index: 12; top: calc(100% + 4px); left: -6px;
+  display: flex; gap: 2px; padding: 4px; border-radius: 14px; background: #fff;
+  box-shadow: 0 0 0 1px rgba(23, 25, 30, .06), 0 8px 24px rgba(23, 25, 30, .14);
+  transform-origin: top left; animation: popover-in .16s cubic-bezier(.2, .8, .2, 1);
+}
+.feed-screen .feed-reaction-picker button {
+  display: grid; justify-items: center; gap: 3px; width: 62px; min-height: 0; padding: 8px 2px 7px;
+  color: var(--c-body); font-size: 11px; font-weight: 600; text-align: center; border-radius: 10px; white-space: nowrap;
+}
+.feed-reaction-picker button b { color: var(--c-mute); font-size: 11px; font-weight: 500; }
+.feed-screen .feed-reaction-picker button:not(:disabled):active { background: #f2f4f6; }
+.feed-screen .feed-reaction-picker button.selected { color: var(--c-accent); background: var(--c-accent-soft); }
+.feed-reaction-picker button.selected b { color: var(--c-accent); }

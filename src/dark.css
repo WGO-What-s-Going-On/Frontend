@@ -189,3 +189,5 @@
 :root[data-theme="dark"] .notice-bell { color: var(--c-ink); }
 :root[data-theme="dark"] .feed-item { border-color: var(--c-line); }
 :root[data-theme="dark"] .feed-screen .feed-meta small { color: var(--c-mute); }
+:root[data-theme="dark"] .feed-screen .feed-reaction-picker { background: var(--c-raised); box-shadow: 0 0 0 1px var(--c-line), 0 12px 32px rgba(0, 0, 0, .5); }
+:root[data-theme="dark"] .feed-screen .feed-reaction-picker button:not(:disabled):active { background: #4c525e; }

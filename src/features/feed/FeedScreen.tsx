@@ -1,4 +1,5 @@
-import { MessageCircle } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
+import { MessageCircle, SmilePlus } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { reactionOptions } from '../../components/ui/PostReactions'
@@ -9,13 +10,24 @@ import type { Board, Comment } from '../../types/domain'
 import { minutesSince, voteStatus } from '../board/commentVote'
 import { RADIUS } from '../map/mapWorld'
 
-// 피드: 진행 중인 주변 게시글을 최신순으로 펼쳐 본다. 글을 열지 않아도 본문 · 사진 · 반응 · 댓글 수가 보이고,
-// 150m 안 글에는 바로 반응을 남길 수 있다. 카드를 누르면 상세로
+// 피드: 진행 중인 주변 게시글을 최신순으로 펼쳐 본다. 글을 열지 않아도 본문 · 사진 · 반응 수 · 댓글 수가 보이고,
+// 반응은 댓글 공감처럼 이모티콘 버튼 하나로 모아 두고, 누르면 4가지 반응 판이 뜬다 (150m 안 글만 고를 수 있음). 카드를 누르면 상세로
 function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
   const { inRange, openBoard, reactToBoard } = useApp()
   const canReact = inRange && board.distance <= RADIUS
   const voting = voteStatus(board, comments) === 'OPEN'
   const open = () => openBoard(board.id)
+  const [picker, setPicker] = useState(false)
+  const actionsRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!picker) return
+    const close = (event: PointerEvent) => { if (!actionsRef.current?.contains(event.target as Node)) setPicker(false) }
+    document.addEventListener('pointerdown', close)
+    return () => document.removeEventListener('pointerdown', close)
+  }, [picker])
+  const mine = myReactions(board)[0]
+  const MineIcon = reactionOptions.find((option) => option.label === mine)?.icon ?? SmilePlus
+  const reactionTotal = Object.values(board.reactions).reduce((sum, count) => sum + count, 0)
   return <article className="feed-item">
     <button className="feed-main" onClick={open}>
       <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}<small>{board.createdAt}</small></span>
@@ -23,14 +35,12 @@ function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
       <span className="feed-body">{board.body}</span>
       {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder feed-image">[이미지]</span>}
     </button>
-    {/* 인스타처럼 한 줄: 아이콘 + 숫자만. 반응 이름은 길게 누르거나 상세에서 본다. 내가 누른 반응만 파랑 */}
-    <div className="feed-actions">
-      {reactionOptions.map(({ label, icon: Icon }) => {
-        const pressed = myReactions(board).includes(label)
-        return <button key={label} className={pressed ? 'selected' : ''} disabled={!canReact} aria-pressed={pressed} aria-label={`${reactionLabel[label].full} ${board.reactions[label]}`} title={reactionLabel[label].full} onClick={() => reactToBoard(board.id, label)}><Icon size={21} strokeWidth={1.8}/><span>{board.reactions[label]}</span></button>
-      })}
+    {/* 반응 버튼(내가 누른 반응이 있으면 그 아이콘이 파랗게) + 반응 합계, 댓글 수. 버튼을 누르면 반응 판 */}
+    <div ref={actionsRef} className="feed-actions">
+      <button className={mine ? 'selected' : ''} onClick={() => setPicker(!picker)} aria-expanded={picker} aria-label={`반응 ${reactionTotal}개, 반응 남기기`}><MineIcon size={21} strokeWidth={1.8}/><span>{reactionTotal}</span></button>
       <button onClick={open} aria-label={`댓글 ${comments.length}개`}><MessageCircle size={21} strokeWidth={1.8}/><span>{comments.length}</span></button>
       {voting && <em>댓글 투표 중</em>}
+      {picker && <div className="feed-reaction-picker" role="menu" aria-label="반응 고르기">{reactionOptions.map(({ label, icon: Icon }) => <button key={label} role="menuitemradio" aria-checked={mine === label} className={mine === label ? 'selected' : ''} disabled={!canReact} title={reactionLabel[label].full} onClick={() => { reactToBoard(board.id, label); setPicker(false) }}><Icon size={18} strokeWidth={2}/><span>{reactionLabel[label].short}</span><b>{board.reactions[label]}</b></button>)}</div>}
     </div>
   </article>
 }
