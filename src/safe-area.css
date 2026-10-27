@@ -21,8 +21,6 @@
   .phone { height: 100dvh; }
   /* 화면 전체가 고무줄처럼 끌려 내려가지 않게 (스크롤은 안쪽 화면에서만) */
   html, body { overscroll-behavior: none; }
-  /* 가짜 시계(9:41)는 컴퓨터 미리보기에서만 */
-  .status-bar strong { display: none; }
 }
 
 /* 위: 상태바 자리 */

@@ -34,7 +34,8 @@ export function AppShell({ children, nav = true, contentClassName = '', shellCla
   }, [screen])
 
   return <main className={`phone ${shellClassName}`.trim()}>
-    <div className="status-bar"><strong>9:41</strong></div>
+    {/* 상태바 자리만 비워 둔다 (컴퓨터 미리보기 44px, 휴대폰은 iOS 안전 영역만큼) */}
+    <div className="status-bar"/>
     <section ref={screenRef} className={`screen ${contentClassName}`.trim()}>{children}</section>
     {bottomContent}
     {nav && <><nav className="bottom-nav ux-bottom-nav">{tabs.map(({ screen: target, label, icon: Icon }) => <Fragment key={target}>{target === 'my' && <span className="nav-slot" aria-hidden="true"/>}<button className={active === target ? 'active' : ''} onClick={() => go(target)}><span className="nav-icon-wrap"><Icon size={22}/></span><span>{label}</span></button></Fragment>)}</nav><button className="compose-fab" onClick={() => setComposerOpen(true)} aria-label="새 글 작성"><Plus size={23}/><span>작성</span></button></>}
