@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bell, BellOff, MessageCircle, SmilePlus } from 'lucide-react'
+import { Bell, BellOff, Lock, MessageCircle, SmilePlus } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { reactionOptions } from '../../components/ui/PostReactions'
@@ -35,7 +35,7 @@ function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
     {/* 게시판 카드와 같은 알림 켜기/끄기 (기본 꺼짐, 켜면 파랑) */}
     <button className={`ux-board-alert feed-alert ${muted ? 'muted' : ''}`} onClick={() => toggleBoardNotifications(board.id)} aria-label={muted ? `${board.title} 알림 켜기` : `${board.title} 알림 끄기`} title={muted ? '알림 켜기' : '알림 끄기'}>{muted ? <BellOff size={17}/> : <Bell size={17}/>}</button>
     <button className="feed-main" onClick={open}>
-      <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}</span>
+      <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}{!canReact && <Lock className="feed-lock" size={14} aria-label="읽기 전용"/>}</span>
       <strong className="feed-title">{board.title}</strong>
       <span className="feed-body">{board.body}</span>
       {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder feed-image">[이미지]</span>}

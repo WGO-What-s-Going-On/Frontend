@@ -1784,9 +1784,11 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-actions button span { color: var(--c-body); font-size: 14px; font-weight: 500; }
 .feed-screen .feed-actions button.selected,
 .feed-actions button.selected span { color: var(--c-accent); }
-.feed-side { display: flex; align-items: center; gap: 8px; margin-left: auto; white-space: nowrap; }
+.feed-side { display: flex; align-items: center; gap: 8px; margin: 0 4px 0 auto; white-space: nowrap; }
 .feed-side em { color: var(--c-accent); font-size: 12px; font-style: normal; font-weight: 600; }
-.feed-side small { color: var(--c-mute); font-size: 12px; }
+.feed-side small { color: var(--c-mute); font-size: 13px; }
+/* 150m 밖(읽기 전용) 글: 태그 오른쪽 자물쇠 */
+.feed-lock { flex-shrink: 0; color: var(--c-mute); }
 
 /* 피드 반응 판: 반응 버튼 바로 아래, 4가지 반응과 각각의 수 */
 .feed-screen .feed-reaction-picker {
