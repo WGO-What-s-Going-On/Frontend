@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Camera, Check, CircleAlert, GalleryVerticalEnd, LayoutList, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
+import { ArrowLeft, Camera, Check, CircleAlert, GalleryVerticalEnd, LayoutGrid, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
-import { BoardCard } from '../../components/ui/BoardCard'
 import { Button } from '../../components/ui/Button'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
@@ -18,20 +17,21 @@ import { RADIUS } from '../map/mapWorld'
 import { pathForScreen } from '../../navigation'
 import { EditBoardSheet } from './EditBoardSheet'
 import { FeedItem } from './FeedItem'
+import { AlbumTile } from './AlbumTile'
 import { CommentVoteSection } from './CommentVoteSection'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
 const sortLabel: Record<BoardSort, string> = { '거리': '거리순', '최신': '최신순', '활발': '활발순', '참여 가능': '참여 가능' }
-// 게시판 보기 방식: 카드(테두리 있는 목록) · 피드(본문·사진·반응을 펼쳐 봄). 마지막으로 고른 방식을 기억한다
-type BoardView = 'card' | 'feed'
+// 게시판 보기 방식: 앨범(한 줄에 2칸, 한눈에 훑기) · 피드(본문·사진·반응을 펼쳐 읽기). 마지막으로 고른 방식을 기억한다
+type BoardView = 'album' | 'feed'
 const BOARD_VIEW_KEY = 'wgo-board-view'
 function readBoardView(): BoardView {
-  try { return localStorage.getItem(BOARD_VIEW_KEY) === 'feed' ? 'feed' : 'card' } catch { return 'card' }
+  try { return localStorage.getItem(BOARD_VIEW_KEY) === 'feed' ? 'feed' : 'album' } catch { return 'album' }
 }
 
 export function BoardListScreen() {
-  const { boards, comments, blockedUsers, go, openBoard, alertBoardIds, toggleBoardNotifications } = useApp()
+  const { boards, comments, blockedUsers, inRange, go, openBoard } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
   const [view, setView] = useState(readBoardView)
   const switchView = (next: BoardView) => {
@@ -75,7 +75,7 @@ export function BoardListScreen() {
   }
   return <AppShell contentClassName={`ux-board-screen ${view === 'feed' ? 'feed-screen' : ''}`}>
     {/* 제목 옆 보기 전환: 두 방식을 나란히 두고 지금 보는 쪽만 파랗게 */}
-    <header className="ux-board-header"><h1>게시판</h1><div className="board-view-switch" role="radiogroup" aria-label="보기 방식">{([['card', '카드로 보기', LayoutList], ['feed', '피드로 보기', GalleryVerticalEnd]] as const).map(([value, label, Icon]) => <button key={value} role="radio" aria-checked={view === value} aria-label={label} className={view === value ? 'selected' : ''} onClick={() => switchView(value)}><Icon size={17}/></button>)}</div><NoticeBell/></header>
+    <header className="ux-board-header"><h1>게시판</h1><div className="board-view-switch" role="radiogroup" aria-label="보기 방식">{([['album', '앨범으로 보기', LayoutGrid], ['feed', '피드로 보기', GalleryVerticalEnd]] as const).map(([value, label, Icon]) => <button key={value} role="radio" aria-checked={view === value} aria-label={label} className={view === value ? 'selected' : ''} onClick={() => switchView(value)}><Icon size={17}/></button>)}</div><NoticeBell/></header>
     {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
     <div ref={filterRowRef} className="ux-filter-row board-filter-row">
       <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>
@@ -87,7 +87,7 @@ export function BoardListScreen() {
     </div>
     {!visibleBoards.length ? <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>
       : view === 'feed' ? <div className="feed-list">{visibleBoards.map((board) => <FeedItem key={board.id} board={board} comments={comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))}/>)}</div>
-      : <div className="ux-board-list">{visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={!alertBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>)}</div>}
+      : <div className="album-grid">{visibleBoards.map((board) => <AlbumTile key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} readOnly={!inRange || board.distance > RADIUS} onOpen={() => openBoard(board.id)}/>)}</div>}
   </AppShell>
 }
 

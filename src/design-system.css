@@ -1807,3 +1807,18 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 하단 탭: 예전 알림(피드) 자리는 비워 두고 마이는 원래 자리 그대로 */
 .ux-bottom-nav > .nav-slot { flex: 1; max-width: 72px; margin-left: 34px; }
+
+/* ---------- 게시판 앨범 보기: 한 줄에 2칸, 모든 칸 높이 같음 ---------- */
+.album-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.album-tile {
+  display: flex; flex-direction: column; gap: 8px; min-width: 0; height: 196px; margin: 0; padding: 12px;
+  color: var(--c-ink); text-align: left; border: 1px solid var(--c-line); border-radius: 16px; background: #fff; box-shadow: none;
+}
+.album-tags { display: flex; align-items: center; gap: 5px; min-height: 22px; }
+.album-tags .feed-category,
+.album-tags .board-tag { white-space: nowrap; }
+.album-title { display: -webkit-box; overflow: hidden; font-size: 14px; font-weight: 700; line-height: 1.4; word-break: keep-all; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.album-tile.has-image .album-title { -webkit-line-clamp: 1; }
+.album-body { display: -webkit-box; overflow: hidden; color: var(--c-body); font-size: 12px; line-height: 1.5; word-break: keep-all; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.album-tile .album-image { display: grid; place-items: center; flex: 1; min-height: 0; border-radius: 10px; font-size: 11px; }
+.album-meta { display: flex; justify-content: space-between; margin-top: auto; color: var(--c-mute); font-size: 11px; }
