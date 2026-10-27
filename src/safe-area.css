@@ -1,0 +1,48 @@
+/* ======================================================================
+   기기 화면 맞춤 (iOS 앱 · 모바일 웹)
+   - 컴퓨터 미리보기(폭 450px 초과): 지금처럼 402px 폰 틀 + 가짜 상태바(44px) + 홈 바 자리(28px)
+   - 휴대폰(폭 450px 이하, Capacitor 앱 포함): 화면 전체를 쓰고, 위는 다이내믹 아일랜드·노치,
+     아래는 홈 바만큼 iOS가 알려주는 안전 영역(safe-area)을 비운다
+   위·아래에 붙는 요소는 모두 --top-inset · --bottom-inset 기준으로 자리를 잡는다.
+   (예전 값은 상태바 44px · 홈 바 28px 기준이라 --bottom-shift = 실제 홈 바 - 28px 만큼 옮긴다)
+   ====================================================================== */
+:root {
+  --top-inset: 44px;
+  --bottom-inset: 28px;
+  --bottom-shift: calc(var(--bottom-inset) - 28px);
+}
+@media (max-width: 450px) {
+  :root {
+    --top-inset: max(env(safe-area-inset-top, 0px), 16px);
+    --bottom-inset: max(env(safe-area-inset-bottom, 0px), 12px);
+  }
+  /* 주소창이 나타나고 사라져도 화면 높이가 맞도록 100vh 대신 dvh */
+  .app-bg { min-height: 100dvh; }
+  .phone { height: 100dvh; }
+  /* 화면 전체가 고무줄처럼 끌려 내려가지 않게 (스크롤은 안쪽 화면에서만) */
+  html, body { overscroll-behavior: none; }
+  /* 가짜 시계(9:41)는 컴퓨터 미리보기에서만 */
+  .status-bar strong { display: none; }
+}
+
+/* 위: 상태바 자리 */
+.status-bar { height: var(--top-inset); }
+.map-screen .map-top-overlay { padding-top: calc(var(--top-inset) + 8px); }
+.map-search-here { top: calc(var(--top-inset) + 120px); }
+.login-shell .login-screen { padding-top: calc(var(--top-inset) + 22px); }
+.login-screen .nearby-alert { top: calc(var(--top-inset) + 182px); }
+
+/* 아래: 하단 탭과 그 위에 뜨는 것들 */
+.bottom-nav { height: calc(65px + var(--bottom-inset)); padding-bottom: var(--bottom-inset); }
+.compose-fab { bottom: calc(46px + var(--bottom-shift)); }
+.toast { bottom: calc(105px + var(--bottom-shift)); }
+.map-controls { bottom: calc(112px + var(--bottom-shift)); }
+.map-bottom-sheet { bottom: calc(108px + var(--bottom-shift)); }
+.screen { padding-bottom: calc(110px + var(--bottom-shift)); }
+
+/* 아래: 탭 없는 화면의 바닥 입력칸·시트 */
+.board-detail-screen { padding-bottom: calc(108px + var(--bottom-shift)); }
+.detail-comment-input { padding-bottom: max(10px, calc(20px + var(--bottom-shift))); }
+.outside-bottom { padding-bottom: max(10px, calc(24px + var(--bottom-shift))); }
+.quick-compose-sheet { padding-bottom: max(16px, calc(34px + var(--bottom-shift))); }
+.login-screen { padding-bottom: max(16px, calc(44px + var(--bottom-shift))); }
