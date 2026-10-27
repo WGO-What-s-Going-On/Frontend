@@ -34,8 +34,8 @@ export function BoardListScreen() {
   const { boards, comments, blockedUsers, go, openBoard, alertBoardIds, toggleBoardNotifications } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
   const [view, setView] = useState(readBoardView)
-  const switchView = () => {
-    const next: BoardView = view === 'card' ? 'feed' : 'card'
+  const switchView = (next: BoardView) => {
+    if (next === view) return
     setView(next)
     try { localStorage.setItem(BOARD_VIEW_KEY, next) } catch { /* 기억 못 해도 전환은 된다 */ }
     document.querySelector('.screen')?.scrollTo({ top: 0 })
@@ -74,8 +74,8 @@ export function BoardListScreen() {
     setSortMenuLeft(sortMenuLeft !== null || !chip || !row ? null : chip.left - row.left)
   }
   return <AppShell contentClassName={`ux-board-screen ${view === 'feed' ? 'feed-screen' : ''}`}>
-    {/* 제목 옆 보기 전환: 누르면 바뀔 방식의 아이콘을 보여준다 */}
-    <header className="ux-board-header"><h1>게시판</h1><IconButton className="board-view-toggle" label={view === 'card' ? '피드로 보기' : '카드로 보기'} onClick={switchView}>{view === 'card' ? <GalleryVerticalEnd size={20}/> : <LayoutList size={20}/>}</IconButton><NoticeBell/></header>
+    {/* 제목 옆 보기 전환: 두 방식을 나란히 두고 지금 보는 쪽만 파랗게 */}
+    <header className="ux-board-header"><h1>게시판</h1><div className="board-view-switch" role="radiogroup" aria-label="보기 방식">{([['card', '카드로 보기', LayoutList], ['feed', '피드로 보기', GalleryVerticalEnd]] as const).map(([value, label, Icon]) => <button key={value} role="radio" aria-checked={view === value} aria-label={label} className={view === value ? 'selected' : ''} onClick={() => switchView(value)}><Icon size={17}/></button>)}</div><NoticeBell/></header>
     {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
     <div ref={filterRowRef} className="ux-filter-row board-filter-row">
       <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>

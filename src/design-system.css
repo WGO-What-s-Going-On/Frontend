@@ -1797,12 +1797,13 @@ button.title-progress-card:active { background: #f7f8fa; }
 .ux-board-screen > .ux-board-header .notice-bell { margin-right: -3px; }
 .board-filter-row .ux-sort-menu { top: calc(100% + 6px); }
 
-/* 게시판 제목 옆 보기 전환 (카드 ↔ 피드) */
-.board-view-toggle {
-  display: grid; flex-shrink: 0; place-items: center; width: 34px; height: 34px; margin: 4px 0 0 4px; padding: 0;
-  color: var(--c-body); border: 0; border-radius: 10px; background: transparent; box-shadow: none;
+/* 게시판 제목 옆 보기 전환 (카드 | 피드): 둥근 틀 안에 두 아이콘, 지금 보는 쪽만 연파랑 바탕 */
+.board-view-switch { display: flex; flex-shrink: 0; gap: 2px; margin-left: 10px; padding: 3px; border: 1px solid var(--c-line); border-radius: 999px; }
+.board-view-switch button {
+  display: grid; place-items: center; width: 34px; height: 26px; padding: 0;
+  color: var(--c-mute); border: 0; border-radius: 999px; background: transparent; box-shadow: none;
 }
-.board-view-toggle:active { background: var(--c-surface); }
+.board-view-switch button.selected { color: var(--c-accent); background: var(--c-accent-soft); }
 
 /* 하단 탭 3개 (지도 · 게시판 | 작성 | 마이): 작성 버튼은 가운데 그대로, 왼쪽 반에 2개 · 오른쪽 반에 1개 */
 .ux-bottom-nav { display: grid; grid-template-columns: 1fr 1fr 76px 2fr; }
