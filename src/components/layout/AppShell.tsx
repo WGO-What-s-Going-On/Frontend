@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bell, Map, MessageSquare, Plus, UserRound } from 'lucide-react'
+import { Map, MessageSquare, Newspaper, Plus, UserRound } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { QuickCreateSheet } from '../../features/board/QuickCreateSheet'
 import { Toast } from '../ui/Toast'
@@ -8,7 +8,8 @@ import type { Screen } from '../../types/domain'
 const tabs: { screen: Screen; label: string; icon: typeof Map }[] = [
   { screen: 'home', label: '지도', icon: Map },
   { screen: 'board', label: '게시판', icon: MessageSquare },
-  { screen: 'alerts', label: '알림', icon: Bell },
+  // 알림은 탭 대신 각 탭 화면 오른쪽 위 종(NoticeBell)으로 연다
+  { screen: 'feed', label: '피드', icon: Newspaper },
   { screen: 'my', label: '마이', icon: UserRound },
 ]
 
@@ -19,11 +20,10 @@ function activeTab(screen: Screen) {
 }
 
 export function AppShell({ children, nav = true, contentClassName = '', shellClassName = '', bottomContent }: { children: React.ReactNode; nav?: boolean; contentClassName?: string; shellClassName?: string; bottomContent?: React.ReactNode }) {
-  const { screen, go, notices, toast } = useApp()
+  const { screen, go, toast } = useApp()
   const [composerOpen, setComposerOpen] = useState(false)
   const screenRef = useRef<HTMLElement>(null)
   const active = activeTab(screen)
-  const unreadNotices = notices.filter((notice) => !notice.read).length
 
   useEffect(() => {
     const element = screenRef.current
@@ -37,7 +37,7 @@ export function AppShell({ children, nav = true, contentClassName = '', shellCla
     <div className="status-bar"><strong>9:41</strong></div>
     <section ref={screenRef} className={`screen ${contentClassName}`.trim()}>{children}</section>
     {bottomContent}
-    {nav && <><nav className="bottom-nav ux-bottom-nav">{tabs.map(({ screen: target, label, icon: Icon }) => <button key={target} className={active === target ? 'active' : ''} onClick={() => go(target)}><span className="nav-icon-wrap"><Icon size={22}/>{target === 'alerts' && unreadNotices > 0 && <b>{unreadNotices}</b>}</span><span>{label}</span></button>)}</nav><button className="compose-fab" onClick={() => setComposerOpen(true)} aria-label="새 글 작성"><Plus size={23}/><span>작성</span></button></>}
+    {nav && <><nav className="bottom-nav ux-bottom-nav">{tabs.map(({ screen: target, label, icon: Icon }) => <button key={target} className={active === target ? 'active' : ''} onClick={() => go(target)}><span className="nav-icon-wrap"><Icon size={22}/></span><span>{label}</span></button>)}</nav><button className="compose-fab" onClick={() => setComposerOpen(true)} aria-label="새 글 작성"><Plus size={23}/><span>작성</span></button></>}
     {composerOpen && <QuickCreateSheet onClose={() => setComposerOpen(false)}/>}
     <Toast message={toast}/>
     <div className="home-indicator"/>

@@ -1737,3 +1737,56 @@ button.title-progress-card:active { background: #f7f8fa; }
 .comment-vote-pending { margin: 0; padding: 12px 0; color: var(--c-mute); font-size: 13px; border-bottom: 1px solid #dedede; }
 .detail-enter :is(.comment-vote, .comment-vote-pending) { animation: detail-rise .34s cubic-bezier(.2, .8, .2, 1) .13s both; }
 @media (prefers-reduced-motion: reduce) { .detail-enter :is(.comment-vote, .comment-vote-pending) { animation: none; } }
+
+/* ---------- 알림 종: 탭 화면 오른쪽 위 (지도 · 게시판 · 피드). 정렬은 '게시판' 제목 바로 오른쪽으로 ---------- */
+.notice-bell {
+  position: relative; display: grid; flex-shrink: 0; place-items: center;
+  width: 40px; height: 40px; margin: 0 -8px 0 auto; padding: 0;
+  color: var(--c-ink); border: 0; border-radius: 50%; background: transparent; box-shadow: none;
+}
+.notice-bell:active { background: var(--c-surface); }
+/* 배지는 종 오른쪽 위 모서리에 살짝 걸치게 (종 모양을 가리지 않게) */
+.notice-bell b {
+  position: absolute; top: 4px; left: 22px; min-width: 16px; height: 16px; padding: 0 4px;
+  color: #fff; font-size: 10px; font-weight: 700; line-height: 16px; text-align: center;
+  border-radius: 8px; background: var(--c-urgent); box-sizing: border-box;
+}
+.ux-board-header { display: flex; align-items: center; }
+.ux-board-header .ux-sort-filter { margin: 4px 0 0 6px; }
+.ux-board-header .ux-sort-menu { right: auto; left: 0; }
+.map-top-overlay header { display: flex; align-items: center; }
+.map-screen .map-top-overlay .notice-bell { pointer-events: auto; }
+
+/* ---------- 피드: 카드 테두리 없이 구분선으로 이어 보는 목록 ---------- */
+.feed-list { display: grid; }
+.feed-item { padding: 16px 0 14px; border-bottom: 1px solid #eef0f3; }
+.feed-item:first-child { padding-top: 4px; }
+/* 버튼 기본 모양 지우기: :where로 감싸 아래 개별 스타일이 이기게 */
+:where(.feed-screen .feed-item) button { margin: 0; padding: 0; color: inherit; font-size: inherit; text-align: left; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.feed-main { display: grid; gap: 6px; width: 100%; color: var(--c-ink); }
+.feed-meta { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.feed-meta small { overflow: hidden; color: var(--c-mute); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+.feed-category { flex-shrink: 0; padding: 3px 8px; color: var(--cat, var(--c-mute)); font-size: 12px; font-weight: 700; border-radius: 999px; background: var(--cat-soft, var(--c-surface)); }
+.feed-category[data-category="긴급 사고"] { --cat: var(--c-urgent); --cat-soft: var(--c-urgent-soft); }
+.feed-category[data-category="도움 요청"] { --cat: var(--c-help); --cat-soft: var(--c-help-soft); }
+.feed-category[data-category="동네 소식"] { --cat: var(--c-news); --cat-soft: var(--c-news-soft); }
+.feed-category[data-category="일상 불편"] { --cat: var(--c-daily); --cat-soft: var(--c-daily-soft); }
+.feed-title { margin-top: 2px; font-size: 17px; font-weight: 700; line-height: 1.35; }
+.feed-body { display: -webkit-box; overflow: hidden; color: var(--c-body); font-size: 14px; line-height: 1.55; word-break: keep-all; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.feed-screen .feed-image { display: grid; place-items: center; height: 170px; margin-top: 4px; }
+.feed-reactions { margin-top: 10px; }
+.feed-reactions .post-reactions { display: flex; flex-wrap: wrap; gap: 6px; }
+.feed-screen .feed-reactions .post-reactions > *,
+.feed-screen .feed-reactions .post-reactions button {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 30px; padding: 0 10px;
+  color: var(--c-body); font-size: 12px; border: 1px solid #e8ebf0; border-radius: 999px; background: #fff;
+}
+.feed-screen .feed-reactions .post-reactions b { color: inherit; font-size: 12px; font-weight: 600; }
+.feed-screen .feed-reactions .post-reactions :is(button span, span small) { color: inherit; font-size: 12px; font-weight: 700; }
+.feed-screen .feed-reactions .post-reactions button.selected { color: var(--c-accent); border-color: var(--c-accent); background: var(--c-accent-soft); }
+.feed-screen .feed-top-comment { display: flex; gap: 6px; width: 100%; margin-top: 10px; padding: 9px 12px; font-size: 13px; border-radius: 10px; background: #f5f6f8; }
+.feed-top-comment b { flex-shrink: 0; color: var(--c-ink); }
+.feed-top-comment span { overflow: hidden; color: var(--c-body); white-space: nowrap; text-overflow: ellipsis; }
+.feed-screen .feed-footer { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; color: var(--c-mute); font-size: 13px; }
+.feed-footer em { margin-left: 4px; color: var(--c-accent); font-style: normal; font-weight: 600; }
+.feed-footer em::before { content: '· '; color: var(--c-mute); font-weight: 400; }

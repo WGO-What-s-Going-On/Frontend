@@ -1,5 +1,7 @@
 import { useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { AppShell } from '../../components/layout/AppShell'
+import { BackHeader } from '../../components/ui/BackHeader'
 import { useApp } from '../../context/AppContext'
 import type { Notice } from '../../types/domain'
 
@@ -57,7 +59,10 @@ function NoticeRow({ notice, open, onOpenChange }: { notice: Notice; open: boole
 }
 
 export function NotificationScreen() {
-  const { notices, markAllNoticesRead } = useApp()
+  const { notices, markAllNoticesRead, go } = useApp()
   const [openId, setOpenId] = useState<string | null>(null)
-  return <AppShell><header><h1>알림</h1><button className="text-button" onClick={markAllNoticesRead}>모두 읽음</button></header><div className="alerts">{notices.map((notice) => <NoticeRow key={notice.id} notice={notice} open={openId === notice.id} onOpenChange={(open) => setOpenId(open ? notice.id : null)}/>)}</div></AppShell>
+  const location = useLocation()
+  const navigate = useNavigate()
+  // 탭이 아니라 종에서 들어오는 화면: 뒤로 가면 종을 누른 화면으로
+  return <AppShell nav={false} contentClassName="alerts-screen"><BackHeader title="알림" onBack={() => location.key === 'default' ? go('home') : navigate(-1)} action={<button className="text-button" onClick={markAllNoticesRead}>모두 읽음</button>}/><div className="alerts">{notices.map((notice) => <NoticeRow key={notice.id} notice={notice} open={openId === notice.id} onOpenChange={(open) => setOpenId(open ? notice.id : null)}/>)}</div></AppShell>
 }

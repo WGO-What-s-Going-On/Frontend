@@ -9,6 +9,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { IconButton } from '../../components/ui/IconButton'
+import { NoticeBell } from '../../components/ui/NoticeBell'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
 import { isHotBoard, myCommentReactions } from '../../types/domain'
@@ -21,6 +22,7 @@ import { CommentVoteSection } from './CommentVoteSection'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
+const sortLabel: Record<BoardSort, string> = { '거리': '거리순', '최신': '최신순', '활발': '활발한 순', '참여 가능': '참여 가능' }
 
 export function BoardListScreen() {
   const { boards, comments, go, openBoard, alertBoardIds, toggleBoardNotifications } = useApp()
@@ -53,7 +55,7 @@ export function BoardListScreen() {
     return () => document.removeEventListener('pointerdown', closeMenu)
   }, [sortMenuOpen])
   return <AppShell contentClassName="ux-board-screen">
-    <header className="ux-board-header"><h1>게시판</h1><div ref={sortMenuRef} className="ux-sort-filter"><button className="ux-sort-trigger" onClick={() => setSortMenuOpen((open) => !open)} aria-label="게시글 정렬" aria-haspopup="menu" aria-expanded={sortMenuOpen}><span>{sort}</span><ChevronDown size={14}/></button>{sortMenuOpen && <div className="ux-sort-menu" role="menu">{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuOpen(false) }}>{item}</button>)}</div>}</div></header>
+    <header className="ux-board-header"><h1>게시판</h1><div ref={sortMenuRef} className="ux-sort-filter"><button className="ux-sort-trigger" onClick={() => setSortMenuOpen((open) => !open)} aria-label="게시글 정렬" aria-haspopup="menu" aria-expanded={sortMenuOpen}><span>{sortLabel[sort]}</span><ChevronDown size={14}/></button>{sortMenuOpen && <div className="ux-sort-menu" role="menu">{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuOpen(false) }}>{sortLabel[item]}</button>)}</div>}</div><NoticeBell/></header>
     <div className="ux-filter-row"><FilterChips className="ux-category-filters" options={categoryOptions.map((item) => ({ value: item, label: item === '전체' ? '전체' : categoryLabel[item] }))} selected={category} onSelect={(item) => updateFilter('category', item)}/><IconButton className="board-search-chip" label="게시판 검색" onClick={() => go('search')}><Search size={17}/></IconButton></div>
     <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={!alertBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => updateFilter('category', '전체')}/>}</div>
   </AppShell>

@@ -18,6 +18,7 @@ export function screenFromPath(pathname: string): Screen {
   if (pathname === '/my/account') return 'my'
   if (pathname === '/my/app-settings' || pathname === '/my/settings') return 'my'
   if (pathname === '/alerts') return 'alerts'
+  if (pathname === '/feed') return 'feed'
   if (pathname === '/signup/terms') return 'terms'
   if (pathname === '/signup/nickname') return 'nickname'
   if (pathname === '/permission/location') return 'location-permission'
@@ -36,6 +37,7 @@ export function pathForScreen(screen: Screen, boardId?: string) {
     my: '/my',
     activity: '/my/activity',
     alerts: '/alerts',
+    feed: '/feed',
     'profile-edit': '/my/edit',
     'notification-settings': '/my/notifications',
     outside: `/boards/${encodedBoardId}/outside`,

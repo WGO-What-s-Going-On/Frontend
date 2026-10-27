@@ -184,3 +184,10 @@
 :root[data-theme="dark"] .board-detail-screen .comment-vote-option { background: transparent; }
 :root[data-theme="dark"] .comment-vote-option:not(.mine, .won) .comment-vote-bar { background: var(--c-raised); }
 :root[data-theme="dark"] .comment-vote-won { background: var(--c-accent-fill); }
+
+/* 알림 종 · 피드 */
+:root[data-theme="dark"] .notice-bell { color: var(--c-ink); }
+:root[data-theme="dark"] .feed-item { border-color: var(--c-line); }
+:root[data-theme="dark"] .feed-screen .feed-reactions .post-reactions :is(button, span):not(.selected) { border-color: var(--c-line); background: transparent; }
+:root[data-theme="dark"] .feed-screen .feed-top-comment { background: var(--c-canvas); }
+:root[data-theme="dark"] .feed-screen .feed-meta small { color: var(--c-mute); }
