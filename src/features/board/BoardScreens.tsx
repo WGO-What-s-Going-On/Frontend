@@ -35,20 +35,17 @@ export function BoardListScreen() {
   const categoryValue = searchParams.get('category') as Category | '전체' | null
   const sort = sortOptions.find((item) => item === sortValue) ?? '거리'
   const category = categoryValue && categoryOptions.includes(categoryValue) ? categoryValue : '전체'
-  // 참여 가능: 정렬이 아니라 150m 안 글만 남기는 거르기 (예전 주소 ?sort=참여 가능 도 그대로 받는다)
-  const nearOnly = searchParams.get('near') === '1' || sortValue === '참여 가능'
-  const updateFilter = (key: 'sort' | 'category' | 'near', value: string) => {
+  const updateFilter = (key: 'sort' | 'category', value: string) => {
     const next = new URLSearchParams(searchParams)
-    if (next.get('sort') === '참여 가능') { next.delete('sort'); next.set('near', '1') }
-    if (value === { sort: '거리', category: '전체', near: '' }[key]) next.delete(key)
+    if (value === (key === 'sort' ? '거리' : '전체')) next.delete(key)
     else next.set(key, value)
     setSearchParams(next)
   }
   const visibleBoards = useMemo(() => {
     // 종료한 게시판은 게시판 목록에서 빼고, 마이 > 최근 활동에서만 본다
-    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category) && (!nearOnly || board.distance <= RADIUS))
+    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category))
     return [...filtered].sort((a, b) => sort === '거리' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
-  }, [boards, category, sort, nearOnly])
+  }, [boards, category, sort])
   useEffect(() => {
     if (sortMenuLeft === null) return
     const closeMenu = (event: PointerEvent) => {
@@ -63,15 +60,14 @@ export function BoardListScreen() {
     setSortMenuLeft(sortMenuLeft !== null || !chip || !row ? null : chip.left - row.left)
   }
   return <AppShell contentClassName="ux-board-screen">
-    <header className="ux-board-header"><h1>게시판</h1><IconButton className="header-search" label="게시판 검색" onClick={() => go('search')}><Search size={22}/></IconButton><NoticeBell/></header>
-    {/* 거르기는 한 줄 칩으로: [정렬 ▾] [참여 가능] | 카테고리. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
+    <header className="ux-board-header"><h1>게시판</h1><NoticeBell/></header>
+    {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
     <div ref={filterRowRef} className="ux-filter-row board-filter-row">
       <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>
         <button ref={sortChipRef} className={`sort-chip ${sort !== '거리' ? 'chip-on' : ''}`} onClick={toggleSortMenu} aria-label={`정렬: ${sortLabel[sort]}`} aria-haspopup="menu" aria-expanded={sortMenuLeft !== null}>{sortLabel[sort]}<ChevronDown size={14}/></button>
-        <button className={nearOnly ? 'chip-on' : ''} aria-pressed={nearOnly} onClick={() => updateFilter('near', nearOnly ? '' : '1')}>참여 가능</button>
-        <i className="chip-divider" aria-hidden="true"/>
         {categoryOptions.map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => updateFilter('category', item)}>{item === '전체' ? '전체' : categoryLabel[item]}</button>)}
       </div>
+      <IconButton className="board-search-chip" label="게시판 검색" onClick={() => go('search')}><Search size={17}/></IconButton>
       {sortMenuLeft !== null && <div className="ux-sort-menu" role="menu" style={{ left: sortMenuLeft }}>{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuLeft(null) }}>{sortLabel[item]}</button>)}</div>}
     </div>
     <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={!alertBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>}</div>

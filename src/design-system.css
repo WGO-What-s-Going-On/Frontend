@@ -1788,18 +1788,10 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-screen .feed-item:first-child .feed-alert { top: 2px; }
 .feed-meta { padding-right: 30px; }
 
-/* ---------- 게시판 거르기 한 줄: [정렬 ▾] [참여 가능] | 카테고리 (모두 같은 둥근 칩) ----------
-   카테고리 선택은 파랗게 채우고, 정렬을 바꿨거나 참여 가능을 켜면 연파랑 + 파란 테두리 */
+/* ---------- 게시판 거르기 한 줄: [정렬 ▾] 카테고리 (모두 같은 둥근 칩) ----------
+   카테고리 선택은 파랗게 채우고, 정렬을 거리순에서 바꾸면 연파랑 + 파란 테두리 */
 .board-filter-row { position: relative; }
 .board-filter-row .sort-chip { display: inline-flex; align-items: center; gap: 2px; }
 .board-filter-row .sort-chip svg { color: inherit; opacity: .7; }
 .ux-category-filters:not(.map-filters) button.chip-on:not(.selected) { color: var(--c-accent); border-color: var(--c-accent); background: var(--c-accent-soft); }
-.chip-divider { flex: none; align-self: center; width: 1px; height: 18px; background: var(--c-line); }
 .board-filter-row .ux-sort-menu { top: calc(100% + 6px); }
-/* 검색은 위쪽 종 옆으로 */
-.header-search {
-  display: grid; flex-shrink: 0; place-items: center; width: 40px; height: 40px; margin-left: auto; padding: 0;
-  color: var(--c-ink); border: 0; border-radius: 50%; background: transparent; box-shadow: none;
-}
-.header-search:active { background: var(--c-surface); }
-.header-search + .notice-bell { margin-left: 0; }

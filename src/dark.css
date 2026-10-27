@@ -192,4 +192,3 @@
 :root[data-theme="dark"] .feed-screen .feed-reaction-picker button:not(:disabled):active { background: #4c525e; }
 :root[data-theme="dark"] .feed-screen .feed-side small { color: var(--c-mute); }
 :root[data-theme="dark"] .ux-category-filters:not(.map-filters) button.chip-on:not(.selected) { color: var(--c-accent); border-color: var(--c-accent-line); background: var(--c-accent-soft); }
-:root[data-theme="dark"] .header-search { color: var(--c-ink); }
