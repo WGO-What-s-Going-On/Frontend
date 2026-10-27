@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Bell, BellOff, Lock, MessageCircle, SmilePlus } from 'lucide-react'
+import { Bell, BellOff, MessageCircle, SmilePlus } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { reactionOptions } from '../../components/ui/PostReactions'
@@ -9,6 +9,11 @@ import { isHotBoard, myReactions } from '../../types/domain'
 import type { Board, Comment, PostReaction } from '../../types/domain'
 import { minutesSince, voteStatus } from '../board/commentVote'
 import { RADIUS } from '../map/mapWorld'
+
+// 읽기 전용(150m 밖) 표시: 선 아이콘보다 작고 단단해 보이는 채운 자물쇠
+function SolidLock() {
+  return <svg className="feed-lock" width="13" height="13" viewBox="0 0 24 24" role="img" aria-label="읽기 전용"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" strokeWidth="2.4"/><rect x="4" y="10" width="16" height="12" rx="3" fill="currentColor"/></svg>
+}
 
 // 피드 반응 판에 보이는 이름
 const pickerLabel: Record<PostReaction, string> = { '저도 궁금해요': '궁금해요', '지금도 그래요': '진행 중', '도움 됐어요': '유익해요', '이제 끝났어요': '끝났어요' }
@@ -35,7 +40,7 @@ function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
     {/* 게시판 카드와 같은 알림 켜기/끄기 (기본 꺼짐, 켜면 파랑) */}
     <button className={`ux-board-alert feed-alert ${muted ? 'muted' : ''}`} onClick={() => toggleBoardNotifications(board.id)} aria-label={muted ? `${board.title} 알림 켜기` : `${board.title} 알림 끄기`} title={muted ? '알림 켜기' : '알림 끄기'}>{muted ? <BellOff size={17}/> : <Bell size={17}/>}</button>
     <button className="feed-main" onClick={open}>
-      <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}{!canReact && <Lock className="feed-lock" size={14} aria-label="읽기 전용"/>}</span>
+      <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}{!canReact && <SolidLock/>}</span>
       <strong className="feed-title">{board.title}</strong>
       <span className="feed-body">{board.body}</span>
       {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder feed-image">[이미지]</span>}
