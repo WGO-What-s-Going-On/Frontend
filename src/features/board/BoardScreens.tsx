@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Camera, Check, CircleAlert, LayoutGrid, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, StretchHorizontal, ThumbsUp, X } from 'lucide-react'
+import { AlignJustify, ArrowLeft, Camera, Check, CircleAlert, LayoutGrid, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
@@ -75,7 +75,7 @@ export function BoardListScreen() {
   }
   return <AppShell contentClassName={`ux-board-screen ${view === 'feed' ? 'feed-screen' : ''}`}>
     {/* 제목 옆 보기 전환: 두 방식을 나란히 두고 지금 보는 쪽만 파랗게 */}
-    <header className="ux-board-header"><h1>게시판</h1><div className="board-view-switch" role="radiogroup" aria-label="보기 방식">{([['feed', '피드로 보기', StretchHorizontal], ['album', '앨범으로 보기', LayoutGrid]] as const).map(([value, label, Icon]) => <button key={value} role="radio" aria-checked={view === value} aria-label={label} className={view === value ? 'selected' : ''} onClick={() => switchView(value)}><Icon size={17}/></button>)}</div><NoticeBell/></header>
+    <header className="ux-board-header"><h1>게시판</h1><div className="board-view-switch" role="radiogroup" aria-label="보기 방식">{([['feed', '피드로 보기', AlignJustify], ['album', '앨범으로 보기', LayoutGrid]] as const).map(([value, label, Icon]) => <button key={value} role="radio" aria-checked={view === value} aria-label={label} className={view === value ? 'selected' : ''} onClick={() => switchView(value)}><Icon size={17}/></button>)}</div><NoticeBell/></header>
     {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
     <div ref={filterRowRef} className="ux-filter-row board-filter-row">
       <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>
