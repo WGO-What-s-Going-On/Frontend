@@ -1761,8 +1761,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* ---------- 피드: 카드 테두리 없이 구분선으로 이어 보는 목록 ---------- */
 .feed-list { display: grid; }
-/* 글과 글 사이는 화면 끝까지 닿는 두꺼운 회색 띠로 나눈다 */
-.feed-item { margin: 0 -18px; padding: 18px 18px 16px; border-bottom: 8px solid #f2f4f6; }
+/* 글과 글 사이: 얇은 줄 + 위아래 넉넉한 여백 */
+.feed-item { padding: 24px 0 22px; border-bottom: 1px solid #e8ebf0; }
 .feed-item:first-child { padding-top: 6px; }
 .feed-item:last-child { border-bottom: 0; }
 /* 버튼 기본 모양 지우기: :where로 감싸 아래 개별 스타일이 이기게 */
@@ -1770,7 +1770,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-main { display: grid; gap: 6px; width: 100%; color: var(--c-ink); }
 .feed-meta { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .feed-meta small { overflow: hidden; color: var(--c-mute); font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
-.feed-category { flex-shrink: 0; padding: 3px 8px; color: var(--cat, var(--c-mute)); font-size: 12px; font-weight: 700; border-radius: 999px; background: var(--cat-soft, var(--c-surface)); }
+/* 게시판 카드의 카테고리 태그와 같은 크기 */
+.feed-category { flex-shrink: 0; padding: 5px 8px; color: var(--cat, var(--c-mute)); font-size: 10px; font-weight: 800; border-radius: 10px; background: var(--cat-soft, var(--c-surface)); }
 .feed-category[data-category="긴급 사고"] { --cat: var(--c-urgent); --cat-soft: var(--c-urgent-soft); }
 .feed-category[data-category="도움 요청"] { --cat: var(--c-help); --cat-soft: var(--c-help-soft); }
 .feed-category[data-category="동네 소식"] { --cat: var(--c-news); --cat-soft: var(--c-news-soft); }
