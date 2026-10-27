@@ -32,7 +32,7 @@ export interface Board {
   status: BoardStatus
   views: number
   reactions: Record<PostReaction, number>
-  // 내가 누른 게시글 반응. 여러 개를 동시에 누를 수 있다.
+  // 내가 누른 게시글 반응. 백엔드 규칙상 최대 1개 (배열은 예전 저장 데이터와 맞추기 위한 모양)
   // (예전 저장 데이터는 하나만 담던 reactedByMe라서 myReactions()로 함께 읽는다)
   myReactions?: PostReaction[]
   reactedByMe?: PostReaction
@@ -60,7 +60,7 @@ export interface Comment {
   verified: boolean
   parentId?: string
   reactions: Record<CommentReaction, number>
-  // 내가 누른 댓글 공감. 여러 개를 동시에 누를 수 있다 (예전 데이터의 reactedByMe는 myCommentReactions()로 함께 읽는다)
+  // 내가 누른 댓글 공감. 백엔드 규칙상 최대 1개 (예전 데이터의 reactedByMe는 myCommentReactions()로 함께 읽는다)
   myReactions?: CommentReaction[]
   reactedByMe?: CommentReaction
   likedByMe?: boolean

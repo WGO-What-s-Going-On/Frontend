@@ -230,10 +230,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const finishBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '종료됨' } : board)); showToast('게시판을 종료했습니다.') }
   const reactToBoard = (id: string, reaction: PostReaction) => setBoards((items) => items.map((board) => {
     if (board.id !== id) return board
+    // 백엔드 규칙: 한 사람은 게시글당 공감을 하나만. 같은 걸 다시 누르면 취소, 다른 걸 누르면 기존 공감을 취소하고 옮긴다
     const mine = myReactions(board)
     const pressed = mine.includes(reaction)
-    const reactions = { ...board.reactions, [reaction]: Math.max(0, board.reactions[reaction] + (pressed ? -1 : 1)) }
-    return { ...board, reactions, myReactions: pressed ? mine.filter((item) => item !== reaction) : [...mine, reaction], reactedByMe: undefined }
+    const reactions = { ...board.reactions }
+    mine.forEach((item) => { reactions[item] = Math.max(0, reactions[item] - 1) })
+    if (!pressed) reactions[reaction] += 1
+    return { ...board, reactions, myReactions: pressed ? [] : [reaction], reactedByMe: undefined }
   }))
   const addComment = (body: string, parentId?: string, imageUrl?: string) => {
     setComments((items) => [...items, { id: `comment-${Date.now()}`, boardId: currentBoardId, authorId: user.id, authorName: user.nickname, body, imageUrl, read: true, createdAt: '방금 전', verified: inRange, parentId, reactions: { '도움돼요': 0, '맞아요': 0, '정보가 달라요': 0 } }])
@@ -245,11 +248,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const toggleCommentLike = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, likedByMe: !comment.likedByMe, likes: Math.max(0, (comment.likes ?? 0) + (comment.likedByMe ? -1 : 1)) } : comment))
   const reactToComment = (id: string, reaction: CommentReaction) => setComments((items) => items.map((comment) => {
     if (comment.id !== id) return comment
-    // 공감은 여러 개를 함께 누를 수 있다: 누른 것을 다시 누르면 빠진다
+    // 백엔드 규칙: 한 사람은 댓글당 공감을 하나만. 같은 걸 다시 누르면 취소, 다른 걸 누르면 옮긴다
     const mine = myCommentReactions(comment)
     const pressed = mine.includes(reaction)
-    const reactions = { ...comment.reactions, [reaction]: Math.max(0, comment.reactions[reaction] + (pressed ? -1 : 1)) }
-    return { ...comment, reactions, myReactions: pressed ? mine.filter((item) => item !== reaction) : [...mine, reaction], reactedByMe: undefined }
+    const reactions = { ...comment.reactions }
+    mine.forEach((item) => { reactions[item] = Math.max(0, reactions[item] - 1) })
+    if (!pressed) reactions[reaction] += 1
+    return { ...comment, reactions, myReactions: pressed ? [] : [reaction], reactedByMe: undefined }
   }))
   const updateUser = (input: Pick<User, 'nickname' | 'realName'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
   const markNoticeRead = (id: string) => setNotices((items) => items.map((notice) => notice.id === id ? { ...notice, read: true } : notice))
