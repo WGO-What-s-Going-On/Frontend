@@ -1883,10 +1883,11 @@ button.title-progress-card:active { background: #f7f8fa; }
 .pull-refresh.idle { padding-bottom: 0; }
 .pull-refresh.refreshing svg { animation: pull-spin .8s linear infinite; }
 @keyframes pull-spin { to { transform: rotate(360deg); } }
-.outside-notice-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 20px; }
+/* 새로고침 버튼은 '읽기 전용 · 범위 밖' 글자 바로 오른쪽 */
+.outside-notice-row { display: flex; align-items: center; gap: 2px; margin-top: 20px; }
 .outside-notice-row .outside-notice { margin: 0; }
 /* 오른쪽 새로고침: 위치 다시 잡기. 누르면 잠깐 돈다 */
-.outside-refresh { display: grid; place-items: center; flex: none; width: 36px; height: 36px; margin-right: -8px; padding: 0; color: var(--c-body); border: 0; border-radius: 50%; background: transparent; }
+.outside-refresh { display: grid; place-items: center; flex: none; width: 32px; height: 32px; margin: -6px 0; padding: 0; color: var(--c-body); border: 0; border-radius: 50%; background: transparent; }
 .outside-refresh:active { background: var(--c-surface); }
 .outside-refresh.checking svg { animation: pull-spin .8s linear infinite; }
 
