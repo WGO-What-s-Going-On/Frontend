@@ -187,7 +187,6 @@
 
 /* 알림 종 · 피드 */
 :root[data-theme="dark"] .notice-bell { color: var(--c-ink); }
-:root[data-theme="dark"] .feed-item { border-color: var(--c-line); }
+:root[data-theme="dark"] .feed-item { border-color: #1f2126; }
 :root[data-theme="dark"] .feed-screen .feed-reactions .post-reactions :is(button, span):not(.selected) { border-color: var(--c-line); background: transparent; }
-:root[data-theme="dark"] .feed-screen .feed-top-comment { background: var(--c-canvas); }
 :root[data-theme="dark"] .feed-screen .feed-meta small { color: var(--c-mute); }

@@ -6,14 +6,13 @@ import { useApp } from '../../context/AppContext'
 import { categoryLabel } from '../../domain/labels'
 import { isHotBoard } from '../../types/domain'
 import type { Board, Comment } from '../../types/domain'
-import { minutesSince, voteScore, voteStatus } from '../board/commentVote'
+import { minutesSince, voteStatus } from '../board/commentVote'
 import { RADIUS } from '../map/mapWorld'
 
-// 피드: 진행 중인 주변 게시글을 최신순으로 펼쳐 본다. 글을 열지 않아도 본문 · 사진 · 반응 · 가장 공감 많은 댓글까지 보이고,
+// 피드: 진행 중인 주변 게시글을 최신순으로 펼쳐 본다. 글을 열지 않아도 본문 · 사진 · 반응 · 댓글 수가 보이고,
 // 150m 안 글에는 바로 반응을 남길 수 있다. 카드를 누르면 상세로
 function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
   const { inRange, openBoard, reactToBoard } = useApp()
-  const topComment = [...comments].sort((a, b) => voteScore(b) - voteScore(a))[0]
   const canReact = inRange && board.distance <= RADIUS
   const voting = voteStatus(board, comments) === 'OPEN'
   const open = () => openBoard(board.id)
@@ -25,8 +24,7 @@ function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
       {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder feed-image">[이미지]</span>}
     </button>
     <div className="feed-reactions"><PostReactions board={board} interactive={canReact} onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
-    {topComment && <button className="feed-top-comment" onClick={open}><b>{topComment.authorName}</b><span>{topComment.body || '[사진]'}</span></button>}
-    <button className="feed-footer" onClick={open}><MessageCircle size={14}/>{comments.length ? `댓글 ${comments.length}개` : '첫 댓글 남기기'}{voting && <em>댓글 투표 중</em>}</button>
+    <button className="feed-footer" onClick={open}><MessageCircle size={14}/>댓글 {comments.length}개{voting && <em>댓글 투표 중</em>}</button>
   </article>
 }
 

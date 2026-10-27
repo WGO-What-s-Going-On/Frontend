@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Map, MessageSquare, Newspaper, Plus, UserRound } from 'lucide-react'
+import { GalleryVerticalEnd, Map, MessageSquare, Plus, UserRound } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { QuickCreateSheet } from '../../features/board/QuickCreateSheet'
 import { Toast } from '../ui/Toast'
@@ -9,7 +9,7 @@ const tabs: { screen: Screen; label: string; icon: typeof Map }[] = [
   { screen: 'home', label: '지도', icon: Map },
   { screen: 'board', label: '게시판', icon: MessageSquare },
   // 알림은 탭 대신 각 탭 화면 오른쪽 위 종(NoticeBell)으로 연다
-  { screen: 'feed', label: '피드', icon: Newspaper },
+  { screen: 'feed', label: '피드', icon: GalleryVerticalEnd },
   { screen: 'my', label: '마이', icon: UserRound },
 ]
 

@@ -11,6 +11,7 @@ export function BoardCard({ board, onOpen, commentCount = 0, showBody = false, n
       <div className="ux-board-card-top"><span data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, commentCount) && <b className="board-tag tag-hot">HOT</b>}{board.status === '종료됨' && <b className="board-tag tag-ended">종료</b>}</div>
       <h3>{board.title}</h3>
       <p>{board.body}</p>
+      {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder card-image">[이미지]</span>}
       <div className="ux-board-card-bottom"><span>조회 {board.views}</span><span>댓글 {commentCount}</span><small>{board.distance}m · {board.createdAt}</small></div>
     </button>
     {action && <div className="ux-board-card-action">{action}</div>}

@@ -1688,6 +1688,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 }
 .board-image-placeholder.sheet-image { height: 120px; margin: 4px 0 12px; }
 .board-image-placeholder.detail-image { height: 200px; margin: 14px 0 4px; }
+/* 게시판 카드: 본문 아래 사진 */
+.ux-board-card .board-image-placeholder.card-image { display: grid; place-items: center; height: 150px; margin: 12px 0 2px; }
 /* 지도 시트의 본문은 한 줄만 보이고 '…'로 끊는다 (나머지는 자세히 보기에서) */
 .map-bottom-sheet p { display: -webkit-box; overflow: hidden; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
 
@@ -1759,8 +1761,10 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* ---------- 피드: 카드 테두리 없이 구분선으로 이어 보는 목록 ---------- */
 .feed-list { display: grid; }
-.feed-item { padding: 16px 0 14px; border-bottom: 1px solid #eef0f3; }
-.feed-item:first-child { padding-top: 4px; }
+/* 글과 글 사이는 화면 끝까지 닿는 두꺼운 회색 띠로 나눈다 */
+.feed-item { margin: 0 -18px; padding: 18px 18px 16px; border-bottom: 8px solid #f2f4f6; }
+.feed-item:first-child { padding-top: 6px; }
+.feed-item:last-child { border-bottom: 0; }
 /* 버튼 기본 모양 지우기: :where로 감싸 아래 개별 스타일이 이기게 */
 :where(.feed-screen .feed-item) button { margin: 0; padding: 0; color: inherit; font-size: inherit; text-align: left; border: 0; border-radius: 0; background: none; box-shadow: none; }
 .feed-main { display: grid; gap: 6px; width: 100%; color: var(--c-ink); }
@@ -1784,9 +1788,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-screen .feed-reactions .post-reactions b { color: inherit; font-size: 12px; font-weight: 600; }
 .feed-screen .feed-reactions .post-reactions :is(button span, span small) { color: inherit; font-size: 12px; font-weight: 700; }
 .feed-screen .feed-reactions .post-reactions button.selected { color: var(--c-accent); border-color: var(--c-accent); background: var(--c-accent-soft); }
-.feed-screen .feed-top-comment { display: flex; gap: 6px; width: 100%; margin-top: 10px; padding: 9px 12px; font-size: 13px; border-radius: 10px; background: #f5f6f8; }
-.feed-top-comment b { flex-shrink: 0; color: var(--c-ink); }
-.feed-top-comment span { overflow: hidden; color: var(--c-body); white-space: nowrap; text-overflow: ellipsis; }
 .feed-screen .feed-footer { display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; color: var(--c-mute); font-size: 13px; }
 .feed-footer em { margin-left: 4px; color: var(--c-accent); font-style: normal; font-weight: 600; }
 .feed-footer em::before { content: '· '; color: var(--c-mute); font-weight: 400; }
