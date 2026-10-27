@@ -534,28 +534,6 @@ html { -webkit-tap-highlight-color: transparent; }
 }
 .alert-swipe .alert.dragging { transition: none; }
 
-/* 게시판: 정렬(거리·최신·활발·참여 가능)은 제목 줄 오른쪽 끝, 아래 줄은 카테고리 필터만 */
-.ux-board-header .ux-sort-filter { margin-left: auto; }
-.ux-board-header .ux-sort-menu { right: 0; left: auto; }
-/* 정렬 버튼: 테두리·배경 없이 글자 + 화살표만 (아래 둥근 필터 칩과 구분) */
-.ux-board-header .ux-sort-trigger,
-.ux-board-header .ux-sort-trigger:hover,
-.ux-board-header .ux-sort-trigger:focus-visible {
-  width: auto;
-  min-height: 32px;
-  gap: 2px;
-  padding: 0 0 0 6px;
-  color: var(--c-body);
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  font-size: 14px;
-  font-weight: 600;
-}
-.ux-board-header .ux-sort-trigger svg { position: static; color: var(--c-mute); }
-.ux-board-header .ux-sort-trigger[aria-expanded="true"] { color: var(--c-ink); }
-/* 정렬 글자 오른쪽 끝을 카드 안 알림 종 아이콘의 오른쪽 끝에 맞춘다 */
-.ux-board-header .ux-sort-filter { margin-right: 17px; }
 
 /* ======================================================================
    로그인 첫 화면: 밤거리 + 반경 150m + 사람들의 질문 말풍선
@@ -1644,8 +1622,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 .comment-reaction-picker button.selected { color: var(--c-urgent); background: var(--c-urgent-soft); }
 .board-detail-screen .comment-tools .comment-react-button[aria-expanded="true"] { color: var(--c-urgent); }
 
-/* ---------- 게시판 정렬(거리 ⌄) 메뉴: 게시글 ⋯ 메뉴와 같은 크기·모양·등장 ---------- */
-.ux-board-header .ux-sort-menu {
+/* ---------- 게시판 정렬(거리순 ⌄) 메뉴: 게시글 ⋯ 메뉴와 같은 크기·모양·등장. 정렬 칩 바로 아래 ---------- */
+.board-filter-row .ux-sort-menu {
   top: calc(100% + 4px);
   display: grid;
   width: auto;
@@ -1655,10 +1633,10 @@ button.title-progress-card:active { background: #f7f8fa; }
   border-radius: 12px;
   background: #fff;
   box-shadow: 0 0 0 1px rgba(23, 25, 30, .06), 0 8px 24px rgba(23, 25, 30, .14);
-  transform-origin: top right;
+  transform-origin: top left;
   animation: popover-in .16s cubic-bezier(.2, .8, .2, 1);
 }
-.ux-board-header .ux-sort-menu button {
+.board-filter-row .ux-sort-menu button {
   width: 100%;
   padding: 9px 12px;
   color: var(--c-ink);
@@ -1671,9 +1649,9 @@ button.title-progress-card:active { background: #f7f8fa; }
   text-align: left;
   white-space: nowrap;
 }
-.ux-board-header .ux-sort-menu button:active { background: #f3f3f3; }
-.ux-board-header .ux-sort-menu button[aria-checked="true"] { color: var(--c-accent); font-weight: 700; }
-@media (prefers-reduced-motion: reduce) { .ux-board-header .ux-sort-menu { animation: none; } }
+.board-filter-row .ux-sort-menu button:active { background: #f3f3f3; }
+.board-filter-row .ux-sort-menu button[aria-checked="true"] { color: var(--c-accent); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .board-filter-row .ux-sort-menu { animation: none; } }
 
 /* 게시글 사진 자리 (목업: 실제 사진 대신 [이미지] 상자). 지도 시트는 작게, 상세는 크게 */
 .board-image-placeholder {
@@ -1754,8 +1732,6 @@ button.title-progress-card:active { background: #f7f8fa; }
   border-radius: 8px; background: var(--c-urgent); box-sizing: border-box;
 }
 .ux-board-header { display: flex; align-items: center; }
-.ux-board-header .ux-sort-filter { margin: 4px 0 0 6px; }
-.ux-board-header .ux-sort-menu { right: auto; left: 0; }
 .map-top-overlay header { display: flex; align-items: center; }
 .map-screen .map-top-overlay .notice-bell { pointer-events: auto; }
 
@@ -1811,3 +1787,19 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-screen .feed-item .feed-alert { top: 20px; right: -6px; }
 .feed-screen .feed-item:first-child .feed-alert { top: 2px; }
 .feed-meta { padding-right: 30px; }
+
+/* ---------- 게시판 거르기 한 줄: [정렬 ▾] [참여 가능] | 카테고리 (모두 같은 둥근 칩) ----------
+   카테고리 선택은 파랗게 채우고, 정렬을 바꿨거나 참여 가능을 켜면 연파랑 + 파란 테두리 */
+.board-filter-row { position: relative; }
+.board-filter-row .sort-chip { display: inline-flex; align-items: center; gap: 2px; }
+.board-filter-row .sort-chip svg { color: inherit; opacity: .7; }
+.ux-category-filters:not(.map-filters) button.chip-on:not(.selected) { color: var(--c-accent); border-color: var(--c-accent); background: var(--c-accent-soft); }
+.chip-divider { flex: none; align-self: center; width: 1px; height: 18px; background: var(--c-line); }
+.board-filter-row .ux-sort-menu { top: calc(100% + 6px); }
+/* 검색은 위쪽 종 옆으로 */
+.header-search {
+  display: grid; flex-shrink: 0; place-items: center; width: 40px; height: 40px; margin-left: auto; padding: 0;
+  color: var(--c-ink); border: 0; border-radius: 50%; background: transparent; box-shadow: none;
+}
+.header-search:active { background: var(--c-surface); }
+.header-search + .notice-bell { margin-left: 0; }

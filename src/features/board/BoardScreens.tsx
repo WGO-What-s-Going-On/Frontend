@@ -7,7 +7,6 @@ import { BoardCard } from '../../components/ui/BoardCard'
 import { Button } from '../../components/ui/Button'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
-import { FilterChips } from '../../components/ui/FilterChips'
 import { IconButton } from '../../components/ui/IconButton'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { PostReactions } from '../../components/ui/PostReactions'
@@ -21,43 +20,61 @@ import { EditBoardSheet } from './EditBoardSheet'
 import { CommentVoteSection } from './CommentVoteSection'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
-type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
-const sortLabel: Record<BoardSort, string> = { '거리': '거리순', '최신': '최신순', '활발': '활발한 순', '참여 가능': '참여 가능' }
+type BoardSort = '거리' | '최신' | '활발'
+const sortLabel: Record<BoardSort, string> = { '거리': '거리순', '최신': '최신순', '활발': '활발한 순' }
 
 export function BoardListScreen() {
   const { boards, comments, go, openBoard, alertBoardIds, toggleBoardNotifications } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [sortMenuOpen, setSortMenuOpen] = useState(false)
-  const sortMenuRef = useRef<HTMLDivElement>(null)
-  const sortOptions: BoardSort[] = ['거리', '최신', '활발', '참여 가능']
+  const [sortMenuLeft, setSortMenuLeft] = useState<number | null>(null) // 열려 있으면 메뉴의 left(px): 정렬 칩 바로 아래
+  const filterRowRef = useRef<HTMLDivElement>(null)
+  const sortChipRef = useRef<HTMLButtonElement>(null)
+  const sortOptions: BoardSort[] = ['거리', '최신', '활발']
   const categoryOptions: (Category | '전체')[] = ['전체', '긴급 사고', '도움 요청', '동네 소식', '일상 불편']
-  const sortValue = searchParams.get('sort') as BoardSort | null
+  const sortValue = searchParams.get('sort')
   const categoryValue = searchParams.get('category') as Category | '전체' | null
-  const sort = sortValue && sortOptions.includes(sortValue) ? sortValue : '거리'
+  const sort = sortOptions.find((item) => item === sortValue) ?? '거리'
   const category = categoryValue && categoryOptions.includes(categoryValue) ? categoryValue : '전체'
-  const updateFilter = (key: 'sort' | 'category', value: string) => {
+  // 참여 가능: 정렬이 아니라 150m 안 글만 남기는 거르기 (예전 주소 ?sort=참여 가능 도 그대로 받는다)
+  const nearOnly = searchParams.get('near') === '1' || sortValue === '참여 가능'
+  const updateFilter = (key: 'sort' | 'category' | 'near', value: string) => {
     const next = new URLSearchParams(searchParams)
-    if (value === (key === 'sort' ? '거리' : '전체')) next.delete(key)
+    if (next.get('sort') === '참여 가능') { next.delete('sort'); next.set('near', '1') }
+    if (value === { sort: '거리', category: '전체', near: '' }[key]) next.delete(key)
     else next.set(key, value)
     setSearchParams(next)
   }
   const visibleBoards = useMemo(() => {
     // 종료한 게시판은 게시판 목록에서 빼고, 마이 > 최근 활동에서만 본다
-    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= 150 && board.status === '실시간'))
-    return [...filtered].sort((a, b) => sort === '거리' || sort === '참여 가능' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
-  }, [boards, category, sort])
+    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category) && (!nearOnly || board.distance <= RADIUS))
+    return [...filtered].sort((a, b) => sort === '거리' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
+  }, [boards, category, sort, nearOnly])
   useEffect(() => {
-    if (!sortMenuOpen) return
+    if (sortMenuLeft === null) return
     const closeMenu = (event: PointerEvent) => {
-      if (!sortMenuRef.current?.contains(event.target as Node)) setSortMenuOpen(false)
+      if (!filterRowRef.current?.contains(event.target as Node) || (event.target as Element).closest('.ux-category-filters > :not(.sort-chip)')) setSortMenuLeft(null)
     }
     document.addEventListener('pointerdown', closeMenu)
     return () => document.removeEventListener('pointerdown', closeMenu)
-  }, [sortMenuOpen])
+  }, [sortMenuLeft])
+  const toggleSortMenu = () => {
+    const chip = sortChipRef.current?.getBoundingClientRect()
+    const row = filterRowRef.current?.getBoundingClientRect()
+    setSortMenuLeft(sortMenuLeft !== null || !chip || !row ? null : chip.left - row.left)
+  }
   return <AppShell contentClassName="ux-board-screen">
-    <header className="ux-board-header"><h1>게시판</h1><div ref={sortMenuRef} className="ux-sort-filter"><button className="ux-sort-trigger" onClick={() => setSortMenuOpen((open) => !open)} aria-label="게시글 정렬" aria-haspopup="menu" aria-expanded={sortMenuOpen}><span>{sortLabel[sort]}</span><ChevronDown size={14}/></button>{sortMenuOpen && <div className="ux-sort-menu" role="menu">{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuOpen(false) }}>{sortLabel[item]}</button>)}</div>}</div><NoticeBell/></header>
-    <div className="ux-filter-row"><FilterChips className="ux-category-filters" options={categoryOptions.map((item) => ({ value: item, label: item === '전체' ? '전체' : categoryLabel[item] }))} selected={category} onSelect={(item) => updateFilter('category', item)}/><IconButton className="board-search-chip" label="게시판 검색" onClick={() => go('search')}><Search size={17}/></IconButton></div>
-    <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={!alertBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => updateFilter('category', '전체')}/>}</div>
+    <header className="ux-board-header"><h1>게시판</h1><IconButton className="header-search" label="게시판 검색" onClick={() => go('search')}><Search size={22}/></IconButton><NoticeBell/></header>
+    {/* 거르기는 한 줄 칩으로: [정렬 ▾] [참여 가능] | 카테고리. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
+    <div ref={filterRowRef} className="ux-filter-row board-filter-row">
+      <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>
+        <button ref={sortChipRef} className={`sort-chip ${sort !== '거리' ? 'chip-on' : ''}`} onClick={toggleSortMenu} aria-label={`정렬: ${sortLabel[sort]}`} aria-haspopup="menu" aria-expanded={sortMenuLeft !== null}>{sortLabel[sort]}<ChevronDown size={14}/></button>
+        <button className={nearOnly ? 'chip-on' : ''} aria-pressed={nearOnly} onClick={() => updateFilter('near', nearOnly ? '' : '1')}>참여 가능</button>
+        <i className="chip-divider" aria-hidden="true"/>
+        {categoryOptions.map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => updateFilter('category', item)}>{item === '전체' ? '전체' : categoryLabel[item]}</button>)}
+      </div>
+      {sortMenuLeft !== null && <div className="ux-sort-menu" role="menu" style={{ left: sortMenuLeft }}>{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuLeft(null) }}>{sortLabel[item]}</button>)}</div>}
+    </div>
+    <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={!alertBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>}</div>
   </AppShell>
 }
 
