@@ -18,7 +18,7 @@ function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
   const open = () => openBoard(board.id)
   return <article className="feed-item">
     <button className="feed-main" onClick={open}>
-      <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}<small>{board.authorName} · {board.distance}m · {board.createdAt}</small></span>
+      <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}<small>{board.createdAt}</small></span>
       <strong className="feed-title">{board.title}</strong>
       <span className="feed-body">{board.body}</span>
       {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder feed-image">[이미지]</span>}
