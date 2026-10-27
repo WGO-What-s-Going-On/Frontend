@@ -197,7 +197,6 @@
 :root[data-theme="dark"] .reach-tip { color: var(--c-page); background: var(--c-ink); }
 :root[data-theme="dark"] .similar-sheet { background: var(--c-raised); }
 :root[data-theme="dark"] .similar-item { border-color: var(--c-line); background: var(--c-canvas); }
-:root[data-theme="dark"] .similar-comment { background: var(--c-canvas); }
 :root[data-theme="dark"] .similar-cancel { color: var(--c-ink); background: var(--c-canvas); }
 :root[data-theme="dark"] .similar-publish { background: var(--c-accent-fill); }
 
