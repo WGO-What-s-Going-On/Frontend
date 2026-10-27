@@ -6,7 +6,7 @@ import { categoryLabel } from '../../domain/labels'
 import { isHotBoard } from '../../types/domain'
 import type { Board } from '../../types/domain'
 
-// 게시하기를 누르면 비슷한 진행 중 글을 먼저 보여준다 (같은 일로 글이 여러 개 생기지 않게).
+// 게시하기를 누르면 비슷한 진행 중 글을 화면 가운데 팝업으로 먼저 보여준다 (같은 일로 글이 여러 개 생기지 않게).
 // 글을 눌러 안에서 바로 읽어 보고, 아래에서 작성 취소 · 그대로 올리기를 고른다. X는 작성 화면으로 돌아간다.
 export function SimilarBoardsSheet({ boards, onClose, onCancelWrite, onPublish }: { boards: Board[]; onClose: () => void; onCancelWrite: () => void; onPublish: () => void }) {
   const { comments } = useApp()

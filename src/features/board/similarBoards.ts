@@ -1,3 +1,4 @@
+import { reachOptions } from '../../types/domain'
 import type { Board, Category } from '../../types/domain'
 
 // 중복 글 막기: 쓰려는 글과 비슷한 진행 중 게시판을 최대 3개 찾는다.
@@ -22,7 +23,8 @@ export function findSimilarBoards(boards: Board[], draft: { category: Category; 
   const mine = pairs(draft.body)
   if (mine.size === 0) return []
   return boards
-    .filter((board) => board.status === '실시간')
+    // 같은 일이면 가까이 있다: 가장 넓은 공개 범위(350m) 안의 진행 중 글만
+    .filter((board) => board.status === '실시간' && board.distance <= Math.max(...reachOptions))
     .map((board) => {
       const theirs = pairs(`${board.title} ${board.body}`)
       let shared = 0
