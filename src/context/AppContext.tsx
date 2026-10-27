@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { RADIUS, mapSeedBoards } from '../features/map/mapWorld'
+import { pickCandidates } from '../features/board/commentVote'
 import { myCommentReactions, myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Report, Screen, User } from '../types/domain'
 
@@ -91,6 +92,8 @@ interface AppContextValue {
   deleteComment: (id: string) => void
   markCommentRead: (id: string) => void
   reactToComment: (id: string, reaction: CommentReaction) => void
+  startVote: (boardId: string) => void
+  castVote: (boardId: string, commentId: string) => void
   toggleCommentLike: (id: string) => void
   updateUser: (input: Pick<User, 'nickname' | 'realName'>) => void
   markNoticeRead: (id: string) => void
@@ -243,7 +246,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast('댓글을 등록했습니다.')
   }
   const updateComment = (id: string, body: string) => { setComments((items) => items.map((comment) => comment.id === id ? { ...comment, body, edited: true } : comment)); showToast('댓글을 수정했습니다.') }
-  const deleteComment = (id: string) => setComments((items) => items.filter((comment) => comment.id !== id))
+  // 투표 중인 후보 댓글이 지워지면 그 투표는 취소된다 (이미 끝난 투표는 그대로)
+  const cancelVoteFor = (commentId: string) => setBoards((items) => items.map((board) => board.status === '실시간' && board.vote && board.vote.candidates.some((candidate) => candidate.commentId === commentId) ? { ...board, vote: { ...board.vote, cancelled: true } } : board))
+  const deleteComment = (id: string) => { setComments((items) => items.filter((comment) => comment.id !== id)); cancelVoteFor(id) }
   const markCommentRead = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, read: true } : comment))
   const toggleCommentLike = (id: string) => setComments((items) => items.map((comment) => comment.id === id ? { ...comment, likedByMe: !comment.likedByMe, likes: Math.max(0, (comment.likes ?? 0) + (comment.likedByMe ? -1 : 1)) } : comment))
   const reactToComment = (id: string, reaction: CommentReaction) => setComments((items) => items.map((comment) => {
@@ -256,6 +261,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (!pressed) reactions[reaction] += 1
     return { ...comment, reactions, myReactions: pressed ? [] : [reaction], reactedByMe: undefined }
   }))
+  // 글 작성 30분 뒤: 그때 공감이 많은 댓글 2개를 후보로 고정한다 (백엔드에서는 워커가 한다)
+  const startVote = (boardId: string) => setBoards((items) => items.map((board) => board.id === boardId && !board.vote ? { ...board, vote: { candidates: pickCandidates(comments.filter((comment) => comment.boardId === boardId)) } } : board))
+  // 한 사람 한 표: 다른 후보를 누르면 표를 옮기고, 내 후보를 다시 누르면 취소한다
+  const castVote = (boardId: string, commentId: string) => setBoards((items) => items.map((board) => {
+    if (board.id !== boardId || !board.vote) return board
+    const { mine } = board.vote
+    const next = mine === commentId ? undefined : commentId
+    const candidates = board.vote.candidates.map((candidate) => ({ ...candidate, votes: candidate.votes - (candidate.commentId === mine ? 1 : 0) + (candidate.commentId === next ? 1 : 0) }))
+    return { ...board, vote: { ...board.vote, candidates, mine: next } }
+  }))
   const updateUser = (input: Pick<User, 'nickname' | 'realName'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
   const markNoticeRead = (id: string) => setNotices((items) => items.map((notice) => notice.id === id ? { ...notice, read: true } : notice))
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
@@ -267,12 +282,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const resolveReport = (id: string, hideTarget: boolean) => {
     const report = reports.find((item) => item.id === id)
     if (hideTarget && report?.targetType === '게시글') setBoards((items) => items.map((board) => board.id === report.targetId ? { ...board, status: '숨김' } : board))
-    if (hideTarget && report?.targetType === '댓글') setComments((items) => items.filter((comment) => comment.id !== report.targetId))
+    if (hideTarget && report?.targetType === '댓글') { setComments((items) => items.filter((comment) => comment.id !== report.targetId)); cancelVoteFor(report.targetId) }
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
-    go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike,
+    go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

@@ -45,6 +45,23 @@ export interface Board {
   position?: { x: number; y: number }
   // 작성 후 수정한 적이 있으면 true (상세에 '수정됨' 표시)
   edited?: boolean
+  // 댓글 후보 투표. 글 작성 30분 뒤 고정한 후보 2개와 득표 (없으면 아직 후보를 고르지 않은 것)
+  vote?: BoardVote
+}
+
+export interface VoteCandidate {
+  commentId: string
+  // 후보로 고른 때의 댓글 내용. 댓글이 나중에 바뀌거나 지워져도 이 내용으로 보여준다
+  content: string
+  votes: number
+}
+
+export interface BoardVote {
+  candidates: VoteCandidate[]
+  // 내가 고른 후보 댓글 id (한 사람 한 표)
+  mine?: string
+  // 투표 중 후보 댓글이 지워져 취소됨
+  cancelled?: boolean
 }
 
 export interface Comment {

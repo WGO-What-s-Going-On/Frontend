@@ -17,6 +17,7 @@ import { categoryLabel } from '../../domain/labels'
 import { RADIUS } from '../map/mapWorld'
 import { pathForScreen } from '../../navigation'
 import { EditBoardSheet } from './EditBoardSheet'
+import { CommentVoteSection } from './CommentVoteSection'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
@@ -230,6 +231,7 @@ export function BoardDetailScreen() {
       {(board.imagePlaceholder || board.imageName) && <div className="board-image-placeholder detail-image">[이미지]</div>}
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={canParticipate} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
     </article>
+    <CommentVoteSection board={board} canChoose={canParticipate}/>
     <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={canParticipate ? startComment : () => undefined} onEdit={startEdit} replyTargetId={replyTo?.id} readOnly={!canParticipate}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong>{canParticipate && <p>가장 먼저 상황을 알려주세요</p>}</div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>접기 <ChevronUp size={17}/></button>}</section>
   </AppShell>
 }
