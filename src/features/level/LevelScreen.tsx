@@ -42,13 +42,12 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
       </div> : <div className="level-progress"><div className="level-progress-head"><strong>대표 의견 점수 {scoreOf(stats)}점</strong></div><p>점수로 {myRegion} 랭킹에서 겨뤄요</p></div>}
     </section>
     <h4>칭호 단계</h4>
-    {/* 4단계를 한 줄로: 동그라미를 가로줄로 잇고, 아래에 이름과 얻는 조건. 지금 단계는 파란 테두리 */}
-    <ol className="level-steps">{levels.map((level, index) => {
+    <ol className="level-road">{levels.map((level, index) => {
       const state = index < current ? 'earned' : index === current ? 'current' : 'locked'
-      return <li key={level.name} className={state} aria-label={`Lv.${index + 1} ${level.name}, ${level.condition}${state === 'earned' ? ', 획득' : state === 'current' ? ', 지금 칭호' : ''}`}>
+      return <li key={level.name} className={state}>
         <LevelEmblem index={index} locked={state === 'locked'}/>
-        <strong>{level.name}</strong>
-        <small>{level.condition}</small>
+        <span className="level-road-text"><strong>Lv.{index + 1} {level.name}</strong><small>{level.condition}</small></span>
+        <em>{state === 'earned' ? '획득' : state === 'current' ? '지금' : ''}</em>
       </li>
     })}</ol>
     <h4>활동 뱃지 <small>{badges.filter((badge) => badge.earned).length}/{badges.length}</small></h4>
