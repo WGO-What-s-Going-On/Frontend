@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Camera, Check, CircleAlert, GalleryVerticalEnd, LayoutGrid, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
+import { ArrowLeft, Camera, Check, CircleAlert, LayoutGrid, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, StretchHorizontal, ThumbsUp, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
@@ -23,11 +23,11 @@ import { CommentVoteSection } from './CommentVoteSection'
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
 const sortLabel: Record<BoardSort, string> = { '거리': '거리순', '최신': '최신순', '활발': '활발순', '참여 가능': '참여 가능' }
-// 게시판 보기 방식: 앨범(한 줄에 2칸, 한눈에 훑기) · 피드(본문·사진·반응을 펼쳐 읽기). 마지막으로 고른 방식을 기억한다
-type BoardView = 'album' | 'feed'
+// 게시판 보기 방식: 피드(기본, 본문·사진·반응을 펼쳐 읽기) · 앨범(한 줄에 2칸, 한눈에 훑기). 마지막으로 고른 방식을 기억한다
+type BoardView = 'feed' | 'album'
 const BOARD_VIEW_KEY = 'wgo-board-view'
 function readBoardView(): BoardView {
-  try { return localStorage.getItem(BOARD_VIEW_KEY) === 'feed' ? 'feed' : 'album' } catch { return 'album' }
+  try { return localStorage.getItem(BOARD_VIEW_KEY) === 'album' ? 'album' : 'feed' } catch { return 'feed' }
 }
 
 export function BoardListScreen() {
@@ -75,7 +75,7 @@ export function BoardListScreen() {
   }
   return <AppShell contentClassName={`ux-board-screen ${view === 'feed' ? 'feed-screen' : ''}`}>
     {/* 제목 옆 보기 전환: 두 방식을 나란히 두고 지금 보는 쪽만 파랗게 */}
-    <header className="ux-board-header"><h1>게시판</h1><div className="board-view-switch" role="radiogroup" aria-label="보기 방식">{([['album', '앨범으로 보기', LayoutGrid], ['feed', '피드로 보기', GalleryVerticalEnd]] as const).map(([value, label, Icon]) => <button key={value} role="radio" aria-checked={view === value} aria-label={label} className={view === value ? 'selected' : ''} onClick={() => switchView(value)}><Icon size={17}/></button>)}</div><NoticeBell/></header>
+    <header className="ux-board-header"><h1>게시판</h1><div className="board-view-switch" role="radiogroup" aria-label="보기 방식">{([['feed', '피드로 보기', StretchHorizontal], ['album', '앨범으로 보기', LayoutGrid]] as const).map(([value, label, Icon]) => <button key={value} role="radio" aria-checked={view === value} aria-label={label} className={view === value ? 'selected' : ''} onClick={() => switchView(value)}><Icon size={17}/></button>)}</div><NoticeBell/></header>
     {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
     <div ref={filterRowRef} className="ux-filter-row board-filter-row">
       <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>
