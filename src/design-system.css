@@ -1841,6 +1841,7 @@ button.title-progress-card:active { background: #f7f8fa; }
   box-shadow: 0 12px 40px rgba(17, 19, 24, .2); animation: dialog-pop .18s cubic-bezier(.2, .8, .2, 1);
 }
 .similar-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.similar-head { align-items: center; }
 .similar-head h2 { margin: 0; color: var(--c-ink); font-size: 18px; }
 .similar-head p { margin: 5px 0 0; color: var(--c-mute); font-size: 13px; }
 .similar-head .quick-compose-close { width: 34px; height: 34px; margin: -4px -4px 0 0; }
@@ -1854,6 +1855,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 .similar-item > svg { flex: none; color: var(--c-mute); }
 .similar-item-text { display: grid; flex: 1; gap: 5px; min-width: 0; }
 .similar-tags { display: flex; align-items: center; gap: 5px; }
+.similar-item-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.similar-item-top small { flex-shrink: 0; color: var(--c-mute); font-size: 12px; }
 .similar-item strong { overflow: hidden; font-size: 14px; font-weight: 700; line-height: 1.4; white-space: nowrap; text-overflow: ellipsis; }
 .similar-item-body { overflow: hidden; color: var(--c-body); font-size: 13px; line-height: 1.5; white-space: nowrap; text-overflow: ellipsis; }
 .similar-stats { display: flex; align-items: center; gap: 12px; color: var(--c-body); font-size: 13px; }

@@ -27,7 +27,7 @@ export function SimilarBoardsSheet({ boards, onClose, onCancelWrite, onPublish }
     <section ref={sheetRef} className="similar-sheet" style={opened ? { height } : undefined}>
       <header className="similar-head">
         {opened ? <IconButton className="similar-back" label="비슷한 글 목록으로" onClick={() => setOpenId(null)}><ArrowLeft size={20}/></IconButton>
-          : <div><h2>비슷한 글이 이미 있어요</h2><p>같은 일이라면 이 글에 참여해 보세요</p></div>}
+          : <h2>비슷한 글이 이미 있어요</h2>}
         <IconButton className="quick-compose-close" label="닫기" onClick={onClose}><X size={21}/></IconButton>
       </header>
       <div className="similar-body">{opened ? <article className="similar-preview">
@@ -38,10 +38,10 @@ export function SimilarBoardsSheet({ boards, onClose, onCancelWrite, onPublish }
         {stats(opened)}
       </article> : <div className="similar-list">{boards.map((board) => <button key={board.id} className="similar-item" onClick={() => setOpenId(board.id)}>
         <span className="similar-item-text">
-          {tags(board)}
+          {/* 목록은 같은 일인지 훑어보는 용도라 반응 · 댓글 수는 빼고 작성 시간만 태그 줄 오른쪽에 */}
+          <span className="similar-item-top">{tags(board)}<small>{board.createdAt}</small></span>
           <strong>{board.title}</strong>
           <span className="similar-item-body">{board.body}</span>
-          {stats(board)}
         </span>
         <ChevronRight size={18} aria-hidden="true"/>
       </button>)}</div>}</div>
