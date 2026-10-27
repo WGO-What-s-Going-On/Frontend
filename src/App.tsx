@@ -4,7 +4,6 @@ import { LocationPermissionScreen, NicknameScreen, TermsScreen } from './feature
 import { MapScreen } from './features/map/MapScreens'
 import { BoardListScreen, SearchScreen, BoardDetailScreen } from './features/board/BoardScreens'
 import { NotificationScreen } from './features/notifications/NotificationScreen'
-import { FeedScreen } from './features/feed/FeedScreen'
 import { ProfileScreen, ActivityScreen, ProfileEditScreen, NotificationSettingsScreen } from './features/profile/ProfileScreens'
 import type { Screen } from './types/domain'
 
@@ -18,7 +17,6 @@ const screens: Record<Screen, React.ComponentType> = {
   my: ProfileScreen,
   activity: ActivityScreen,
   alerts: NotificationScreen,
-  feed: FeedScreen,
   'profile-edit': ProfileEditScreen,
   'notification-settings': NotificationSettingsScreen,
   // 150m 밖 게시판도 같은 상세 화면을 쓰고, 화면 안에서 읽기 전용으로 바뀐다

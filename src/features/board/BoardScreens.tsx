@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Camera, Check, CircleAlert, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
+import { ArrowLeft, Camera, Check, CircleAlert, GalleryVerticalEnd, LayoutList, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { BoardCard } from '../../components/ui/BoardCard'
@@ -17,15 +17,29 @@ import { categoryLabel } from '../../domain/labels'
 import { RADIUS } from '../map/mapWorld'
 import { pathForScreen } from '../../navigation'
 import { EditBoardSheet } from './EditBoardSheet'
+import { FeedItem } from './FeedItem'
 import { CommentVoteSection } from './CommentVoteSection'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
 const sortLabel: Record<BoardSort, string> = { '거리': '거리순', '최신': '최신순', '활발': '활발순', '참여 가능': '참여 가능' }
+// 게시판 보기 방식: 카드(테두리 있는 목록) · 피드(본문·사진·반응을 펼쳐 봄). 마지막으로 고른 방식을 기억한다
+type BoardView = 'card' | 'feed'
+const BOARD_VIEW_KEY = 'wgo-board-view'
+function readBoardView(): BoardView {
+  try { return localStorage.getItem(BOARD_VIEW_KEY) === 'feed' ? 'feed' : 'card' } catch { return 'card' }
+}
 
 export function BoardListScreen() {
-  const { boards, comments, go, openBoard, alertBoardIds, toggleBoardNotifications } = useApp()
+  const { boards, comments, blockedUsers, go, openBoard, alertBoardIds, toggleBoardNotifications } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
+  const [view, setView] = useState(readBoardView)
+  const switchView = () => {
+    const next: BoardView = view === 'card' ? 'feed' : 'card'
+    setView(next)
+    try { localStorage.setItem(BOARD_VIEW_KEY, next) } catch { /* 기억 못 해도 전환은 된다 */ }
+    document.querySelector('.screen')?.scrollTo({ top: 0 })
+  }
   const [sortMenuLeft, setSortMenuLeft] = useState<number | null>(null) // 열려 있으면 메뉴의 left(px): 정렬 칩 바로 아래
   const filterRowRef = useRef<HTMLDivElement>(null)
   const sortChipRef = useRef<HTMLButtonElement>(null)
@@ -59,8 +73,9 @@ export function BoardListScreen() {
     const row = filterRowRef.current?.getBoundingClientRect()
     setSortMenuLeft(sortMenuLeft !== null || !chip || !row ? null : chip.left - row.left)
   }
-  return <AppShell contentClassName="ux-board-screen">
-    <header className="ux-board-header"><h1>게시판</h1><NoticeBell/></header>
+  return <AppShell contentClassName={`ux-board-screen ${view === 'feed' ? 'feed-screen' : ''}`}>
+    {/* 제목 옆 보기 전환: 누르면 바뀔 방식의 아이콘을 보여준다 */}
+    <header className="ux-board-header"><h1>게시판</h1><IconButton className="board-view-toggle" label={view === 'card' ? '피드로 보기' : '카드로 보기'} onClick={switchView}>{view === 'card' ? <GalleryVerticalEnd size={20}/> : <LayoutList size={20}/>}</IconButton><NoticeBell/></header>
     {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
     <div ref={filterRowRef} className="ux-filter-row board-filter-row">
       <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>
@@ -70,7 +85,9 @@ export function BoardListScreen() {
       <IconButton className="board-search-chip" label="게시판 검색" onClick={() => go('search')}><Search size={17}/></IconButton>
       {sortMenuLeft !== null && <div className="ux-sort-menu" role="menu" style={{ left: sortMenuLeft }}>{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuLeft(null) }}>{sortLabel[item]}</button>)}</div>}
     </div>
-    <div className="ux-board-list">{visibleBoards.length ? visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={!alertBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>) : <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>}</div>
+    {!visibleBoards.length ? <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>
+      : view === 'feed' ? <div className="feed-list">{visibleBoards.map((board) => <FeedItem key={board.id} board={board} comments={comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))}/>)}</div>
+      : <div className="ux-board-list">{visibleBoards.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} notificationsMuted={!alertBoardIds.includes(board.id)} onToggleNotifications={() => toggleBoardNotifications(board.id)} onOpen={() => openBoard(board.id)}/>)}</div>}
   </AppShell>
 }
 

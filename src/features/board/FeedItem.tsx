@@ -1,13 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Bell, BellOff, MessageCircle, SmilePlus } from 'lucide-react'
-import { AppShell } from '../../components/layout/AppShell'
-import { NoticeBell } from '../../components/ui/NoticeBell'
 import { reactionOptions } from '../../components/ui/PostReactions'
 import { useApp } from '../../context/AppContext'
 import { categoryLabel, reactionLabel } from '../../domain/labels'
 import { isHotBoard, myReactions } from '../../types/domain'
 import type { Board, Comment, PostReaction } from '../../types/domain'
-import { minutesSince, voteStatus } from '../board/commentVote'
+import { voteStatus } from './commentVote'
 import { RADIUS } from '../map/mapWorld'
 
 // 읽기 전용(150m 밖) 표시: 선 아이콘보다 작고 단단해 보이는 채운 자물쇠
@@ -18,9 +16,9 @@ function SolidLock() {
 // 피드 반응 판에 보이는 이름
 const pickerLabel: Record<PostReaction, string> = { '저도 궁금해요': '궁금해요', '지금도 그래요': '진행 중', '도움 됐어요': '유익해요', '이제 끝났어요': '끝났어요' }
 
-// 피드: 진행 중인 주변 게시글을 최신순으로 펼쳐 본다. 글을 열지 않아도 본문 · 사진 · 반응 수 · 댓글 수가 보이고,
+// 게시판 피드 보기의 글 하나. 글을 열지 않아도 본문 · 사진 · 반응 수 · 댓글 수가 보이고,
 // 반응은 댓글 공감처럼 이모티콘 버튼 하나로 모아 두고, 누르면 4가지 반응 판이 뜬다 (150m 안 글만 고를 수 있음). 카드를 누르면 상세로
-function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
+export function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
   const { inRange, openBoard, reactToBoard, alertBoardIds, toggleBoardNotifications } = useApp()
   const muted = !alertBoardIds.includes(board.id)
   const canReact = inRange && board.distance <= RADIUS
@@ -54,16 +52,4 @@ function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
       {picker && <div className="feed-reaction-picker" role="menu" aria-label="반응 고르기">{reactionOptions.map(({ label, icon: Icon }) => <button key={label} role="menuitemradio" aria-checked={mine === label} className={mine === label ? 'selected' : ''} disabled={!canReact} title={reactionLabel[label].full} onClick={() => { reactToBoard(board.id, label); setPicker(false) }}><Icon size={18} strokeWidth={2}/><span>{pickerLabel[label]}</span><b>{board.reactions[label]}</b></button>)}</div>}
     </div>
   </article>
-}
-
-export function FeedScreen() {
-  const { boards, comments, blockedUsers } = useApp()
-  const live = boards
-    .filter((board) => board.status === '실시간')
-    .sort((a, b) => minutesSince(a.createdAt) - minutesSince(b.createdAt) || a.distance - b.distance)
-  const commentsOf = (id: string) => comments.filter((comment) => comment.boardId === id && !blockedUsers.includes(comment.authorId))
-  return <AppShell contentClassName="ux-board-screen feed-screen">
-    <header className="ux-board-header"><h1>피드</h1><NoticeBell/></header>
-    <div className="feed-list">{live.map((board) => <FeedItem key={board.id} board={board} comments={commentsOf(board.id)}/>)}</div>
-  </AppShell>
 }
