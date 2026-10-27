@@ -1805,9 +1805,5 @@ button.title-progress-card:active { background: #f7f8fa; }
 }
 .board-view-switch button.selected { color: var(--c-accent); background: var(--c-accent-soft); }
 
-/* 하단 탭 3개 (지도 · 게시판 | 작성 | 마이): 작성 버튼은 가운데 그대로, 왼쪽 반에 2개 · 오른쪽 반에 1개 */
-.ux-bottom-nav { display: grid; grid-template-columns: 1fr 1fr 76px 2fr; }
-.ux-bottom-nav > button { justify-self: center; width: 72px; }
-.ux-bottom-nav > button:nth-child(2),
-.ux-bottom-nav > button:nth-child(3) { margin: 0; }
-.ux-bottom-nav > button:nth-child(3) { grid-column: 4; }
+/* 하단 탭: 예전 알림(피드) 자리는 비워 두고 마이는 원래 자리 그대로 */
+.ux-bottom-nav > .nav-slot { flex: 1; max-width: 72px; margin-left: 34px; }
