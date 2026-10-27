@@ -1802,3 +1802,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-screen .feed-reaction-picker button:not(:disabled):active { background: #f2f4f6; }
 .feed-screen .feed-reaction-picker button.selected { color: var(--c-accent); background: var(--c-accent-soft); }
 .feed-reaction-picker button.selected b { color: var(--c-accent); }
+/* 피드 알림 켜기/끄기: 태그 줄 오른쪽 끝 */
+.feed-item { position: relative; }
+.feed-screen .feed-item .feed-alert { top: 20px; right: -6px; }
+.feed-screen .feed-item:first-child .feed-alert { top: 2px; }
+.feed-meta { padding-right: 30px; }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { MessageCircle, SmilePlus } from 'lucide-react'
+import { Bell, BellOff, MessageCircle, SmilePlus } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { reactionOptions } from '../../components/ui/PostReactions'
@@ -16,7 +16,8 @@ const pickerLabel: Record<PostReaction, string> = { '저도 궁금해요': '궁�
 // 피드: 진행 중인 주변 게시글을 최신순으로 펼쳐 본다. 글을 열지 않아도 본문 · 사진 · 반응 수 · 댓글 수가 보이고,
 // 반응은 댓글 공감처럼 이모티콘 버튼 하나로 모아 두고, 누르면 4가지 반응 판이 뜬다 (150m 안 글만 고를 수 있음). 카드를 누르면 상세로
 function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
-  const { inRange, openBoard, reactToBoard } = useApp()
+  const { inRange, openBoard, reactToBoard, alertBoardIds, toggleBoardNotifications } = useApp()
+  const muted = !alertBoardIds.includes(board.id)
   const canReact = inRange && board.distance <= RADIUS
   const voting = voteStatus(board, comments) === 'OPEN'
   const open = () => openBoard(board.id)
@@ -31,6 +32,8 @@ function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
   const mine = myReactions(board)[0]
   const reactionTotal = Object.values(board.reactions).reduce((sum, count) => sum + count, 0)
   return <article className="feed-item">
+    {/* 게시판 카드와 같은 알림 켜기/끄기 (기본 꺼짐, 켜면 파랑) */}
+    <button className={`ux-board-alert feed-alert ${muted ? 'muted' : ''}`} onClick={() => toggleBoardNotifications(board.id)} aria-label={muted ? `${board.title} 알림 켜기` : `${board.title} 알림 끄기`} title={muted ? '알림 켜기' : '알림 끄기'}>{muted ? <BellOff size={17}/> : <Bell size={17}/>}</button>
     <button className="feed-main" onClick={open}>
       <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}<small>{board.createdAt}</small></span>
       <strong className="feed-title">{board.title}</strong>
