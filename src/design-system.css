@@ -759,7 +759,9 @@ html { -webkit-tap-highlight-color: transparent; }
 .terms-all { margin-top: 20px; padding: 16px 14px; border-radius: 14px; background: var(--c-surface); font-size: 16px; font-weight: 700; }
 .terms-list { margin: 8px 0 0; padding: 0; list-style: none; }
 .terms-list li { display: flex; align-items: center; justify-content: space-between; color: var(--c-mute); }
-.terms-item { font-size: 14px; }
+/* 아래 항목의 동그라미·글자를 위 '전체 동의' 상자 안쪽(14px)과 같은 세로줄에, 화살표도 상자 안쪽 끝에 */
+.terms-item { padding-left: 14px; font-size: 14px; }
+.terms-list li { padding-right: 14px; }
 .terms-item b { color: var(--c-accent); font-weight: 600; }
 .terms-check {
   width: 22px;
