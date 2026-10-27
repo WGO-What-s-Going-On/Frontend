@@ -53,7 +53,7 @@ export function ProfileScreen() {
 }
 
 export function ActivityScreen() {
-  const { boards, comments, user, recentBoardIds, openBoard, go } = useApp()
+  const { boards, comments, user, recentBoardIds, openBoard, go, reopenBoard } = useApp()
   const [filter, setFilter] = useState<'최근 본' | '댓글 단' | '공감한' | '내가 작성한'>('최근 본')
   const participatingIds = new Set(comments.filter((comment) => comment.authorId === user.id).map((comment) => comment.boardId))
   const filters = [
@@ -67,7 +67,7 @@ export function ActivityScreen() {
   // 게시판 목록과 같은 여백·칩·카드를 써서 같은 화면처럼 보이게 한다
   return <AppShell contentClassName="ux-board-screen activity-screen"><BackHeader title="최근 활동" onBack={() => go('my')}/>
     <div className="ux-filter-row"><FilterChips className="ux-category-filters activity-chips" options={filters.map((item) => ({ value: item.label, count: item.count }))} selected={filter} onSelect={setFilter}/></div>
-    <div className="ux-board-list">{filtered.length ? filtered.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} onOpen={() => openBoard(board.id)}/>) : <EmptyState title={emptyText[filter]}/>}</div>
+    <div className="ux-board-list">{filtered.length ? filtered.map((board) => <BoardCard key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} onOpen={() => openBoard(board.id)} action={board.authorId === user.id && board.status === '종료됨' ? <button className="board-reopen" onClick={() => reopenBoard(board.id)}>종료 해제</button> : undefined}/>) : <EmptyState title={emptyText[filter]}/>}</div>
   </AppShell>
 }
 

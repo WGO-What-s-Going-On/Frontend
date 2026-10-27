@@ -1702,3 +1702,11 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 지도 필터: 칩이 넘치면 화면 오른쪽 끝까지 이어지고 옆으로 밀어 넘긴다 (그림자가 잘리지 않게 아래 여백) */
 .map-screen .map-top-overlay .map-filters { margin-right: -20px; padding: 2px 20px 6px 0; }
 
+/* 종료한 게시판: 카드에 '종료' 태그, 최근 활동에서는 카드 아래 오른쪽 '종료 해제' */
+.tag-ended { color: var(--c-mute); background: #eef0f3; }
+.ux-board-card-action { display: flex; justify-content: flex-end; padding: 0 16px 14px; margin-top: -4px; }
+.board-reopen { padding: 6px 12px; color: var(--c-accent); border: 1px solid var(--c-line); border-radius: 999px; background: none; font-size: 12px; font-weight: 700; }
+.board-reopen:active { background: var(--c-accent-soft); }
+/* 팝업 설명: 줄바꿈(\n)을 그대로 */
+.dialog-backdrop .dialog p { white-space: pre-line; }
+

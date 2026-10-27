@@ -39,7 +39,8 @@ export function BoardListScreen() {
     setSearchParams(next)
   }
   const visibleBoards = useMemo(() => {
-    const filtered = boards.filter((board) => board.status !== '숨김' && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= 150 && board.status === '실시간'))
+    // 종료한 게시판은 게시판 목록에서 빼고, 마이 > 최근 활동에서만 본다
+    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= 150 && board.status === '실시간'))
     return [...filtered].sort((a, b) => sort === '거리' || sort === '참여 가능' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
   }, [boards, category, sort])
   useEffect(() => {
@@ -218,7 +219,7 @@ export function BoardDetailScreen() {
   return <AppShell nav={false} contentClassName={`board-detail-screen ${entering ? 'detail-enter' : ''}`} shellClassName={entering ? 'detail-enter-shell' : ''} bottomContent={<>{commentComposer ?? readOnlyBar}
     {editOpen && <EditBoardSheet board={board} canEdit={!outOfRange} onClose={closeEdit}/>}
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="삭제한 게시글은 다시 볼 수 없어요." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
-    {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description="종료하면 더 이상 새 댓글과 반응을 받을 수 없어요." confirmLabel="종료" onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>}
+    {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description={"더 이상 댓글과 반응을 받지 않아요\n마이 > 최근 활동에서 해제 가능"} confirmLabel="종료" danger onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>}
   </>}>
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('board')}><ArrowLeft size={22}/></IconButton></header>
     {outOfRange && <p className="outside-notice">{board.distance <= RADIUS && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '읽기 전용 · 범위 밖'}</p>}
