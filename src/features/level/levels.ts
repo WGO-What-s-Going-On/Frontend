@@ -19,7 +19,7 @@ export const PICK_SCORE = 10
 export interface Level {
   name: string
   tagline: string
-  // 이 칭호를 얻는 조건 (단계 목록에 보여준다)
+  // 이 칭호를 얻는 조건 (단계 줄에 짧게 보여준다)
   condition: string
   // 다음 칭호로 가는 목표. 마지막 단계(천리안)는 없음
   goal?: { stat: 'participation' | 'agreeReceived' | 'score'; target: number; unit: string; hint: string }
@@ -28,11 +28,11 @@ export interface Level {
 export const levels: Level[] = [
   { name: '소식통', tagline: '동네 소식에 귀를 여는 첫 칭호', condition: '가입하면 바로',
     goal: { stat: 'participation', target: 10, unit: '회', hint: '글쓰기 · 댓글 · 반응 · 투표 모두 1회' } },
-  { name: '리포터', tagline: '현장을 직접 전하는 이웃', condition: '게시판 참여 10회',
+  { name: '리포터', tagline: '현장을 직접 전하는 이웃', condition: '참여 10회',
     goal: { stat: 'agreeReceived', target: 10, unit: '개', hint: "내 댓글이 '맞아요'를 받을 때마다 1개" } },
-  { name: '특파원', tagline: '투표로 인정받는 현장 의견', condition: "내 댓글 '맞아요' 10개",
+  { name: '특파원', tagline: '투표로 인정받는 현장 의견', condition: "'맞아요' 10개",
     goal: { stat: 'score', target: 50, unit: '점', hint: `댓글 투표에서 대표 의견이 되면 +${PICK_SCORE}점` } },
-  { name: '천리안', tagline: '동네를 꿰뚫어 보는 최고 칭호', condition: '대표 의견 점수 50점 · 지역 랭킹 등장' },
+  { name: '천리안', tagline: '동네를 꿰뚫어 보는 최고 칭호', condition: '대표 의견 50점' },
 ]
 
 export const scoreOf = (stats: LevelStats) => stats.picks * PICK_SCORE

@@ -232,6 +232,9 @@ export function BoardDetailScreen() {
   // 범위 밖이면 당겨서 새로고침으로 위치를 다시 잡는다 (걸어와서 범위 안에 들어왔을 때)
   const pullable = Boolean(board) && (!inRange || (board?.distance ?? 0) > RADIUS)
   const { pull, refreshing, ready } = usePullToRefresh(pullable, () => { if (board) relocate(board.id) })
+  // 오른쪽 새로고침 버튼: 당기기와 같은 위치 다시 잡기 (잠깐 돌다가 결과)
+  const [checking, setChecking] = useState(false)
+  const checkLocation = () => { if (checking || !board) return; setChecking(true); window.setTimeout(() => { setChecking(false); relocate(board.id) }, 800) }
   if (!board) return null
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))
   const submit = () => {
@@ -260,7 +263,7 @@ export function BoardDetailScreen() {
   </>}>
     {outOfRange && <div className={`pull-refresh ${pull ? '' : 'idle'} ${refreshing ? 'refreshing' : ''}`} style={{ height: pull }} aria-live="polite"><RotateCw size={18} style={{ transform: refreshing ? undefined : `rotate(${pull * 3}deg)` }}/><span>{refreshing ? '위치 확인 중' : ready ? '놓으면 위치 새로고침' : '당겨서 위치 새로고침'}</span></div>}
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('board')}><ArrowLeft size={22}/></IconButton></header>
-    {outOfRange && <p className="outside-notice">{board.distance <= RADIUS && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : <>읽기 전용 · 범위 밖<small>당겨서 위치 새로고침</small></>}</p>}
+    {outOfRange && <div className="outside-notice-row"><p className="outside-notice">{board.distance <= RADIUS && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '읽기 전용 · 범위 밖'}</p><IconButton className={`outside-refresh ${checking ? 'checking' : ''}`} label={checking ? '위치 확인 중' : '위치 새로고침'} onClick={checkLocation}><RotateCw size={18}/></IconButton></div>}
     <article className="detail-article">
       <div className="detail-title-row"><h1 title={board.title}>{board.title}</h1><span className="detail-title-menu-wrap"><IconButton className="detail-title-menu" label="게시글 메뉴" onClick={() => setMenu(!menu)} expanded={menu}><MoreHorizontal size={18}/></IconButton>{menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => { setEditOpen(true); setMenu(false) }}>수정</button><button onClick={() => { setConfirm('finish'); setMenu(false) }}>종료</button><button onClick={() => { setConfirm('delete'); setMenu(false) }}>삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>차단</button></>}</div>}</span></div>
       <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span>{board.edited && <span className="detail-edited">수정됨</span>}<span><MapPin size={12}/>{board.distance}m</span></div>
