@@ -1776,7 +1776,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 .feed-category[data-category="동네 소식"] { --cat: var(--c-news); --cat-soft: var(--c-news-soft); }
 .feed-category[data-category="일상 불편"] { --cat: var(--c-daily); --cat-soft: var(--c-daily-soft); }
 .feed-title { margin-top: 2px; font-size: 17px; font-weight: 700; line-height: 1.35; }
-.feed-body { display: -webkit-box; overflow: hidden; color: var(--c-body); font-size: 14px; line-height: 1.55; word-break: keep-all; -webkit-box-orient: vertical; -webkit-line-clamp: 1; }
+/* 본문: 2줄까지는 그대로, 그보다 긴 글만 … 으로 자른다 */
+.feed-body { display: -webkit-box; overflow: hidden; color: var(--c-body); font-size: 14px; line-height: 1.55; word-break: keep-all; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .feed-screen .feed-image { display: grid; place-items: center; height: 170px; margin-top: 4px; }
 .feed-actions { position: relative; display: flex; align-items: center; gap: 16px; margin-top: 12px; }
 .feed-screen .feed-actions button { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; color: var(--c-ink); }
