@@ -10,6 +10,9 @@
   --top-inset: 44px;
   --bottom-inset: 28px;
   --bottom-shift: calc(var(--bottom-inset) - 28px);
+  /* 하단 탭: 아이콘·글자 줄 50px + 아래 홈 바 자리. 글자는 홈 바 쪽으로 8px 붙이되 최소 6px은 띄운다 */
+  --nav-pad: max(calc(var(--bottom-inset) - 8px), 6px);
+  --nav-shift: calc(50px + var(--nav-pad) - 93px); /* 예전 하단 탭(93px) 기준 값을 옮길 만큼 */
 }
 @media (max-width: 450px) {
   :root {
@@ -30,13 +33,14 @@
 .login-shell .login-screen { padding-top: calc(var(--top-inset) + 22px); }
 .login-screen .nearby-alert { top: calc(var(--top-inset) + 182px); }
 
-/* 아래: 하단 탭과 그 위에 뜨는 것들 */
-.bottom-nav { height: calc(65px + var(--bottom-inset)); padding-bottom: var(--bottom-inset); }
-.compose-fab { bottom: calc(46px + var(--bottom-shift)); }
-.toast { bottom: calc(105px + var(--bottom-shift)); }
-.map-controls { bottom: calc(112px + var(--bottom-shift)); }
-.map-bottom-sheet { bottom: calc(108px + var(--bottom-shift)); }
-.screen { padding-bottom: calc(110px + var(--bottom-shift)); }
+/* 아래: 하단 탭과 그 위에 뜨는 것들 (탭 높이가 줄어든 만큼 같이 내려온다) */
+.bottom-nav { height: calc(50px + var(--nav-pad)); padding-top: 6px; padding-bottom: var(--nav-pad); }
+/* 작성 버튼: 탭 줄 위에 걸치되 아래 끝이 홈 바 자리에 닿지 않게 */
+.compose-fab { bottom: calc(51px + var(--nav-shift)); }
+.toast { bottom: calc(105px + var(--nav-shift)); }
+.map-controls { bottom: calc(112px + var(--nav-shift)); }
+.map-bottom-sheet { bottom: calc(108px + var(--nav-shift)); }
+.screen { padding-bottom: calc(110px + var(--nav-shift)); }
 
 /* 아래: 탭 없는 화면의 바닥 입력칸·시트 */
 .board-detail-screen { padding-bottom: calc(108px + var(--bottom-shift)); }
