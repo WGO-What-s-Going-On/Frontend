@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
-import { AlignJustify, ArrowLeft, Camera, Check, CircleAlert, LayoutGrid, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
+import { AlignJustify, ArrowLeft, Camera, Check, CircleAlert, LayoutGrid, Lock, ChevronDown, ChevronUp, MapPin, MoreHorizontal, RotateCw, Search, Send, SmilePlus, ThumbsUp, X } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
@@ -9,6 +9,7 @@ import { EmptyState } from '../../components/ui/EmptyState'
 import { IconButton } from '../../components/ui/IconButton'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { PostReactions } from '../../components/ui/PostReactions'
+import { usePullToRefresh } from '../../components/ui/usePullToRefresh'
 import { useApp } from '../../context/AppContext'
 import { isHotBoard, myCommentReactions } from '../../types/domain'
 import type { Board, Category, Comment, CommentReaction } from '../../types/domain'
@@ -214,7 +215,7 @@ function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, 
 export function BoardDetailScreen() {
   // 다른 화면에서 게시글을 열고 들어왔을 때만 들어오는 애니메이션을 쓴다
   const entering = Boolean((useLocation().state as { enter?: boolean } | null)?.enter)
-  const { screen, currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers } = useApp()
+  const { screen, currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers, relocate } = useApp()
   const [body, setBody] = useState('')
   const [commentImageUrl, setCommentImageUrl] = useState('')
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
@@ -228,6 +229,9 @@ export function BoardDetailScreen() {
   const closeEdit = () => { setEditOpen(false); if (screen === 'edit' && board) navigate(pathForScreen('detail', board.id), { replace: true }) }
   const commentFileRef = useRef<HTMLInputElement>(null)
   const commentInputRef = useRef<HTMLInputElement>(null)
+  // 범위 밖이면 당겨서 새로고침으로 위치를 다시 잡는다 (걸어와서 범위 안에 들어왔을 때)
+  const pullable = Boolean(board) && (!inRange || (board?.distance ?? 0) > RADIUS)
+  const { pull, refreshing, ready } = usePullToRefresh(pullable, () => { if (board) relocate(board.id) })
   if (!board) return null
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))
   const submit = () => {
@@ -254,8 +258,9 @@ export function BoardDetailScreen() {
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="삭제한 게시글은 다시 볼 수 없어요." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
     {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description={"더 이상 댓글과 반응을 받지 않아요\n마이 > 최근 활동에서 해제 가능"} confirmLabel="종료" danger onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>}
   </>}>
+    {outOfRange && <div className={`pull-refresh ${pull ? '' : 'idle'} ${refreshing ? 'refreshing' : ''}`} style={{ height: pull }} aria-live="polite"><RotateCw size={18} style={{ transform: refreshing ? undefined : `rotate(${pull * 3}deg)` }}/><span>{refreshing ? '위치 확인 중' : ready ? '놓으면 위치 새로고침' : '당겨서 위치 새로고침'}</span></div>}
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('board')}><ArrowLeft size={22}/></IconButton></header>
-    {outOfRange && <p className="outside-notice">{board.distance <= RADIUS && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '읽기 전용 · 범위 밖'}</p>}
+    {outOfRange && <p className="outside-notice">{board.distance <= RADIUS && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : <>읽기 전용 · 범위 밖<small>당겨서 위치 새로고침</small></>}</p>}
     <article className="detail-article">
       <div className="detail-title-row"><h1 title={board.title}>{board.title}</h1><span className="detail-title-menu-wrap"><IconButton className="detail-title-menu" label="게시글 메뉴" onClick={() => setMenu(!menu)} expanded={menu}><MoreHorizontal size={18}/></IconButton>{menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => { setEditOpen(true); setMenu(false) }}>수정</button><button onClick={() => { setConfirm('finish'); setMenu(false) }}>종료</button><button onClick={() => { setConfirm('delete'); setMenu(false) }}>삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>차단</button></>}</div>}</span></div>
       <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span>{board.edited && <span className="detail-edited">수정됨</span>}<span><MapPin size={12}/>{board.distance}m</span></div>

@@ -13,16 +13,7 @@ import { useApp, type NotificationSettings } from '../../context/AppContext'
 import { nicknameError, nicknameFormatError } from '../../domain/nickname'
 import { myReactions } from '../../types/domain'
 import { TitleProgressCard } from './TitleProgressCard'
-
-// 뱃지 (USR-F12): 도움 활동에 따라 얻는다. 실제 획득 기준은 백엔드가 계산한다.
-function earnedBadges({ posts, comments, likes, finished }: { posts: number; comments: number; likes: number; finished: number }) {
-  return [
-    { name: '첫 소식', hint: '게시판 1개 만들기', earned: posts >= 1 },
-    { name: '해결사', hint: '내 게시판 1개 마무리', earned: finished >= 1 },
-    { name: '탐정', hint: '댓글 하트 10개 받기', earned: likes >= 10 },
-    { name: '단골 이웃', hint: '댓글 10개 쓰기', earned: comments >= 10 },
-  ]
-}
+import { levelStats } from '../level/levels'
 
 // 화면 모드 토글: 왼쪽 해(라이트) · 오른쪽 달(다크). 손잡이가 먼저 미끄러진 뒤 화면 색이 겹쳐 바뀐다
 function ThemeSwitch({ dark, onToggle }: { dark: boolean; onToggle: () => void }) {
@@ -45,11 +36,8 @@ function ThemeSwitch({ dark, onToggle }: { dark: boolean; onToggle: () => void }
 export function ProfileScreen() {
   const { user, boards, comments, go, showToast, themeMode, toggleTheme } = useApp()
   const [withdrawOpen, setWithdrawOpen] = useState(false)
-  const myBoards = boards.filter((board) => board.authorId === user.id)
-  const myComments = comments.filter((comment) => comment.authorId === user.id)
-  const badges = earnedBadges({ posts: myBoards.length, comments: myComments.length, likes: myComments.reduce((sum, comment) => sum + (comment.likes ?? 0), 0), finished: myBoards.filter((board) => board.status === '종료됨').length })
   const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="탈퇴 후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>
-  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard postCount={myBoards.length} commentCount={myComments.length} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>뱃지 <small>{badges.filter((badge) => badge.earned).length}/{badges.length}</small></h4><ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
+  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={levelStats(boards, comments, user.id)} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
 
 export function ActivityScreen() {

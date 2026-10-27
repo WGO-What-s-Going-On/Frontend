@@ -1,6 +1,6 @@
 export type Screen =
   | 'login' | 'home' | 'board' | 'search' | 'detail'
-  | 'edit' | 'my' | 'activity' | 'alerts'
+  | 'edit' | 'my' | 'activity' | 'alerts' | 'level'
   | 'profile-edit' | 'notification-settings' | 'outside'
   | 'terms' | 'nickname' | 'location-permission'
 
@@ -8,6 +8,9 @@ export type Category = '긴급 사고' | '도움 요청' | '동네 소식' | '�
 export type BoardStatus = '실시간' | '종료됨' | '숨김'
 export type PostReaction = '저도 궁금해요' | '지금도 그래요' | '도움 됐어요' | '이제 끝났어요'
 export type CommentReaction = '도움돼요' | '맞아요' | '정보가 달라요'
+// 게시글 공개 범위: 작성할 때 고른다 (작을수록 현장에 있는 사람에게만 보인다)
+export type Reach = 150 | 250 | 350
+export const reachOptions: Reach[] = [150, 250, 350]
 
 export interface User {
   id: string
@@ -43,6 +46,8 @@ export interface Board {
   anonymous?: boolean
   // 목업 지도 좌표 (m 단위). 실제로는 백엔드가 주는 근사 좌표
   position?: { x: number; y: number }
+  // 공개 범위 (m). 예전 데이터에는 없어서 없으면 150m
+  reach?: Reach
   // 작성 후 수정한 적이 있으면 true (상세에 '수정됨' 표시)
   edited?: boolean
   // 댓글 후보 투표. 글 작성 30분 뒤 고정한 후보 2개와 득표 (없으면 아직 후보를 고르지 않은 것)

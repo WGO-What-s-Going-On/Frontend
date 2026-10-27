@@ -6,9 +6,9 @@ import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { RADIUS, mapSeedBoards } from '../features/map/mapWorld'
 import { pickCandidates } from '../features/board/commentVote'
 import { myCommentReactions, myReactions } from '../types/domain'
-import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Report, Screen, User } from '../types/domain'
+import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
 
-interface BoardInput { category: Category; title: string; body: string; imageName?: string; anonymous?: boolean }
+interface BoardInput { category: Category; title: string; body: string; imageName?: string; anonymous?: boolean; reach?: Reach }
 export type LocationPermission = 'unknown' | 'granted' | 'denied'
 // 화면 모드: 라이트(기본) · 다크
 export type ThemeMode = 'light' | 'dark'
@@ -82,6 +82,7 @@ interface AppContextValue {
   setLocationPermission: (permission: LocationPermission) => void
   updateComment: (id: string, body: string) => void
   setInRange: (value: boolean) => void
+  relocate: (boardId: string) => void
   createBoard: (input: BoardInput) => void
   updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous' | 'imageName'>) => void
   deleteBoard: (id: string) => void
@@ -203,6 +204,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setInRange(permission === 'granted')
     go('home')
   }
+  // 범위 밖 게시판에서 당겨서 새로고침: 위치를 다시 잡고, 150m 안이면 바로 참여 화면으로 바꾼다.
+  // 실제로는 GPS를 다시 읽어 거리를 새로 계산한다. 목업은 걸어갈 수 없어서 그 게시판 쪽으로 걸어와 범위 안에 들어온 것으로 친다
+  const relocate = (boardId: string) => {
+    if (locationPermission !== 'granted') { showToast('위치 권한이 꺼져 있어요'); return }
+    setInRange(true)
+    setBoards((items) => items.map((board) => board.id === boardId && board.distance > RADIUS ? { ...board, distance: RADIUS - 20 } : board))
+    navigate(pathForScreen('detail', boardId), { replace: true })
+    showToast('150m 안이에요. 이제 참여할 수 있어요')
+  }
   const createBoard = (input: BoardInput) => {
     const id = `board-${Date.now()}`
     // 새 글 추가와 화면 이동을 한 번에 반영해야 전환 직전 화면(작성 시트)에서 바로 상세로 겹쳐 넘어간다
@@ -287,7 +297,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
-    go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
+    go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

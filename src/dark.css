@@ -192,3 +192,20 @@
 :root[data-theme="dark"] .feed-screen .feed-reaction-picker button:not(:disabled):active { background: #4c525e; }
 :root[data-theme="dark"] .feed-screen .feed-side small { color: var(--c-mute); }
 :root[data-theme="dark"] .album-tile { border-color: var(--c-line); background: var(--c-canvas); }
+
+/* 공개 범위 안내 · 비슷한 글 시트 */
+:root[data-theme="dark"] .reach-tip { color: var(--c-page); background: var(--c-ink); }
+:root[data-theme="dark"] .similar-sheet { background: var(--c-raised); }
+:root[data-theme="dark"] .similar-item { border-color: var(--c-line); background: var(--c-canvas); }
+:root[data-theme="dark"] .similar-comment { background: var(--c-canvas); }
+:root[data-theme="dark"] .similar-cancel { color: var(--c-ink); background: var(--c-canvas); }
+:root[data-theme="dark"] .similar-publish { background: var(--c-accent-fill); }
+
+/* 활동 탭 */
+:root[data-theme="dark"] .level-hero { border-color: var(--c-line); background: var(--c-canvas); }
+:root[data-theme="dark"] :is(.level-progress) { border-color: var(--c-line); }
+:root[data-theme="dark"] .level-bar { background: var(--c-raised); }
+:root[data-theme="dark"] .level-bar i { background: var(--c-accent-fill); }
+:root[data-theme="dark"] .level-emblem.locked { background: var(--c-raised); }
+:root[data-theme="dark"] .rank-me { background: var(--c-canvas); }
+:root[data-theme="dark"] .rank-list li { border-color: var(--c-line); }
