@@ -20,8 +20,8 @@ import { EditBoardSheet } from './EditBoardSheet'
 import { CommentVoteSection } from './CommentVoteSection'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
-type BoardSort = '거리' | '최신' | '활발'
-const sortLabel: Record<BoardSort, string> = { '거리': '거리순', '최신': '최신순', '활발': '활발한 순' }
+type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
+const sortLabel: Record<BoardSort, string> = { '거리': '거리순', '최신': '최신순', '활발': '활발순', '참여 가능': '참여 가능' }
 
 export function BoardListScreen() {
   const { boards, comments, go, openBoard, alertBoardIds, toggleBoardNotifications } = useApp()
@@ -29,7 +29,7 @@ export function BoardListScreen() {
   const [sortMenuLeft, setSortMenuLeft] = useState<number | null>(null) // 열려 있으면 메뉴의 left(px): 정렬 칩 바로 아래
   const filterRowRef = useRef<HTMLDivElement>(null)
   const sortChipRef = useRef<HTMLButtonElement>(null)
-  const sortOptions: BoardSort[] = ['거리', '최신', '활발']
+  const sortOptions: BoardSort[] = ['거리', '최신', '활발', '참여 가능']
   const categoryOptions: (Category | '전체')[] = ['전체', '긴급 사고', '도움 요청', '동네 소식', '일상 불편']
   const sortValue = searchParams.get('sort')
   const categoryValue = searchParams.get('category') as Category | '전체' | null
@@ -43,8 +43,8 @@ export function BoardListScreen() {
   }
   const visibleBoards = useMemo(() => {
     // 종료한 게시판은 게시판 목록에서 빼고, 마이 > 최근 활동에서만 본다
-    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category))
-    return [...filtered].sort((a, b) => sort === '거리' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
+    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= RADIUS))
+    return [...filtered].sort((a, b) => sort === '거리' || sort === '참여 가능' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
   }, [boards, category, sort])
   useEffect(() => {
     if (sortMenuLeft === null) return
@@ -64,7 +64,7 @@ export function BoardListScreen() {
     {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
     <div ref={filterRowRef} className="ux-filter-row board-filter-row">
       <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>
-        <button ref={sortChipRef} className={`sort-chip ${sort !== '거리' ? 'chip-on' : ''}`} onClick={toggleSortMenu} aria-label={`정렬: ${sortLabel[sort]}`} aria-haspopup="menu" aria-expanded={sortMenuLeft !== null}>{sortLabel[sort]}<ChevronDown size={14}/></button>
+        <button ref={sortChipRef} className="sort-chip" onClick={toggleSortMenu} aria-label={`정렬: ${sortLabel[sort]}`} aria-haspopup="menu" aria-expanded={sortMenuLeft !== null}>{sortLabel[sort]}<ChevronDown size={14}/></button>
         {categoryOptions.map((item) => <button key={item} className={category === item ? 'selected' : ''} onClick={() => updateFilter('category', item)}>{item === '전체' ? '전체' : categoryLabel[item]}</button>)}
       </div>
       <IconButton className="board-search-chip" label="게시판 검색" onClick={() => go('search')}><Search size={17}/></IconButton>

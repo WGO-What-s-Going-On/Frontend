@@ -191,4 +191,3 @@
 :root[data-theme="dark"] .feed-screen .feed-reaction-picker { background: var(--c-raised); box-shadow: 0 0 0 1px var(--c-line), 0 12px 32px rgba(0, 0, 0, .5); }
 :root[data-theme="dark"] .feed-screen .feed-reaction-picker button:not(:disabled):active { background: #4c525e; }
 :root[data-theme="dark"] .feed-screen .feed-side small { color: var(--c-mute); }
-:root[data-theme="dark"] .ux-category-filters:not(.map-filters) button.chip-on:not(.selected) { color: var(--c-accent); border-color: var(--c-accent-line); background: var(--c-accent-soft); }
