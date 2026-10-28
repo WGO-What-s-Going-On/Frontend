@@ -80,7 +80,7 @@ function RankPanel({ stats }: { stats: LevelStats }) {
     <div className="ux-filter-row rank-regions"><div className="ux-category-filters">{rankRegions.map((item) => <button key={item} className={region === item ? 'selected' : ''} onClick={() => selectRegion(item)}>{item}</button>)}</div></div>
     {region === myRegion && <div className="rank-me">{seer
       ? <><strong>내 순위 {myRank}위</strong><span className="rank-score">{scoreOf(stats)}점</span></>
-      : <><SolidLock size={15} label="잠김"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>현재 Lv.{current + 1} {levels[current].name}</small></span></>}</div>}
+      : <><SolidLock size={20} label="잠김"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>현재 Lv.{current + 1} {levels[current].name}</small></span></>}</div>}
     <ol className="rank-list">{entries.map((entry, index) => <li key={entry.name} className={'me' in entry ? 'me' : ''}>
       <b className={index < 3 ? 'top' : ''}>{index + 1}</b>
       <Avatar name={entry.name} size={36}/>

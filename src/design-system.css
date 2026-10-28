@@ -1929,8 +1929,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 .level-screen .badge-list li { padding: 10px 14px; }
 
 /* 랭킹: 동네 칩 → 내 자리 → 순위 목록 */
-.rank-regions { margin-bottom: 14px; }
-.rank-me + .rank-list { margin-top: 8px; }
+.rank-regions { margin-bottom: 20px; }
+.rank-me + .rank-list { margin-top: 16px; }
 .rank-me { display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: var(--c-mute); border-radius: 14px; background: #f5f7fa; }
 .rank-me > span:not(.rank-score) { display: grid; gap: 2px; }
 .rank-me strong { color: var(--c-ink); font-size: 14px; }
