@@ -1716,9 +1716,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comment-vote-option:disabled { opacity: 1; cursor: default; }
 .comment-vote-won { flex-shrink: 0; padding: 2px 6px; color: #fff; font-size: 11px; border-radius: 6px; background: var(--c-accent); }
 .comment-vote-note { margin: 0; color: var(--c-mute); font-size: 13px; }
-.comment-vote-pending { margin: 0; padding: 12px 0; color: var(--c-mute); font-size: 13px; border-bottom: 1px solid #dedede; }
-.detail-enter :is(.comment-vote, .comment-vote-pending) { animation: detail-rise .34s cubic-bezier(.2, .8, .2, 1) .13s both; }
-@media (prefers-reduced-motion: reduce) { .detail-enter :is(.comment-vote, .comment-vote-pending) { animation: none; } }
+.detail-enter .comment-vote { animation: detail-rise .34s cubic-bezier(.2, .8, .2, 1) .13s both; }
+@media (prefers-reduced-motion: reduce) { .detail-enter .comment-vote { animation: none; } }
 
 /* ---------- 알림 종: 탭 화면 오른쪽 위 (지도 · 게시판 · 피드). 정렬은 '게시판' 제목 바로 오른쪽으로 ---------- */
 .notice-bell {

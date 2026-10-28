@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Check } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import type { Board } from '../../types/domain'
-import { VOTE_OPENS_AFTER, minutesSince, voteStatus, voteWinner } from './commentVote'
+import { voteStatus, voteWinner } from './commentVote'
 
 // 댓글 투표: 공감 많은 댓글 2개 중 더 맞는 쪽을 고른다. 다른 후보를 누르면 표를 옮기고, 내 후보를 다시 누르면 취소.
 // 고르기·옮기기는 150m 안에서만, 취소는 범위 밖에서도 된다 (백엔드: PUT은 위치 확인, DELETE는 확인 없음)
@@ -13,8 +13,8 @@ export function CommentVoteSection({ board, canChoose }: { board: Board; canChoo
   const needsCandidates = status === 'OPEN' && !board.vote
   useEffect(() => { if (needsCandidates) startVote(board.id) }, [needsCandidates, board.id, startVote])
 
-  if (status === 'NONE' || needsCandidates) return null
-  if (status === 'PENDING') return boardComments.length >= 2 ? <p className="comment-vote-pending">댓글 투표 · {VOTE_OPENS_AFTER - minutesSince(board.createdAt)}분 뒤 열려요</p> : null
+  // 열리기 전에는 아무것도 보여주지 않는다: 여는 조건(댓글 수 · 조회수 · 공감 비율)은 백엔드가 판단해서 남은 시간을 약속할 수 없다
+  if (status === 'NONE' || status === 'PENDING' || needsCandidates) return null
 
   const vote = board.vote!
   const total = vote.candidates.reduce((sum, candidate) => sum + candidate.votes, 0)

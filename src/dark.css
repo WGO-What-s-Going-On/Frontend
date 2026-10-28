@@ -179,7 +179,7 @@
 :root[data-theme="dark"] .tag-ended { background: var(--c-raised); }
 
 /* 댓글 투표 */
-:root[data-theme="dark"] :is(.comment-vote, .comment-vote-pending) { border-color: var(--c-line); }
+:root[data-theme="dark"] .comment-vote { border-color: var(--c-line); }
 :root[data-theme="dark"] .board-detail-screen .comment-vote-option:not(.mine) { border-color: var(--c-line); }
 :root[data-theme="dark"] .board-detail-screen .comment-vote-option { background: transparent; }
 :root[data-theme="dark"] .comment-vote-option:not(.mine, .won) .comment-vote-bar { background: var(--c-raised); }
