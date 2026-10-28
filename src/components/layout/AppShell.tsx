@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { Crown, Map, MessageSquare, Plus, UserRound } from 'lucide-react'
+import { Map, MessageSquare, Plus, UserRound } from 'lucide-react'
 import { useApp } from '../../context/AppContext'
 import { QuickCreateSheet } from '../../features/board/QuickCreateSheet'
 import { Toast } from '../ui/Toast'
+import { CrownIcon } from '../ui/CrownIcon'
 import type { Screen } from '../../types/domain'
 
 const tabs: { screen: Screen; label: string; icon: typeof Map }[] = [
   { screen: 'home', label: '지도', icon: Map },
   { screen: 'board', label: '게시판', icon: MessageSquare },
   // 알림은 각 탭 화면 오른쪽 위 종(NoticeBell)으로, 피드는 게시판의 보기 방식으로 옮겼다. 그 자리(작성 버튼 오른쪽)는 칭호·랭킹
-  { screen: 'level', label: '활동', icon: Crown },
+  { screen: 'level', label: '활동', icon: CrownIcon },
   { screen: 'my', label: '마이', icon: UserRound },
 ]
 
