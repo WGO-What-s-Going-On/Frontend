@@ -42,6 +42,8 @@ export interface Board {
   myReactions?: PostReaction[]
   reactedByMe?: PostReaction
   imageName?: string
+  // 서버에 올라간 첨부 사진 주소 (백엔드 연동 후)
+  imageUrl?: string
   // 목업용: 사진이 첨부된 게시글처럼 보이게 하는 자리 표시 ([이미지])
   imagePlaceholder?: boolean
   // 닉네임 대신 익명으로 표시한 게시글 (USR-F08)

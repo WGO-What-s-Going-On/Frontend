@@ -6,3 +6,11 @@ export const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY ?? ''
 // 카카오 로그인 후 돌아올 주소. 백엔드 KAKAO_REDIRECT_URI · Kakao Developers 등록 주소와 똑같아야 한다
 export const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI ?? `${window.location.origin}/auth/kakao/callback`
 export const kakaoEnabled = apiEnabled && KAKAO_REST_API_KEY !== ''
+
+// 기능별로 실제 서버를 쓸지. 서버에서 막혀 있는 기능은 목업으로 두고, 풀리는 대로 켠다 (docs/api-integration.md 현황표)
+export const serverFeatures = {
+  // 로그인 · 약관 · 닉네임 · 내 정보: 연결됨
+  users: apiEnabled,
+  // 게시글 · 댓글 · 공감 · 투표 · 위치: staging 503 (백엔드 사용자 인증 연결 전)
+  posts: false,
+}
