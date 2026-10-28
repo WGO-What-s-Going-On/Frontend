@@ -1958,3 +1958,15 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comment-replies .reply-comment > .comment-head .comment-tools { margin-right: -8px; }
 /* 답글 다는 중인 답글은 상자째 연한 파랑 */
 .board-detail-screen .comment-replies .reply-comment.reply-target { background: var(--c-accent-soft); }
+
+/* 댓글 공감 표시: 아이콘과 숫자, 공감끼리 조금 더 붙인다 */
+.board-detail-screen .comment-reactions { gap: 6px; }
+.board-detail-screen .comment-reactions .comment-reaction-chip { gap: 1px; }
+/* 답글 상자: 닉네임 · 본문 · 시간 줄 사이를 조금 좁혀 상자 높이를 줄인다 */
+.board-detail-screen .comment-replies .reply-comment,
+.board-detail-screen .comment-replies .reply-comment:hover,
+.board-detail-screen .comment-replies .reply-comment:focus-visible { padding-top: 9px; padding-bottom: 8px; }
+.board-detail-screen .comment-replies .reply-comment::before { top: 11px; }
+.board-detail-screen .comment-replies .reply-comment > p { margin-top: 2px; line-height: 1.45; }
+.board-detail-screen .comment-replies .reply-comment > .comment-actions { margin-top: 0; }
+.board-detail-screen .comment-replies .reply-comment .comment-reply-button { padding-top: 2px; padding-bottom: 2px; }
