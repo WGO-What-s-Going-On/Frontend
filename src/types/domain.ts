@@ -2,7 +2,7 @@ export type Screen =
   | 'login' | 'home' | 'board' | 'search' | 'detail'
   | 'edit' | 'my' | 'activity' | 'alerts' | 'level'
   | 'profile-edit' | 'notification-settings' | 'outside'
-  | 'terms' | 'nickname' | 'location-permission'
+  | 'terms' | 'nickname' | 'location-permission' | 'kakao-callback'
 
 export type Category = '긴급 사고' | '도움 요청' | '동네 소식' | '일상 불편'
 export type BoardStatus = '실시간' | '종료됨' | '숨김'
@@ -21,6 +21,8 @@ export interface User {
   realName?: string
   // 약관 동의와 닉네임 설정을 마쳤는지
   onboarded?: boolean
+  // 서버 사용자 ID (실제 로그인했을 때만). 목업 글 · 댓글의 작성자 비교는 id('me')로 계속 한다
+  serverId?: string
 }
 
 export interface Board {

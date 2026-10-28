@@ -5,6 +5,12 @@ import { initialBoards, initialComments, initialNotices, initialUser } from '../
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { RADIUS, mapSeedBoards } from '../features/map/mapWorld'
 import { pickCandidates } from '../features/board/commentVote'
+import { apiEnabled, kakaoEnabled } from '../api/config'
+import { ApiError } from '../api/client'
+import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/auth'
+import { readSession } from '../api/session'
+import { consentTerms, getMe, getTerms, updateMe } from '../api/users'
+import type { MeResponse } from '../api/users'
 import { myCommentReactions, myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
 
@@ -77,8 +83,10 @@ interface AppContextValue {
   withBackTransition: (run: () => void) => void
   openBoard: (id: string) => void
   startLogin: () => void
-  agreeTerms: () => void
-  completeNickname: (nickname: string) => void
+  finishKakaoLogin: (code: string) => Promise<void>
+  agreeTerms: () => Promise<void>
+  completeNickname: (nickname: string) => Promise<void>
+  logout: () => Promise<void>
   setLocationPermission: (permission: LocationPermission) => void
   updateComment: (id: string, body: string) => void
   setInRange: (value: boolean) => void
@@ -96,7 +104,7 @@ interface AppContextValue {
   startVote: (boardId: string) => void
   castVote: (boardId: string, commentId: string) => void
   toggleCommentLike: (id: string) => void
-  updateUser: (input: Pick<User, 'nickname' | 'realName'>) => void
+  updateUser: (input: Pick<User, 'nickname' | 'realName'>) => Promise<void>
   markNoticeRead: (id: string) => void
   markAllNoticesRead: () => void
   deleteNotice: (id: string) => void
@@ -195,9 +203,54 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     else open()
   }
   // 로그인 흐름: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도 (실제 카카오 인증은 백엔드 연동 때)
-  const startLogin = () => go(!user.onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home')
-  const agreeTerms = () => go('nickname')
-  const completeNickname = (nickname: string) => { setUser((value) => ({ ...value, nickname, onboarded: true })); go('location-permission') }
+  // 로그인 다음 화면: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도
+  const afterLogin = (onboarded: boolean) => go(!onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home')
+  // 실제 서버 사용자 정보를 앱 사용자에 반영 (목업 글의 작성자 비교용 id는 그대로)
+  const applyMe = (me: MeResponse) => setUser((value) => ({ ...value, serverId: me.userId, nickname: me.nickname || value.nickname, onboarded: !me.onboardingRequired }))
+  // 카카오 앱 키가 있으면 카카오 인가 화면으로, 없으면 목업 로그인 (실제 인증은 /auth/kakao/callback에서 이어진다)
+  const startLogin = () => {
+    if (kakaoEnabled) { window.location.assign(kakaoAuthorizeUrl()); return }
+    afterLogin(Boolean(user.onboarded))
+  }
+  const finishKakaoLogin = async (code: string) => {
+    const result = await loginWithKakao(code)
+    const me = await getMe()
+    applyMe(me)
+    if (result.restoredFromWithdrawal) showToast('탈퇴 신청을 취소하고 다시 로그인했어요.')
+    afterLogin(!result.onboardingRequired && !me.onboardingRequired)
+  }
+  // 약관 동의: 로그인했으면 서버에 현재 필수 약관 동의를 보낸다 (서버 약관 목록이 비어 있으면 보낼 것이 없어 건너뛴다)
+  const agreeTerms = async () => {
+    if (apiEnabled && readSession()) {
+      try {
+        const termIds = (await getTerms()).filter((term) => term.required).map((term) => term.termId)
+        if (termIds.length) await consentTerms(termIds)
+      } catch { showToast('약관 동의를 저장하지 못했어요. 다시 시도해 주세요.'); return }
+    }
+    go('nickname')
+  }
+  // 닉네임: 로그인했으면 서버에 저장 (이미 쓰는 이름이면 409)
+  const completeNickname = async (nickname: string) => {
+    if (apiEnabled && readSession()) {
+      try { applyMe(await updateMe({ nickname })) } catch (error) {
+        showToast(error instanceof ApiError && error.status === 409 ? '이미 사용 중인 닉네임이에요.' : '닉네임을 저장하지 못했어요. 다시 시도해 주세요.')
+        return
+      }
+    }
+    setUser((value) => ({ ...value, nickname, onboarded: true }))
+    go('location-permission')
+  }
+  const logout = async () => {
+    await logoutApi()
+    setUser((value) => ({ ...value, serverId: undefined }))
+    showToast('로그아웃했습니다.')
+    go('login')
+  }
+  // 앱을 켰을 때 로그인 상태면 서버의 내 정보로 맞춘다 (토큰이 끝났으면 갱신, 실패하면 로그인 화면으로)
+  useEffect(() => {
+    if (!apiEnabled || !readSession()) return
+    getMe().then(applyMe).catch((error) => { if (error instanceof ApiError && error.status === 401) { setUser((value) => ({ ...value, serverId: undefined })); go('login') } })
+  }, [])
   const setLocationPermission = (permission: LocationPermission) => {
     setLocationPermissionState(permission)
     // 위치 권한이 없으면 150m 판정을 할 수 없어 열람만 가능하다 (MAP-F01, MAP-F05)
@@ -281,7 +334,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const candidates = board.vote.candidates.map((candidate) => ({ ...candidate, votes: candidate.votes - (candidate.commentId === mine ? 1 : 0) + (candidate.commentId === next ? 1 : 0) }))
     return { ...board, vote: { ...board.vote, candidates, mine: next } }
   }))
-  const updateUser = (input: Pick<User, 'nickname' | 'realName'>) => { setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my') }
+  const updateUser = async (input: Pick<User, 'nickname' | 'realName'>) => {
+    // 실명은 서버에 없는 값이라 기기에만 저장하고, 닉네임만 서버에 보낸다
+    if (apiEnabled && readSession() && input.nickname !== user.nickname) {
+      try { applyMe(await updateMe({ nickname: input.nickname })) } catch (error) {
+        showToast(error instanceof ApiError && error.status === 409 ? '이미 사용 중인 닉네임이에요.' : '프로필을 저장하지 못했어요.')
+        return
+      }
+    }
+    setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my')
+  }
   const markNoticeRead = (id: string) => setNotices((items) => items.map((notice) => notice.id === id ? { ...notice, read: true } : notice))
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
   const deleteNotice = (id: string) => setNotices((items) => items.filter((notice) => notice.id !== id))
@@ -297,7 +359,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
-    go, back, withBackTransition, openBoard, startLogin, agreeTerms, completeNickname, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
+    go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
   }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

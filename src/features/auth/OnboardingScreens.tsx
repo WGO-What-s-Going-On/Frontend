@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Check, ChevronRight, MapPin } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
 import { useApp } from '../../context/AppContext'
 import { nicknameError } from '../../domain/nickname'
+import { apiEnabled } from '../../api/config'
+import { checkNickname } from '../../api/users'
 
 // 필수 약관 (USR-F02)
 const terms = [
@@ -30,21 +32,30 @@ export function TermsScreen() {
   </AppShell>
 }
 
-// 닉네임 설정 (USR-F05): 중복·금칙어 확인. 실제 확인은 백엔드가 하고, 목업에서는 이미 쓰이는 이름과 예시 금칙어로 확인한다.
+// 닉네임 설정 (USR-F05): 글자 규칙 · 금칙어는 바로, 중복은 서버에 확인한다 (목업에서는 이미 쓰이는 이름으로 확인)
 
 export function NicknameScreen() {
   const { boards, comments, user, completeNickname, go } = useApp()
   const [nickname, setNickname] = useState('')
   const trimmed = nickname.trim()
   const taken = new Set([...boards, ...comments].filter((item) => item.authorId !== user.id).map((item) => item.authorName))
-  const error = nicknameError(trimmed, taken)
+  // 서버 중복 확인: 입력이 멈추고 0.4초 뒤에 묻는다. 결과가 오기 전에는 시작하기를 막는다
+  const [serverCheck, setServerCheck] = useState<{ name: string; available: boolean } | null>(null)
+  const formatError = nicknameError(trimmed, apiEnabled ? new Set() : taken)
+  useEffect(() => {
+    if (!apiEnabled || !trimmed || formatError) return
+    const timer = window.setTimeout(() => { checkNickname(trimmed).then(({ available }) => setServerCheck({ name: trimmed, available })).catch(() => setServerCheck({ name: trimmed, available: true })) }, 400)
+    return () => window.clearTimeout(timer)
+  }, [trimmed, formatError])
+  const checked = !apiEnabled || serverCheck?.name === trimmed
+  const error = formatError || (apiEnabled && serverCheck?.name === trimmed && !serverCheck.available ? '이미 사용 중인 닉네임이에요.' : '')
   return <AppShell nav={false} contentClassName="onboarding-screen">
     <BackHeader title="" onBack={() => go('terms')}/>
     <h1 className="onboarding-title">어떤 이름으로<br/>활동할까요?</h1>
     <p className="onboarding-help">실명 대신 닉네임으로 활동해요. 글을 쓸 때 익명으로 바꿀 수도 있어요.</p>
     <input className={`field nickname-field ${error ? 'invalid' : ''}`} value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="닉네임 (2~12자)" maxLength={12} autoComplete="nickname"/>
-    <p className={`nickname-message ${error ? 'error' : trimmed ? 'ok' : ''}`} aria-live="polite">{error || (trimmed ? '사용할 수 있는 닉네임이에요.' : ' ')}</p>
-    <div className="onboarding-bottom"><Button className="primary" onClick={() => completeNickname(trimmed)} disabled={!trimmed || Boolean(error)}>시작하기</Button></div>
+    <p className={`nickname-message ${error ? 'error' : trimmed ? 'ok' : ''}`} aria-live="polite">{error || (trimmed ? (checked ? '사용할 수 있는 닉네임이에요.' : '확인하는 중…') : ' ')}</p>
+    <div className="onboarding-bottom"><Button className="primary" onClick={() => completeNickname(trimmed)} disabled={!trimmed || Boolean(error) || !checked}>시작하기</Button></div>
   </AppShell>
 }
 

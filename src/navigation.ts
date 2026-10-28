@@ -24,6 +24,7 @@ export function screenFromPath(pathname: string): Screen {
   if (pathname === '/signup/terms') return 'terms'
   if (pathname === '/signup/nickname') return 'nickname'
   if (pathname === '/permission/location') return 'location-permission'
+  if (pathname === '/auth/kakao/callback') return 'kakao-callback'
   return 'login'
 }
 
@@ -46,6 +47,7 @@ export function pathForScreen(screen: Screen, boardId?: string) {
     terms: '/signup/terms',
     nickname: '/signup/nickname',
     'location-permission': '/permission/location',
+    'kakao-callback': '/auth/kakao/callback',
   }
   return paths[screen]
 }

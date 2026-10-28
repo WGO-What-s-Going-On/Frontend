@@ -85,3 +85,24 @@ export function LoginScreen() {
     <div className="start-card"><h3>간편하게 시작하기</h3><Button className="kakao" onClick={startLogin}>카카오로 계속하기</Button></div>
   </AppShell>
 }
+
+// 카카오 로그인 후 돌아오는 화면 (/auth/kakao/callback?code=...). 인가 코드는 한 번만 쓸 수 있어서 같은 코드로 두 번 보내지 않는다
+const usedKakaoCodes = new Set<string>()
+
+export function KakaoCallbackScreen() {
+  const { finishKakaoLogin, go } = useApp()
+  const [failed, setFailed] = useState(false)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const code = params.get('code')
+    if (!code || params.get('error')) { setFailed(true); return }
+    if (usedKakaoCodes.has(code)) return
+    usedKakaoCodes.add(code)
+    finishKakaoLogin(code).catch(() => setFailed(true))
+  }, [])
+  return <AppShell nav={false} contentClassName="onboarding-screen kakao-callback-screen">
+    {failed
+      ? <><h1 className="onboarding-title">로그인하지 못했어요</h1><p className="onboarding-help">잠시 후 다시 시도해 주세요.</p><div className="onboarding-bottom"><Button className="primary" onClick={() => go('login')}>처음으로</Button></div></>
+      : <h1 className="onboarding-title">로그인하는 중…</h1>}
+  </AppShell>
+}

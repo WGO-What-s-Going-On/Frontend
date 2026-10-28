@@ -1,0 +1,8 @@
+// 백엔드 연동 설정. .env.local에 주소가 있으면 실제 서버, 없으면 지금처럼 목업으로 동작한다 (.env.example 참고)
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
+export const apiEnabled = API_BASE_URL !== ''
+
+export const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY ?? ''
+// 카카오 로그인 후 돌아올 주소. 백엔드 KAKAO_REDIRECT_URI · Kakao Developers 등록 주소와 똑같아야 한다
+export const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI ?? `${window.location.origin}/auth/kakao/callback`
+export const kakaoEnabled = apiEnabled && KAKAO_REST_API_KEY !== ''

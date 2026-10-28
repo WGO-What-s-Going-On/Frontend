@@ -11,6 +11,8 @@ import { IconButton } from '../../components/ui/IconButton'
 import { Moon, Sun } from 'lucide-react'
 import { useApp, type NotificationSettings } from '../../context/AppContext'
 import { nicknameError, nicknameFormatError } from '../../domain/nickname'
+import { apiEnabled } from '../../api/config'
+import { checkNickname as checkNicknameApi } from '../../api/users'
 import { myReactions } from '../../types/domain'
 import { TitleProgressCard } from './TitleProgressCard'
 import { levelStats } from '../level/levels'
@@ -34,10 +36,10 @@ function ThemeSwitch({ dark, onToggle }: { dark: boolean; onToggle: () => void }
 }
 
 export function ProfileScreen() {
-  const { user, boards, comments, go, showToast, themeMode, toggleTheme } = useApp()
+  const { user, boards, comments, go, showToast, themeMode, toggleTheme, logout } = useApp()
   const [withdrawOpen, setWithdrawOpen] = useState(false)
   const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="탈퇴 후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>
-  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={levelStats(boards, comments, user.id)} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={() => { showToast('로그아웃했습니다.'); go('login') }}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
+  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={levelStats(boards, comments, user.id)} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
 
 export function ActivityScreen() {
@@ -70,7 +72,15 @@ export function ProfileEditScreen() {
   const formatError = nicknameFormatError(trimmed)
   const result = checked?.name === trimmed ? checked : null
   const taken = new Set([...boards, ...comments].filter((item) => item.authorId !== user.id).map((item) => item.authorName))
-  const checkNickname = () => setChecked({ name: trimmed, error: nicknameError(trimmed, taken) })
+  // 중복 확인: 서버가 있으면 서버에, 목업이면 이미 쓰이는 이름과 비교
+  const checkNickname = async () => {
+    const formatError = nicknameError(trimmed, apiEnabled ? new Set() : taken)
+    if (formatError || !apiEnabled) { setChecked({ name: trimmed, error: formatError }); return }
+    try {
+      const { available } = await checkNicknameApi(trimmed)
+      setChecked({ name: trimmed, error: available ? '' : '이미 사용 중인 닉네임이에요.' })
+    } catch { setChecked({ name: trimmed, error: '확인하지 못했어요. 다시 눌러 주세요.' }) }
+  }
   const message = !changed ? '' : formatError || (result ? result.error || '사용할 수 있는 닉네임이에요.' : '중복 확인을 해 주세요.')
   const messageTone = !changed ? '' : formatError || result?.error ? 'error' : result ? 'ok' : 'hint'
   const canSave = Boolean(realName.trim() && trimmed) && (!changed || (result !== null && !result.error))

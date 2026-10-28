@@ -1,5 +1,5 @@
 import { useApp } from './context/AppContext'
-import { LoginScreen } from './features/auth/AuthScreens'
+import { KakaoCallbackScreen, LoginScreen } from './features/auth/AuthScreens'
 import { LocationPermissionScreen, NicknameScreen, TermsScreen } from './features/auth/OnboardingScreens'
 import { MapScreen } from './features/map/MapScreens'
 import { BoardListScreen, SearchScreen, BoardDetailScreen } from './features/board/BoardScreens'
@@ -26,6 +26,7 @@ const screens: Record<Screen, React.ComponentType> = {
   terms: TermsScreen,
   nickname: NicknameScreen,
   'location-permission': LocationPermissionScreen,
+  'kakao-callback': KakaoCallbackScreen,
 }
 
 export default function App() {
