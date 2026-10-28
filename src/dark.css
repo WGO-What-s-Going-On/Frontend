@@ -214,3 +214,11 @@
 :root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment:hover,
 :root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment:focus-visible { background: #2f3239; }
 :root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment.reply-target { background: var(--c-accent-soft); }
+
+/* 댓글 판 */
+:root[data-theme="dark"] .comments-sheet { background: var(--c-canvas); }
+:root[data-theme="dark"] .comments-sheet .comment-replies .reply-comment,
+:root[data-theme="dark"] .comments-sheet .comment-replies .reply-comment:hover,
+:root[data-theme="dark"] .comments-sheet .comment-replies .reply-comment:focus-visible { background: var(--c-raised); }
+:root[data-theme="dark"] .comments-sheet .comment-tools { background: #464b56; }
+:root[data-theme="dark"] .comments-sheet .comment-replies .reply-comment.reply-target { background: var(--c-accent-soft); }

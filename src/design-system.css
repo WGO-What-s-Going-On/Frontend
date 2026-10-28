@@ -1973,3 +1973,26 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 닉네임과 댓글 본문 사이를 붙인다 (원댓글 · 답글 같게) */
 .board-detail-screen .comment > p,
 .board-detail-screen .comment-replies .reply-comment > p { margin-top: 1px; line-height: 1.45; }
+
+/* ---------- 게시글 / 댓글 구분: 선 대신 댓글 영역을 '아래에서 올라온 판'처럼 ----------
+   게시글은 흰 바탕 그대로, 댓글 영역은 위 모서리가 둥근 연회색 판이 화면 끝까지 깔린다.
+   판이 화면 아래까지 차도록 상세 화면을 세로 flex로 두고, 위쪽 간격은 예전(여백 겹침)과 같게 맞춘다 */
+.board-detail-screen { display: flex; flex-direction: column; }
+.board-detail-screen > * { flex-shrink: 0; }
+.board-detail-screen > .detail-nav { margin-bottom: 4px; }
+.board-detail-screen > .outside-notice-row { margin-top: 16px; }
+.board-detail-screen .detail-article { padding-bottom: 22px; border-bottom: 0; }
+.comments-sheet {
+  flex: 1 0 auto; margin: 0 -20px calc(-108px - var(--bottom-shift)); padding: 18px 20px calc(108px + var(--bottom-shift));
+  border-radius: 22px 22px 0 0; background: #f5f6f8;
+}
+.comments-sheet .comments-section { margin-top: 0; }
+.comments-sheet .comment-vote { padding-top: 0; margin-bottom: 14px; }
+/* 판 위 답글 상자는 흰색, [공감 | ⋯] 상자는 판·답글 어디서나 같은 회색 */
+.comments-sheet .comment-replies .reply-comment,
+.comments-sheet .comment-replies .reply-comment:hover,
+.comments-sheet .comment-replies .reply-comment:focus-visible { background: #fff; }
+.comments-sheet .comment-tools { background: #eaecf0; }
+.comments-sheet .comment-replies .reply-comment.reply-target { background: var(--c-accent-soft); }
+/* 판 위 투표 막대: 판 색과 섞이지 않게 한 단계 진하게 */
+.comments-sheet .comment-vote-option:not(.mine, .won) .comment-vote-bar { background: #e8ebef; }
