@@ -1899,7 +1899,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .level-hero-head h2 { margin: 2px 0 3px; color: var(--c-ink); font-size: 22px; letter-spacing: -.02em; }
 .level-hero-head p { margin: 0; color: var(--c-body); font-size: 13px; }
 .level-emblem { display: grid; place-items: center; flex: none; color: var(--c-accent); border-radius: 50%; background: var(--c-accent-soft); }
-.level-emblem.large { width: 52px; height: 52px; }
+.level-emblem.large { width: 60px; height: 60px; }
 .level-emblem.small { width: 36px; height: 36px; }
 .level-emblem.locked { color: var(--c-mute); background: #f2f4f6; }
 .level-progress { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eef1f5; }
@@ -1912,8 +1912,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 칭호 단계: 동그라미를 세로 줄로 잇는다 */
 .level-road { display: grid; margin: 0; padding: 0; list-style: none; }
-.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 0; }
-.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 46px; bottom: -10px; left: 18px; width: 1px; background: var(--c-line); }
+.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 11.5px 0; }
+.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 47.5px; bottom: -11.5px; left: 18px; width: 1px; background: var(--c-line); }
 .level-road-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
 .level-road-text strong { color: var(--c-ink); font-size: 14px; }
 .level-road-text small { color: var(--c-mute); font-size: 12px; }

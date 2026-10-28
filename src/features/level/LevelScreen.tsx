@@ -24,7 +24,7 @@ function earnedBadges({ posts, comments, likes, finished }: { posts: number; com
 function LevelEmblem({ index, size = 'small', locked = false }: { index: number; size?: 'small' | 'large'; locked?: boolean }) {
   // 잠긴 단계도 칭호 아이콘은 회색으로 보여주고, 잠김은 오른쪽 자물쇠로 표시한다
   const Icon = levelIcons[index]
-  return <span className={`level-emblem ${size} ${locked ? 'locked' : ''}`} aria-hidden="true"><Icon size={size === 'large' ? 26 : 17} strokeWidth={2.2}/></span>
+  return <span className={`level-emblem ${size} ${locked ? 'locked' : ''}`} aria-hidden="true"><Icon size={size === 'large' ? 30 : 17} strokeWidth={2.2}/></span>
 }
 
 function BadgePanel({ stats }: { stats: LevelStats }) {
