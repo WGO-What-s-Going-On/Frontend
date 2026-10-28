@@ -271,11 +271,8 @@ export function BoardDetailScreen() {
       {(board.imagePlaceholder || board.imageName) && <div className="board-image-placeholder detail-image">[이미지]</div>}
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={canParticipate} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
     </article>
-    {/* 댓글 판: 게시글 아래에 위 모서리가 둥근 연회색 판으로 깔려, 선 없이 '여기부터 댓글'이 보이게 (투표도 댓글 이야기라 판 안에) */}
-    <div className="comments-sheet">
     <CommentVoteSection board={board} canChoose={canParticipate}/>
     <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={canParticipate ? startComment : () => undefined} onEdit={startEdit} replyTargetId={replyTo?.id} readOnly={!canParticipate}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong>{canParticipate && <p>가장 먼저 상황을 알려주세요</p>}</div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>접기 <ChevronUp size={17}/></button>}</section>
-    </div>
   </AppShell>
 }
 
