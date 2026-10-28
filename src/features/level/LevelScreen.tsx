@@ -1,9 +1,10 @@
 import { useSearchParams } from 'react-router-dom'
-import { Eye, Lock, Megaphone, Mic, RadioTower } from 'lucide-react'
+import { Eye, Megaphone, Mic, RadioTower } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { Avatar } from '../../components/ui/Avatar'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { useApp } from '../../context/AppContext'
+import { SolidLock } from '../board/FeedItem'
 import { PICK_SCORE, levelIndex, levelProgress, levelStats, levels, myRegion, rankRegions, regionRanks, scoreOf } from './levels'
 import type { LevelStats } from './levels'
 
@@ -21,8 +22,9 @@ function earnedBadges({ posts, comments, likes, finished }: { posts: number; com
 }
 
 function LevelEmblem({ index, size = 'small', locked = false }: { index: number; size?: 'small' | 'large'; locked?: boolean }) {
-  const Icon = locked ? Lock : levelIcons[index]
-  return <span className={`level-emblem ${size} ${locked ? 'locked' : ''}`} aria-hidden="true"><Icon size={size === 'large' ? 26 : 17} strokeWidth={2.2}/></span>
+  // 잠긴 단계는 게시판 읽기 전용과 같은 채운 자물쇠
+  const Icon = levelIcons[index]
+  return <span className={`level-emblem ${size} ${locked ? 'locked' : ''}`} aria-hidden="true">{locked ? <SolidLock size={15}/> : <Icon size={size === 'large' ? 26 : 17} strokeWidth={2.2}/>}</span>
 }
 
 function BadgePanel({ stats }: { stats: LevelStats }) {
@@ -50,8 +52,11 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
         <em>{state === 'earned' ? '획득' : state === 'current' ? '현재' : ''}</em>
       </li>
     })}</ol>
-    <h4>뱃지</h4>
-    <ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul>
+    {/* 뱃지는 화면 아래쪽(작성 버튼 위)에 붙인다: 남는 세로 공간은 칭호 단계와 뱃지 사이로 */}
+    <div className="level-badges">
+      <h4>뱃지</h4>
+      <ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul>
+    </div>
   </>
 }
 
@@ -75,7 +80,7 @@ function RankPanel({ stats }: { stats: LevelStats }) {
     <div className="ux-filter-row rank-regions"><div className="ux-category-filters">{rankRegions.map((item) => <button key={item} className={region === item ? 'selected' : ''} onClick={() => selectRegion(item)}>{item}</button>)}</div></div>
     {region === myRegion && <div className="rank-me">{seer
       ? <><strong>내 순위 {myRank}위</strong><span className="rank-score">{scoreOf(stats)}점</span></>
-      : <><Lock size={15} aria-hidden="true"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>현재 Lv.{current + 1} {levels[current].name}</small></span></>}</div>}
+      : <><SolidLock size={15} label="잠김"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>현재 Lv.{current + 1} {levels[current].name}</small></span></>}</div>}
     <ol className="rank-list">{entries.map((entry, index) => <li key={entry.name} className={'me' in entry ? 'me' : ''}>
       <b className={index < 3 ? 'top' : ''}>{index + 1}</b>
       <Avatar name={entry.name} size={36}/>

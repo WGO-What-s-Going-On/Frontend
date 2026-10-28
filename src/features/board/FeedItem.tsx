@@ -9,8 +9,8 @@ import { voteStatus } from './commentVote'
 import { RADIUS } from '../map/mapWorld'
 
 // 읽기 전용(150m 밖) 표시: 선 아이콘보다 작고 단단해 보이는 채운 자물쇠
-export function SolidLock() {
-  return <svg className="feed-lock" width="13" height="13" viewBox="0 0 24 24" role="img" aria-label="읽기 전용"><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" strokeWidth="2.4"/><rect x="4" y="10" width="16" height="12" rx="3" fill="currentColor"/></svg>
+export function SolidLock({ size = 13, label = '읽기 전용' }: { size?: number; label?: string }) {
+  return <svg className="feed-lock" width={size} height={size} viewBox="0 0 24 24" role="img" aria-label={label}><path d="M7 10V7a5 5 0 0 1 10 0v3" fill="none" stroke="currentColor" strokeWidth="2.4"/><rect x="4" y="10" width="16" height="12" rx="3" fill="currentColor"/></svg>
 }
 
 // 피드 반응 판에 보이는 이름

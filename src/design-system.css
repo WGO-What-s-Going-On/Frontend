@@ -1886,7 +1886,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .outside-refresh.checking svg { animation: pull-spin .8s linear infinite; }
 
 /* ---------- 활동 탭: 위 [뱃지 | 랭킹] ---------- */
-.level-tabs { display: flex; margin: 0 -18px 10px; border-bottom: 1px solid var(--c-line); }
+.level-tabs { display: flex; margin: 0 -18px 14px; border-bottom: 1px solid var(--c-line); }
 .level-tabs button {
   flex: 1; margin: 0 0 -1px; padding: 11px 0; color: var(--c-mute); font-size: 15px; font-weight: 700;
   border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none;
@@ -1912,8 +1912,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 칭호 단계: 동그라미를 세로 줄로 잇는다 */
 .level-road { display: grid; margin: 0; padding: 0; list-style: none; }
-.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 4px 0; }
-.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 40px; bottom: -4px; left: 18px; width: 1px; background: var(--c-line); }
+.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 5px 0; }
+.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 41px; bottom: -5px; left: 18px; width: 1px; background: var(--c-line); }
 .level-road-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
 .level-road-text strong { color: var(--c-ink); font-size: 14px; }
 .level-road-text small { color: var(--c-mute); font-size: 12px; }
@@ -1983,3 +1983,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comments-heading { margin-bottom: 2px; }
 /* 마지막 답글 상자 아래도 원댓글과 같은 여백을 두고 다음 댓글 구분선이 온다 (예전 바탕의 -13px 여백을 없앤다) */
 .board-detail-screen .comment-replies { margin-bottom: 0; }
+/* 활동 > 뱃지 탭: 화면이 길면 뱃지 묶음을 아래(작성 버튼 위)로 내리고, 짧으면 칭호 단계 바로 아래 */
+.level-screen { display: flex; flex-direction: column; }
+.level-screen > * { flex-shrink: 0; }
+.level-screen > .level-badges { margin-top: auto; padding-bottom: 14px; }
