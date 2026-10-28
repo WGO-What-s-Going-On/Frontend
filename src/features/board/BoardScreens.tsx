@@ -270,6 +270,8 @@ export function BoardDetailScreen() {
       <p className="detail-body">{board.body}</p>
       {(board.imagePlaceholder || board.imageName) && <div className="board-image-placeholder detail-image">[이미지]</div>}
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={canParticipate} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
+      {/* 글 끝맺음 줄: 여기까지가 게시글 (아래 댓글과는 선 대신 여백으로 나눈다) */}
+      <p className="detail-footer">조회 {board.views} · {board.reach ?? 150}m 안에 공개</p>
     </article>
     <CommentVoteSection board={board} canChoose={canParticipate}/>
     <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={canParticipate ? startComment : () => undefined} onEdit={startEdit} replyTargetId={replyTo?.id} readOnly={!canParticipate}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong>{canParticipate && <p>가장 먼저 상황을 알려주세요</p>}</div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>접기 <ChevronUp size={17}/></button>}</section>
