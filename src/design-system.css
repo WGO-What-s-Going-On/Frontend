@@ -1989,4 +1989,4 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 활동 > 뱃지 탭: 화면이 길면 뱃지 묶음을 아래(작성 버튼 위)로 내리고, 짧으면 칭호 단계 바로 아래 */
 .level-screen { display: flex; flex-direction: column; }
 .level-screen > * { flex-shrink: 0; }
-.level-screen > .level-badges { margin-top: auto; padding-bottom: 14px; }
+.level-screen > .level-badges { margin-top: auto; padding-bottom: 24px; }

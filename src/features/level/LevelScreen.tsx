@@ -49,7 +49,7 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
       return <li key={level.name} className={state}>
         <LevelEmblem index={index} locked={state === 'locked'}/>
         <span className="level-road-text"><strong>Lv.{index + 1} {level.name}</strong><small>{level.condition}</small></span>
-        <em>{state === 'earned' ? '획득' : state === 'current' ? '현재' : <SolidLock size={14} label="잠김"/>}</em>
+        <em>{state === 'earned' ? '획득' : state === 'current' ? '현재' : <SolidLock size={16} label="잠김"/>}</em>
       </li>
     })}</ol>
     {/* 뱃지는 화면 아래쪽(작성 버튼 위)에 붙인다: 남는 세로 공간은 칭호 단계와 뱃지 사이로 */}
