@@ -1970,3 +1970,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comment-replies .reply-comment > p { margin-top: 2px; line-height: 1.45; }
 .board-detail-screen .comment-replies .reply-comment > .comment-actions { margin-top: 0; }
 .board-detail-screen .comment-replies .reply-comment .comment-reply-button { padding-top: 2px; padding-bottom: 2px; }
+/* 닉네임과 댓글 본문 사이를 붙인다 (원댓글 · 답글 같게) */
+.board-detail-screen .comment > p,
+.board-detail-screen .comment-replies .reply-comment > p { margin-top: 1px; line-height: 1.45; }
