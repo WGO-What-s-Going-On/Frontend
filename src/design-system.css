@@ -1619,11 +1619,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* [공감 | ⋯] 상자는 댓글·답글 모두 같은 오른쪽 끝에 고정 (답글은 오른쪽 안쪽 여백 10px이 있어서 그만큼 밖으로) */
 .board-detail-screen .comment-replies .reply-comment > .comment-head .comment-tools { margin-right: -6px; }
 
-/* 공감 색: 파랑 대신 빨강 (내가 누른 공감, 고르기 판의 선택, 판이 열린 아이콘) */
-.board-detail-screen .comment-reactions .comment-reaction-chip.mine { color: var(--c-urgent); }
-.comment-reaction-picker button.selected { color: var(--c-urgent); background: var(--c-urgent-soft); }
-.board-detail-screen .comment-tools .comment-react-button[aria-expanded="true"] { color: var(--c-urgent); }
-
 /* ---------- 게시판 정렬(거리순 ⌄) 메뉴: 게시글 ⋯ 메뉴와 같은 크기·모양·등장. 정렬 칩 바로 아래 ---------- */
 .board-filter-row .ux-sort-menu {
   top: calc(100% + 4px);
