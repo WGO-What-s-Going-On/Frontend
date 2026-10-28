@@ -212,6 +212,5 @@
 /* 답글 상자 */
 :root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment,
 :root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment:hover,
-:root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment:focus-visible { background: var(--c-canvas); }
-:root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment > .comment-head .comment-tools { background: var(--c-raised); }
+:root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment:focus-visible { background: #2f3239; }
 :root[data-theme="dark"] .board-detail-screen .comment-replies .reply-comment.reply-target { background: var(--c-accent-soft); }

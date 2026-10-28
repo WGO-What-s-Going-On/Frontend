@@ -1950,11 +1950,11 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comment-replies .reply-comment,
 .board-detail-screen .comment-replies .reply-comment:hover,
 .board-detail-screen .comment-replies .reply-comment:focus-visible {
-  margin: 0 0 0 28px; padding: 11px 12px 10px 14px; border: 0; border-radius: 14px; background: #f5f6f8;
+  margin: 0 0 0 28px; padding: 11px 12px 10px 14px; border: 0; border-radius: 14px; background: #f8f9fa;
 }
 .board-detail-screen .comment-replies .reply-comment + .reply-comment { border-top: 0; }
 .board-detail-screen .comment-replies .reply-comment::before { top: 13px; left: -24px; }
-/* 상자 안 [공감 | ⋯]은 흰 바탕으로 (회색 위에 회색이면 묻힌다) */
-.board-detail-screen .comment-replies .reply-comment > .comment-head .comment-tools { margin-right: 0; background: #fff; }
+/* 상자 안 [공감 | ⋯]도 원댓글과 같은 색 · 같은 오른쪽 세로줄 (상자 안쪽 여백만큼 밖으로) */
+.board-detail-screen .comment-replies .reply-comment > .comment-head .comment-tools { margin-right: -8px; }
 /* 답글 다는 중인 답글은 상자째 연한 파랑 */
 .board-detail-screen .comment-replies .reply-comment.reply-target { background: var(--c-accent-soft); }
