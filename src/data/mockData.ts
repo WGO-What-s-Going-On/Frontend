@@ -40,6 +40,17 @@ export const initialComments: Comment[] = [
     body: '맞아요. 직원분이 7시 입장이라고 안내했어요.', createdAt: '방금 전', verified: true, read: false,
     likes: 4, reactions: { '도움돼요': 4, '맞아요': 18, '정보가 달라요': 0 },
   },
+  // 답글 예시 (원댓글 comment-1에 달린 답글)
+  {
+    id: 'comment-1-reply-1', boardId: 'fire', authorId: 'user-1', authorName: '익명탐정', parentId: 'comment-1',
+    body: '연기는 이벤트랑 상관없는 것 같아요. 4번 출구 쪽 건물이에요.', createdAt: '1분 전', verified: false, read: false,
+    reactions: { '도움돼요': 3, '맞아요': 1, '정보가 달라요': 0 },
+  },
+  {
+    id: 'comment-1-reply-2', boardId: 'fire', authorId: 'user-11', authorName: '강남역지기', parentId: 'comment-1',
+    body: '소방차 두 대 방금 도착했어요.', createdAt: '방금 전', verified: true, read: false,
+    reactions: { '도움돼요': 5, '맞아요': 0, '정보가 달라요': 0 },
+  },
   {
     id: 'outage-comment-1', boardId: 'outage', authorId: 'user-5', authorName: '101동 주민',
     body: '101동부터 104동까지 모두 정전된 것 같아요.', createdAt: '28분 전', verified: true, read: false,
