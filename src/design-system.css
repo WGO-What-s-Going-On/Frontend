@@ -1912,14 +1912,17 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 칭호 단계: 동그라미를 세로 줄로 잇는다 */
 .level-road { display: grid; margin: 0; padding: 0; list-style: none; }
-.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 5px 0; }
-.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 41px; bottom: -5px; left: 18px; width: 1px; background: var(--c-line); }
+.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 46px; bottom: -10px; left: 18px; width: 1px; background: var(--c-line); }
 .level-road-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
 .level-road-text strong { color: var(--c-ink); font-size: 14px; }
 .level-road-text small { color: var(--c-mute); font-size: 12px; }
 .level-road li.locked strong { color: var(--c-mute); }
 .level-road em { color: var(--c-accent); font-size: 12px; font-style: normal; font-weight: 700; }
 .level-road li.earned em { color: var(--c-mute); }
+/* 잠김 자물쇠는 '획득' · '현재'와 같은 오른쪽 자리, 글자 폭 가운데 */
+.level-road em { display: grid; justify-items: center; min-width: 26px; }
+.level-road li.locked em { color: var(--c-mute); }
 
 /* 활동 탭은 한 화면에 들어오게 제목 위 여백 · 뱃지 칸만 조금 줄인다 */
 .level-screen h4 { margin: 22px 0 10px; }

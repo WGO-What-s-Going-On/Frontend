@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { Eye, Megaphone, Mic, RadioTower } from 'lucide-react'
+import { Megaphone, Mic, SatelliteDish, Telescope } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { Avatar } from '../../components/ui/Avatar'
 import { NoticeBell } from '../../components/ui/NoticeBell'
@@ -8,8 +8,8 @@ import { SolidLock } from '../board/FeedItem'
 import { PICK_SCORE, levelIndex, levelProgress, levelStats, levels, myRegion, rankRegions, regionRanks, scoreOf } from './levels'
 import type { LevelStats } from './levels'
 
-// 칭호마다 하나씩: 소식통(확성기) · 리포터(마이크) · 특파원(송신탑) · 천리안(눈)
-const levelIcons = [Megaphone, Mic, RadioTower, Eye]
+// 칭호마다 하나씩: 소식통(확성기) · 리포터(마이크) · 특파원(현장 중계 안테나) · 천리안(멀리 보는 망원경)
+const levelIcons = [Megaphone, Mic, SatelliteDish, Telescope]
 
 // 뱃지 (USR-F12): 칭호와 따로 모으는 활동 뱃지. 실제 획득 기준은 백엔드가 계산한다.
 function earnedBadges({ posts, comments, likes, finished }: { posts: number; comments: number; likes: number; finished: number }) {
@@ -22,9 +22,9 @@ function earnedBadges({ posts, comments, likes, finished }: { posts: number; com
 }
 
 function LevelEmblem({ index, size = 'small', locked = false }: { index: number; size?: 'small' | 'large'; locked?: boolean }) {
-  // 잠긴 단계는 게시판 읽기 전용과 같은 채운 자물쇠
+  // 잠긴 단계도 칭호 아이콘은 회색으로 보여주고, 잠김은 오른쪽 자물쇠로 표시한다
   const Icon = levelIcons[index]
-  return <span className={`level-emblem ${size} ${locked ? 'locked' : ''}`} aria-hidden="true">{locked ? <SolidLock size={15}/> : <Icon size={size === 'large' ? 26 : 17} strokeWidth={2.2}/>}</span>
+  return <span className={`level-emblem ${size} ${locked ? 'locked' : ''}`} aria-hidden="true"><Icon size={size === 'large' ? 26 : 17} strokeWidth={2.2}/></span>
 }
 
 function BadgePanel({ stats }: { stats: LevelStats }) {
@@ -49,7 +49,7 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
       return <li key={level.name} className={state}>
         <LevelEmblem index={index} locked={state === 'locked'}/>
         <span className="level-road-text"><strong>Lv.{index + 1} {level.name}</strong><small>{level.condition}</small></span>
-        <em>{state === 'earned' ? '획득' : state === 'current' ? '현재' : ''}</em>
+        <em>{state === 'earned' ? '획득' : state === 'current' ? '현재' : <SolidLock size={14} label="잠김"/>}</em>
       </li>
     })}</ol>
     {/* 뱃지는 화면 아래쪽(작성 버튼 위)에 붙인다: 남는 세로 공간은 칭호 단계와 뱃지 사이로 */}
