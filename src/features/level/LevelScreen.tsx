@@ -34,11 +34,11 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
   const badges = earnedBadges({ posts: myBoards.length, comments: myComments.length, likes: myComments.reduce((sum, comment) => sum + (comment.likes ?? 0), 0), finished: myBoards.filter((board) => board.status === '종료됨').length })
   return <>
     <section className="level-hero">
-      <div className="level-hero-head"><LevelEmblem index={current} size="large"/><div><small>Lv.{current + 1} · 현재 칭호</small><h2>{levels[current].name}</h2><p>{levels[current].tagline}</p></div></div>
+      <div className="level-hero-head"><LevelEmblem index={current} size="large"/><div><small>Lv.{current + 1}</small><h2>{levels[current].name}</h2><p>{levels[current].tagline}</p></div></div>
       {progress ? <div className="level-progress">
         <div className="level-progress-head"><strong>{progress.next.name}까지 {progress.remaining}{progress.unit}</strong><span>{progress.current}/{progress.target}{progress.unit}</span></div>
         <div className="level-bar" role="progressbar" aria-valuemin={0} aria-valuemax={progress.target} aria-valuenow={progress.current} aria-label={`${progress.next.name}까지 진행`}><i style={{ width: `${progress.current / progress.target * 100}%` }}/></div>
-        <p>{progress.hint}</p>
+        {progress.hint && <p>{progress.hint}</p>}
       </div> : <div className="level-progress"><div className="level-progress-head"><strong>대표 의견 점수 {scoreOf(stats)}점</strong></div><p>점수로 {myRegion} 랭킹에서 겨뤄요</p></div>}
     </section>
     <h4>칭호 단계</h4>
@@ -47,10 +47,10 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
       return <li key={level.name} className={state}>
         <LevelEmblem index={index} locked={state === 'locked'}/>
         <span className="level-road-text"><strong>Lv.{index + 1} {level.name}</strong><small>{level.condition}</small></span>
-        <em>{state === 'earned' ? '획득' : state === 'current' ? '지금' : ''}</em>
+        <em>{state === 'earned' ? '획득' : state === 'current' ? '현재' : ''}</em>
       </li>
     })}</ol>
-    <h4>활동 뱃지 <small>{badges.filter((badge) => badge.earned).length}/{badges.length}</small></h4>
+    <h4>뱃지</h4>
     <ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul>
   </>
 }
@@ -75,8 +75,7 @@ function RankPanel({ stats }: { stats: LevelStats }) {
     <div className="ux-filter-row rank-regions"><div className="ux-category-filters">{rankRegions.map((item) => <button key={item} className={region === item ? 'selected' : ''} onClick={() => selectRegion(item)}>{item}</button>)}</div></div>
     {region === myRegion && <div className="rank-me">{seer
       ? <><strong>내 순위 {myRank}위</strong><span className="rank-score">{scoreOf(stats)}점</span></>
-      : <><Lock size={15} aria-hidden="true"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>지금 Lv.{current + 1} {levels[current].name}</small></span></>}</div>}
-    <p className="rank-note">천리안 이웃의 대표 의견 점수 순 · 1회 {PICK_SCORE}점</p>
+      : <><Lock size={15} aria-hidden="true"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>현재 Lv.{current + 1} {levels[current].name}</small></span></>}</div>}
     <ol className="rank-list">{entries.map((entry, index) => <li key={entry.name} className={'me' in entry ? 'me' : ''}>
       <b className={index < 3 ? 'top' : ''}>{index + 1}</b>
       <Avatar name={entry.name} size={36}/>

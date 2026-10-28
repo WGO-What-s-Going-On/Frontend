@@ -22,14 +22,14 @@ export interface Level {
   // 이 칭호를 얻는 조건 (단계 목록에 보여준다)
   condition: string
   // 다음 칭호로 가는 목표. 마지막 단계(천리안)는 없음
-  goal?: { stat: 'participation' | 'agreeReceived' | 'score'; target: number; unit: string; hint: string }
+  goal?: { stat: 'participation' | 'agreeReceived' | 'score'; target: number; unit: string; hint?: string }
 }
 
 export const levels: Level[] = [
   { name: '소식통', tagline: '동네 소식에 귀를 여는 첫 칭호', condition: '가입하면 바로',
     goal: { stat: 'participation', target: 10, unit: '회', hint: '글쓰기 · 댓글 · 반응 · 투표 모두 1회' } },
   { name: '리포터', tagline: '현장을 직접 전하는 이웃', condition: '게시판 참여 10회',
-    goal: { stat: 'agreeReceived', target: 10, unit: '개', hint: "내 댓글이 '맞아요'를 받을 때마다 1개" } },
+    goal: { stat: 'agreeReceived', target: 10, unit: '개' } },
   { name: '특파원', tagline: '투표로 인정받는 현장 의견', condition: "내 댓글 '맞아요' 10개",
     goal: { stat: 'score', target: 50, unit: '점', hint: `댓글 투표에서 대표 의견이 되면 +${PICK_SCORE}점` } },
   { name: '천리안', tagline: '동네를 꿰뚫어 보는 최고 칭호', condition: '대표 의견 점수 50점 · 지역 랭킹 등장' },
@@ -75,25 +75,21 @@ export function levelStats(boards: Board[], comments: Comment[], userId: string)
 }
 
 // 지역 랭킹 (천리안만): 대표 의견 점수 순. 목업 동네와 이웃
-export const myRegion = '역삼1동'
-export const rankRegions = ['역삼1동', '역삼2동', '논현1동', '도곡1동']
+export const myRegion = '역삼동'
+export const rankRegions = ['역삼동', '논현동', '도곡동']
 
 export interface RankEntry { name: string; picks: number }
 
 export const regionRanks: Record<string, RankEntry[]> = {
-  '역삼1동': [
+  '역삼동': [
     { name: '현장지킴이', picks: 31 }, { name: '역삼출근러', picks: 24 }, { name: '강남역지기', picks: 19 }, { name: '테헤란로', picks: 15 },
     { name: '101동 주민', picks: 12 }, { name: '퇴근길', picks: 9 }, { name: '동네주민', picks: 7 }, { name: '역삼토박이', picks: 5 },
   ],
-  '역삼2동': [
-    { name: '선릉로주민', picks: 27 }, { name: '운동하자', picks: 18 }, { name: '역삼2동통장', picks: 14 }, { name: '카페사장', picks: 10 },
-    { name: '산책러', picks: 8 }, { name: '야간근무', picks: 6 },
-  ],
-  '논현1동': [
+  '논현동': [
     { name: '말티즈아빠', picks: 22 }, { name: '논현동이웃', picks: 17 }, { name: '가구거리', picks: 11 }, { name: '학동역', picks: 9 },
     { name: '자취생', picks: 6 }, { name: '논현새내기', picks: 5 },
   ],
-  '도곡1동': [
+  '도곡동': [
     { name: '도곡동', picks: 29 }, { name: '매봉역', picks: 20 }, { name: '양재천러너', picks: 13 }, { name: '도곡시장', picks: 8 },
     { name: '타워팰리스', picks: 6 },
   ],

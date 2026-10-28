@@ -1886,7 +1886,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .outside-refresh.checking svg { animation: pull-spin .8s linear infinite; }
 
 /* ---------- 활동 탭: 위 [뱃지 | 랭킹] ---------- */
-.level-tabs { display: flex; margin: 0 -18px 14px; border-bottom: 1px solid var(--c-line); }
+.level-tabs { display: flex; margin: 0 -18px 10px; border-bottom: 1px solid var(--c-line); }
 .level-tabs button {
   flex: 1; margin: 0 0 -1px; padding: 11px 0; color: var(--c-mute); font-size: 15px; font-weight: 700;
   border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none;
@@ -1912,8 +1912,8 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 칭호 단계: 동그라미를 세로 줄로 잇는다 */
 .level-road { display: grid; margin: 0; padding: 0; list-style: none; }
-.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 5px 0; }
-.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 41px; bottom: -5px; left: 18px; width: 1px; background: var(--c-line); }
+.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 4px 0; }
+.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 40px; bottom: -4px; left: 18px; width: 1px; background: var(--c-line); }
 .level-road-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
 .level-road-text strong { color: var(--c-ink); font-size: 14px; }
 .level-road-text small { color: var(--c-mute); font-size: 12px; }
@@ -1922,17 +1922,17 @@ button.title-progress-card:active { background: #f7f8fa; }
 .level-road li.earned em { color: var(--c-mute); }
 
 /* 활동 탭은 한 화면에 들어오게 제목 위 여백 · 뱃지 칸만 조금 줄인다 */
-.level-screen h4 { margin: 16px 0 10px; }
+.level-screen h4 { margin: 22px 0 10px; }
 .level-screen .badge-list li { padding: 10px 14px; }
 
 /* 랭킹: 동네 칩 → 내 자리 → 순위 목록 */
 .rank-regions { margin-bottom: 14px; }
+.rank-me + .rank-list { margin-top: 8px; }
 .rank-me { display: flex; align-items: center; gap: 10px; padding: 12px 14px; color: var(--c-mute); border-radius: 14px; background: #f5f7fa; }
 .rank-me > span:not(.rank-score) { display: grid; gap: 2px; }
 .rank-me strong { color: var(--c-ink); font-size: 14px; }
 .rank-me small { color: var(--c-mute); font-size: 12px; }
 .rank-me .rank-score { margin-left: auto; }
-.rank-note { margin: 16px 0 4px; color: var(--c-mute); font-size: 12px; }
 .rank-list { margin: 0; padding: 0; list-style: none; }
 .rank-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f2f5; }
 .rank-list li:last-child { border-bottom: 0; }
