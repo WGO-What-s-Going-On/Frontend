@@ -1912,8 +1912,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 칭호 단계: 동그라미를 세로 줄로 잇는다 */
 .level-road { display: grid; margin: 0; padding: 0; list-style: none; }
-.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 11.5px 0; }
-.level-road li:not(:last-child)::after { content: ''; position: absolute; top: 47.5px; bottom: -11.5px; left: 18px; width: 1px; background: var(--c-line); }
+.level-road li { position: relative; display: flex; align-items: center; gap: 12px; padding: 2.5px 0; }
 .level-road-text { display: grid; flex: 1; gap: 2px; min-width: 0; }
 .level-road-text strong { color: var(--c-ink); font-size: 14px; }
 .level-road-text small { color: var(--c-mute); font-size: 12px; }
@@ -1989,4 +1988,13 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 활동 > 뱃지 탭: 화면이 길면 뱃지 묶음을 아래(작성 버튼 위)로 내리고, 짧으면 칭호 단계 바로 아래 */
 .level-screen { display: flex; flex-direction: column; }
 .level-screen > * { flex-shrink: 0; }
-.level-screen > .level-badges { margin-top: auto; padding-bottom: 36px; }
+.level-screen > .level-badges { margin-top: auto; }
+/* 한 화면에 들어오게: 남는 세로 공간을 칭호 단계 줄 간격(줄 위아래 2.5 ~ 11.5px)에 먼저 주고, 다음 뱃지 아래 여백(10 ~ 36px),
+   그래도 남으면 칭호 단계와 뱃지 사이로. 화면이 낮으면 반대 순서로 줄어든다 */
+.level-screen > .level-road {
+  position: relative; display: flex; flex-direction: column; justify-content: space-around;
+  flex: 100 0 auto; max-height: 236px;
+}
+.level-road::before { content: ''; position: absolute; top: 22px; bottom: 22px; left: 18px; width: 1px; background: var(--c-line); }
+.level-road .level-emblem { position: relative; z-index: 1; }
+.level-screen > .level-bottom-gap { flex: 1 0 10px; max-height: 36px; }

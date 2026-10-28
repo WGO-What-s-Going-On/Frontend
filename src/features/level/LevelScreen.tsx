@@ -57,6 +57,8 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
       <h4>뱃지</h4>
       <ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul>
     </div>
+    {/* 뱃지와 작성 버튼 사이 여백: 화면이 낮으면 이것부터 줄어든다 */}
+    <div className="level-bottom-gap" aria-hidden="true"/>
   </>
 }
 
