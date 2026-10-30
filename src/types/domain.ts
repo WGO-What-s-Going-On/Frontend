@@ -56,6 +56,10 @@ export interface Board {
   edited?: boolean
   // 댓글 후보 투표. 글 작성 30분 뒤 고정한 후보 2개와 득표 (없으면 아직 후보를 고르지 않은 것)
   vote?: BoardVote
+  // 서버가 알려준 댓글 수 (서버 연동 때, 목록에서는 댓글을 따로 불러오지 않으므로)
+  commentCount?: number
+  // 서버가 알려준 투표 상태 (실제 서버 연동 때만). 있으면 목업 계산 대신 이 값을 쓴다
+  voteStatus?: 'PENDING' | 'OPEN' | 'CLOSED' | 'CANCELLED' | 'NONE'
 }
 
 export interface VoteCandidate {
@@ -118,6 +122,11 @@ export function myReactions(board: Board): PostReaction[] {
 // HOT: 조회수나 댓글이 많이 몰린 진행 중 게시판 (실제 기준은 백엔드 활성도 점수). 지도 HOT 필터와 게시판 HOT 태그가 같이 쓴다.
 export function isHotBoard(board: Board, commentCount: number) {
   return board.status === '실시간' && (board.views >= 100 || commentCount >= 5)
+}
+
+// 게시판 댓글 수: 서버가 준 값이 있으면 그 값, 목업이면 댓글을 센다
+export function commentCountOf(board: Board, comments: Comment[]) {
+  return board.commentCount ?? comments.filter((comment) => comment.boardId === board.id).length
 }
 
 export function myCommentReactions(comment: Comment): CommentReaction[] {

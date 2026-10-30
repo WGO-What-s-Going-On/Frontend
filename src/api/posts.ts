@@ -1,5 +1,6 @@
 import { api } from './client'
 import type { Board, Category, Comment, CommentReaction, PostReaction, Reach } from '../types/domain'
+import { timeAgo } from '../domain/time'
 
 // 게시글 · 댓글 · 공감 · 투표 · 활동 API (백엔드 docs/contracts/frontend-integration.md 기준).
 // 화면은 아직 목업 데이터를 쓰고, serverFeatures.posts를 켜면 여기 함수로 바꿔 끼운다 (docs/api-integration.md)
@@ -59,7 +60,7 @@ export interface VoteResponse {
   mySelection: { commentId: string } | null
 }
 
-export interface Coords { latitude: number; longitude: number }
+import type { Coords } from './geo'
 export interface DraftInput extends Coords { title: string; content: string; category: Category; radiusM: Reach; anonymous?: boolean; mediaIds?: string[] }
 export interface NearbyQuery extends Coords { radiusM?: Reach; sort?: 'distance' | 'latest'; category?: Category; q?: string; cursor?: string; limit?: number }
 
@@ -100,7 +101,7 @@ export const getMyRegion = ({ latitude, longitude }: Coords) => api<{ code: stri
 export const getRanking = (regionCode: string) => api<{ regionCode: string; items: { rank: number; userId: number; authorNickname: string | null; picks: number; score: number }[]; myRank: number | null; myScore: number }>('GET', '/api/v1/posts/me/ranking', { query: { regionCode } })
 
 // 서버 응답 → 화면 데이터
-const categoryFromCode = (code: string): Category => (Object.entries(categoryCode).find(([, value]) => value === code)?.[0] as Category | undefined) ?? '일상 불편'
+export const categoryFromCode = (code: string): Category => (Object.entries(categoryCode).find(([, value]) => value === code)?.[0] as Category | undefined) ?? '일상 불편'
 const postReactionFromCode = (code: PostReactionCode) => (Object.entries(postReactionCode).find(([, value]) => value === code)?.[0]) as PostReaction
 const commentReactionFromCode = (code: CommentReactionCode) => (Object.entries(commentReactionCode).find(([, value]) => value === code)?.[0]) as CommentReaction
 
@@ -109,7 +110,7 @@ export function toBoard(post: PostResponse): Board {
   return {
     id: post.postId, authorId: post.authorId === null ? '' : String(post.authorId), authorName: post.anonymous ? '익명' : post.authorNickname ?? '알 수 없음',
     anonymous: post.anonymous, category: categoryFromCode(post.category), title: post.title, body: post.content,
-    distance: Math.round(post.distanceM ?? 0), createdAt: post.createdAt, status: post.status === 'ACTIVE' && !post.closedAt ? '실시간' : '종료됨', views: post.counters.viewCount,
+    distance: Math.round(post.distanceM ?? 0), createdAt: timeAgo(post.createdAt), status: post.status === 'ACTIVE' && !post.closedAt ? '실시간' : '종료됨', views: post.counters.viewCount, commentCount: post.counters.commentCount,
     reactions: { '저도 궁금해요': counts.CURIOUS, '지금도 그래요': counts.STILL_HAPPENING, '도움 됐어요': counts.HELPFUL, '이제 끝났어요': counts.ENDED },
     myReactions: post.myReaction ? [postReactionFromCode(post.myReaction)] : [],
     imageUrl: post.media.find((media) => media.type === 'IMAGE')?.url, reach: ([150, 250, 350] as const).find((value) => value === post.radiusM),
@@ -120,8 +121,18 @@ export function toComment(comment: CommentResponse): Comment {
   const counts = comment.reactionCounts ?? { HELPFUL: 0, AGREE: 0, DIFFERENT: 0 }
   return {
     id: comment.commentId, boardId: comment.postId, authorId: String(comment.authorId), authorName: comment.authorNickname ?? '알 수 없음', body: comment.content,
-    imageUrl: comment.media[0]?.url, createdAt: comment.createdAt, verified: comment.verified, parentId: comment.parentCommentId ?? undefined,
+    imageUrl: comment.media[0]?.url, createdAt: timeAgo(comment.createdAt), verified: comment.verified, parentId: comment.parentCommentId ?? undefined,
     reactions: { '도움돼요': counts.HELPFUL, '맞아요': counts.AGREE, '정보가 달라요': counts.DIFFERENT },
     myReactions: comment.myReaction ? [commentReactionFromCode(comment.myReaction)] : [],
+  }
+}
+
+// 서버 투표 → 화면 투표. 열림 · 끝남 · 취소일 때만 후보를 담는다
+export function toBoardVote(vote: VoteResponse | null): Pick<Board, 'vote' | 'voteStatus'> {
+  if (!vote) return { vote: undefined, voteStatus: undefined }
+  const shown = vote.status === 'OPEN' || vote.status === 'CLOSED' || vote.status === 'CANCELLED'
+  return {
+    voteStatus: vote.status,
+    vote: shown ? { candidates: vote.candidates.map(({ commentId, content, votes }) => ({ commentId, content, votes })), mine: vote.mySelection?.commentId, cancelled: vote.status === 'CANCELLED' } : undefined,
   }
 }

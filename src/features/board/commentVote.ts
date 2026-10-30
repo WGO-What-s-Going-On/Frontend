@@ -27,6 +27,7 @@ export function pickCandidates(comments: Comment[]): VoteCandidate[] {
 }
 
 export function voteStatus(board: Board, comments: Comment[]): VoteStatus {
+  if (board.voteStatus) return board.voteStatus
   const live = board.status === '실시간'
   if (!board.vote) {
     if (minutesSince(board.createdAt) < VOTE_OPENS_AFTER) return live ? 'PENDING' : 'NONE'

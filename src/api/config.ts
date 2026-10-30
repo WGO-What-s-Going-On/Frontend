@@ -11,6 +11,6 @@ export const kakaoEnabled = apiEnabled && KAKAO_REST_API_KEY !== ''
 export const serverFeatures = {
   // 로그인 · 약관 · 닉네임 · 내 정보: 연결됨
   users: apiEnabled,
-  // 게시글 · 댓글 · 공감 · 투표 · 위치 · 알림: API 준비됨, 실제 로그인으로 확인한 뒤 켠다 (토큰 없이는 401)
-  posts: false,
+  // 게시글 · 댓글 · 공감 · 투표 · 위치 · 알림 · 활동: .env.local의 VITE_SERVER_POSTS=true로 켠다 (실제 로그인 확인 전에는 꺼 둠)
+  posts: apiEnabled && import.meta.env.VITE_SERVER_POSTS === 'true',
 }

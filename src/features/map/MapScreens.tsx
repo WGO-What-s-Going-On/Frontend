@@ -4,7 +4,7 @@ import { AppShell } from '../../components/layout/AppShell'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { useApp } from '../../context/AppContext'
-import { isHotBoard } from '../../types/domain'
+import { commentCountOf, isHotBoard } from '../../types/domain'
 import type { Board, Category } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { IncidentBottomSheet } from './IncidentBottomSheet'
@@ -38,7 +38,7 @@ export function MapScreen() {
   const [searchCenter, setSearchCenter] = useState<Point>(mapMemory.searchCenter)
   const [viewCenter, setViewCenter] = useState<Point>(mapMemory.viewCenter)
   Object.assign(mapMemory, { filter, selectedId: selectedBoard?.id, searchCenter, viewCenter })
-  const hotIds = useMemo(() => new Set(boards.filter((board) => isHotBoard(board, comments.filter((comment) => comment.boardId === board.id).length)).map((board) => board.id)), [boards, comments])
+  const hotIds = useMemo(() => new Set(boards.filter((board) => isHotBoard(board, commentCountOf(board, comments))).map((board) => board.id)), [boards, comments])
   const nearby = filterBoards(boards, filter, hotIds)
   const selectFilter = (next: MapFilter) => { setFilter(next); setSelectedBoard(undefined) }
   // 지도를 멀리 옮기면 '이 지역에서 다시 찾기' (MAP-F09, 실제로는 화면 영역으로 게시판을 다시 조회)

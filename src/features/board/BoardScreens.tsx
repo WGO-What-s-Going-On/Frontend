@@ -6,12 +6,14 @@ import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
+import { ErrorState } from '../../components/ui/ErrorState'
+import { BoardCardSkeleton } from '../../components/ui/Skeleton'
 import { IconButton } from '../../components/ui/IconButton'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { usePullToRefresh } from '../../components/ui/usePullToRefresh'
 import { useApp } from '../../context/AppContext'
-import { isHotBoard, myCommentReactions } from '../../types/domain'
+import { commentCountOf, isHotBoard, myCommentReactions } from '../../types/domain'
 import type { Board, Category, Comment, CommentReaction } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { RADIUS } from '../map/mapWorld'
@@ -32,7 +34,7 @@ function readBoardView(): BoardView {
 }
 
 export function BoardListScreen() {
-  const { boards, comments, blockedUsers, inRange, go, openBoard } = useApp()
+  const { boards, comments, blockedUsers, inRange, go, openBoard, live, boardsLoading, boardsError, reloadBoards } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
   const [view, setView] = useState(readBoardView)
   const switchView = (next: BoardView) => {
@@ -86,9 +88,12 @@ export function BoardListScreen() {
       <IconButton className="board-search-chip" label="게시판 검색" onClick={() => go('search')}><Search size={17}/></IconButton>
       {sortMenuLeft !== null && <div className="ux-sort-menu" role="menu" style={{ left: sortMenuLeft }}>{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuLeft(null) }}>{sortLabel[item]}</button>)}</div>}
     </div>
-    {!visibleBoards.length ? <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>
+    {/* 서버 연동 중: 처음 불러오는 동안 자리 표시, 실패하면 다시 시도 */}
+    {live && boardsError ? <ErrorState onRetry={reloadBoards}/>
+      : live && boardsLoading && !boards.length ? <div className="ux-board-list"><BoardCardSkeleton/><BoardCardSkeleton/><BoardCardSkeleton/></div>
+      : !visibleBoards.length ? <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>
       : view === 'feed' ? <div className="feed-list">{visibleBoards.map((board) => <FeedItem key={board.id} board={board} comments={comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))}/>)}</div>
-      : <div className="album-grid">{visibleBoards.map((board) => <AlbumTile key={board.id} board={board} commentCount={comments.filter((comment) => comment.boardId === board.id).length} readOnly={!inRange || board.distance > RADIUS} onOpen={() => openBoard(board.id)}/>)}</div>}
+      : <div className="album-grid">{visibleBoards.map((board) => <AlbumTile key={board.id} board={board} commentCount={commentCountOf(board, comments)} readOnly={!inRange || board.distance > RADIUS} onOpen={() => openBoard(board.id)}/>)}</div>}
   </AppShell>
 }
 
@@ -143,7 +148,7 @@ export function SearchScreen() {
     .map((item) => item.board) : []
   // 입력 전: 지금 진행 중인 주변 소식 (가까운 순)
   const live = visible.filter((board) => board.status === '실시간').sort((a, b) => a.distance - b.distance)
-  const commentCount = (id: string) => comments.filter((comment) => comment.boardId === id).length
+  const commentCount = (id: string) => { const board = boards.find((item) => item.id === id); return board ? commentCountOf(board, comments) : 0 }
   const remember = (word: string) => {
     if (!word) return
     const next = [word, ...recent.filter((item) => item !== word)].slice(0, 8)

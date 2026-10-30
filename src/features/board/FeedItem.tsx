@@ -23,6 +23,7 @@ export function FeedItem({ board, comments }: { board: Board; comments: Comment[
   const muted = !alertBoardIds.includes(board.id)
   const canReact = inRange && board.distance <= RADIUS
   const voting = voteStatus(board, comments) === 'OPEN'
+  const commentCount = board.commentCount ?? comments.length
   const open = () => openBoard(board.id)
   const [picker, setPicker] = useState(false)
   const actionsRef = useRef<HTMLDivElement>(null)
@@ -38,7 +39,7 @@ export function FeedItem({ board, comments }: { board: Board; comments: Comment[
     {/* 게시판 카드와 같은 알림 켜기/끄기 (기본 꺼짐, 켜면 파랑) */}
     <button className={`ux-board-alert feed-alert ${muted ? 'muted' : ''}`} onClick={() => toggleBoardNotifications(board.id)} aria-label={muted ? `${board.title} 알림 켜기` : `${board.title} 알림 끄기`} title={muted ? '알림 켜기' : '알림 끄기'}>{muted ? <BellOff size={17}/> : <Bell size={17}/>}</button>
     <button className="feed-main" onClick={open}>
-      <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, comments.length) && <b className="board-tag tag-hot">HOT</b>}{!canReact && <SolidLock/>}</span>
+      <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, commentCount) && <b className="board-tag tag-hot">HOT</b>}{!canReact && <SolidLock/>}</span>
       <strong className="feed-title">{board.title}</strong>
       <span className="feed-body">{board.body}</span>
       {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder feed-image">[이미지]</span>}
@@ -46,7 +47,7 @@ export function FeedItem({ board, comments }: { board: Board; comments: Comment[
     {/* 반응 버튼(무엇을 눌렀든 이모티콘 그대로, 내가 반응했으면 파랗게) + 반응 합계, 댓글 수. 버튼을 누르면 반응 판 */}
     <div ref={actionsRef} className="feed-actions">
       <button className={mine ? 'selected' : ''} onClick={() => setPicker(!picker)} aria-expanded={picker} aria-label={`반응 ${reactionTotal}개, 반응 남기기`}><SmilePlus size={21} strokeWidth={1.8}/><span>{reactionTotal}</span></button>
-      <button onClick={open} aria-label={`댓글 ${comments.length}개`}><MessageCircle size={21} strokeWidth={1.8}/><span>{comments.length}</span></button>
+      <button onClick={open} aria-label={`댓글 ${commentCount}개`}><MessageCircle size={21} strokeWidth={1.8}/><span>{commentCount}</span></button>
       {/* 오른쪽 끝: 게시판 카드처럼 작성 시간 (투표 중이면 그 앞에) */}
       <span className="feed-side">{voting && <em>댓글 투표 중</em>}<small>{board.createdAt}</small></span>
       {picker && <div className="feed-reaction-picker" role="menu" aria-label="반응 고르기">{reactionOptions.map(({ label, icon: Icon }) => <button key={label} role="menuitemradio" aria-checked={mine === label} className={mine === label ? 'selected' : ''} disabled={!canReact} title={reactionLabel[label].full} onClick={() => { reactToBoard(board.id, label); setPicker(false) }}><Icon size={18} strokeWidth={2}/><span>{pickerLabel[label]}</span><b>{board.reactions[label]}</b></button>)}</div>}

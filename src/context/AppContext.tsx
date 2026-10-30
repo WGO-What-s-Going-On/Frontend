@@ -11,6 +11,8 @@ import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/a
 import { readSession } from '../api/session'
 import { consentTerms, getMe, getTerms, updateMe } from '../api/users'
 import type { MeResponse } from '../api/users'
+import { useServerSync, type RankingView } from './useServerSync'
+import type { LevelStats } from '../features/level/levels'
 import { myCommentReactions, myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
 
@@ -114,6 +116,14 @@ interface AppContextValue {
   updateNotificationSettings: (settings: NotificationSettings) => void
   resolveReport: (id: string, hideTarget: boolean) => void
   showToast: (message: string) => void
+  // 실제 서버 연동 상태 (VITE_SERVER_POSTS=true이고 로그인했을 때)
+  live: boolean
+  boardsLoading: boolean
+  boardsError: boolean
+  reloadBoards: () => void
+  serverLevel: LevelStats | null
+  loadRanking: () => Promise<RankingView>
+  findSimilar: (draft: { category: Category; title: string; body: string; reach?: Reach }) => Promise<Board[]>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -146,6 +156,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [locationPermission, setLocationPermissionState] = useState<LocationPermission>(persisted.locationPermission ?? 'unknown')
   const [themeMode, setThemeMode] = useState<ThemeMode>(persisted.themeMode === 'dark' ? 'dark' : 'light')
   const [toast, setToast] = useState('')
+  const server = useServerSync({ setBoards, setComments, setNotices, setNotificationSettings })
+  // 서버 데이터는 목업 저장소에 섞지 않는다: 서버 연동 중에는 마지막 목업 글 · 댓글 · 알림을 그대로 저장해 둔다
+  const mockData = useRef({ boards, comments, notices })
+  if (!server.live) mockData.current = { boards, comments, notices }
 
   // 화면 모드를 <html data-theme>에 반영한다 (첫 그림 전 적용은 index.html 스크립트가 한다).
   // 그리기 전에 반영해야 아래 toggleTheme의 겹쳐 전환이 바뀐 색을 찍는다
@@ -155,7 +169,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [themeMode])
 
   useEffect(() => {
-    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, mapSeed: MAP_SEED, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, themeMode }
+    const state: PersistedMockState = { noticesVersion: NOTICES_VERSION, mapSeed: MAP_SEED, user, ...mockData.current, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, themeMode }
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state))
   }, [user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, locationPermission, themeMode])
 
@@ -206,7 +220,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // 로그인 다음 화면: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도
   const afterLogin = (onboarded: boolean) => go(!onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home')
   // 실제 서버 사용자 정보를 앱 사용자에 반영 (목업 글의 작성자 비교용 id는 그대로)
-  const applyMe = (me: MeResponse) => setUser((value) => ({ ...value, serverId: me.userId, nickname: me.nickname || value.nickname, onboarded: !me.onboardingRequired }))
+  const applyMe = (me: MeResponse) => setUser((value) => ({ ...value, serverId: me.userId, nickname: me.nickname || value.nickname, realName: me.realName ?? value.realName, onboarded: !me.onboardingRequired }))
   // 카카오 앱 키가 있으면 카카오 인가 화면으로, 없으면 목업 로그인 (실제 인증은 /auth/kakao/callback에서 이어진다)
   const startLogin = () => {
     if (kakaoEnabled) { window.location.assign(kakaoAuthorizeUrl()); return }
@@ -222,10 +236,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // 약관 동의: 로그인했으면 서버에 현재 필수 약관 동의를 보낸다 (서버 약관 목록이 비어 있으면 보낼 것이 없어 건너뛴다)
   const agreeTerms = async () => {
     if (apiEnabled && readSession()) {
-      try {
-        const termIds = (await getTerms()).filter((term) => term.required).map((term) => term.termId)
-        if (termIds.length) await consentTerms(termIds)
-      } catch { showToast('약관 동의를 저장하지 못했어요. 다시 시도해 주세요.'); return }
+      // 약관 목록을 못 받으면(staging 404 등) 동의 저장 없이 넘어간다. 동의 저장 자체가 실패하면 멈춘다
+      const terms = await getTerms().catch(() => [])
+      const termIds = terms.filter((term) => term.required).map((term) => term.termId)
+      if (termIds.length) {
+        try { await consentTerms(termIds) } catch { showToast('약관 동의를 저장하지 못했어요. 다시 시도해 주세요.'); return }
+      }
     }
     go('nickname')
   }
@@ -335,9 +351,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return { ...board, vote: { ...board.vote, candidates, mine: next } }
   }))
   const updateUser = async (input: Pick<User, 'nickname' | 'realName'>) => {
-    // 실명은 서버에 없는 값이라 기기에만 저장하고, 닉네임만 서버에 보낸다
-    if (apiEnabled && readSession() && input.nickname !== user.nickname) {
-      try { applyMe(await updateMe({ nickname: input.nickname })) } catch (error) {
+    // 실명은 본인에게만 보이는 값으로 서버에 저장된다. 닉네임은 바뀌었을 때만 보낸다
+    if (apiEnabled && readSession()) {
+      try { applyMe(await updateMe({ ...(input.nickname !== user.nickname ? { nickname: input.nickname } : {}), realName: input.realName?.trim() || null })) } catch (error) {
         showToast(error instanceof ApiError && error.status === 409 ? '이미 사용 중인 닉네임이에요.' : '프로필을 저장하지 못했어요.')
         return
       }
@@ -357,11 +373,64 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (hideTarget && report?.targetType === '댓글') { setComments((items) => items.filter((comment) => comment.id !== report.targetId)); cancelVoteFor(report.targetId) }
     setReports((items) => items.map((item) => item.id === id ? { ...item, status: '처리 완료' } : item))
   }
+  // 실제 서버 연동: 켜져 있으면 아래 동작은 서버로 보내고, 결과를 다시 받아 화면에 반영한다 (목업 동작을 덮어쓴다)
+  const fail = (message: string) => () => showToast(message)
+  const commentOf = (id: string) => comments.find((comment) => comment.id === id)
+  const liveActions: Partial<AppContextValue> = !server.live ? {} : {
+    openBoard: (id) => { server.loadBoard(id).catch(fail('게시글을 불러오지 못했어요.')); openBoard(id) },
+    relocate: (boardId) => {
+      server.locate().then(() => server.loadBoard(boardId)).then((board) => {
+        const ok = inRange && board.distance <= RADIUS
+        navigate(pathForScreen(ok ? 'detail' : 'outside', boardId), { replace: true })
+        showToast(ok ? '150m 안이에요. 이제 참여할 수 있어요' : `아직 범위 밖이에요 · ${board.distance}m`)
+      }).catch(fail('위치를 확인하지 못했어요.'))
+    },
+    createBoard: (input) => {
+      server.createPost(input).then((id) => {
+        setCurrentBoardId(id)
+        navigate(pathForScreen('detail', id), { state: { enter: true } })
+        showToast('게시판이 생성되었습니다.')
+      }).catch(fail('글을 올리지 못했어요. 다시 시도해 주세요.'))
+    },
+    // 서버는 제목 · 본문만 수정할 수 있다 (카테고리 · 작성자 표시 · 사진은 그대로)
+    updateBoard: (id, input) => { server.editPost(id, input.title, input.body).then(() => showToast('게시글을 수정했습니다.')).catch(fail('게시글을 수정하지 못했어요.')) },
+    deleteBoard: (id) => { server.deletePost(id).then(() => { showToast('게시글을 삭제했습니다.'); go('board') }).catch(fail('게시글을 삭제하지 못했어요.')) },
+    finishBoard: (id) => { server.setClosed(id, true).then(() => showToast('게시판을 종료했습니다.')).catch(fail('게시판을 종료하지 못했어요.')) },
+    reopenBoard: (id) => { server.setClosed(id, false).then(() => showToast('게시판을 다시 열었어요.')).catch(fail('게시판을 다시 열지 못했어요.')) },
+    reactToBoard: (id, reaction) => { const board = boards.find((item) => item.id === id); server.reactToPost(id, reaction, board ? myReactions(board)[0] : undefined).catch(fail('반응을 남기지 못했어요.')) },
+    addComment: (body, parentId) => { server.addComment(currentBoardId, body, parentId).then(() => showToast('댓글을 등록했습니다.')).catch(fail('댓글을 등록하지 못했어요.')) },
+    updateComment: () => showToast('댓글 수정은 아직 지원하지 않아요.'),
+    deleteComment: (id) => { const comment = commentOf(id); if (comment) server.deleteComment(comment.boardId, id).catch(fail('댓글을 삭제하지 못했어요.')) },
+    reactToComment: (id, reaction) => { const comment = commentOf(id); if (comment) server.reactToComment(comment.boardId, id, reaction, myCommentReactions(comment)[0]).catch(fail('공감을 남기지 못했어요.')) },
+    // 투표 후보는 서버가 고른다
+    startVote: () => undefined,
+    castVote: (boardId, commentId) => { server.castVote(boardId, commentId, boards.find((board) => board.id === boardId)?.vote?.mine).catch(fail('투표하지 못했어요.')) },
+    markNoticeRead: (id) => { markNoticeRead(id); server.readNotice(id).catch(() => undefined) },
+    markAllNoticesRead: () => { markAllNoticesRead(); server.readAllNotices().catch(fail('알림을 읽음 처리하지 못했어요.')) },
+    deleteNotice: (id) => { deleteNotice(id); server.removeNotice(id).catch(fail('알림을 삭제하지 못했어요.')) },
+    reportTarget: (targetType, targetId, reason) => { server.report(targetType, targetId, reason).then(() => showToast('신고가 접수되었습니다.')).catch(fail('신고하지 못했어요.')) },
+    blockUser: (userId) => { server.block(userId).then(() => blockUser(userId)).catch(fail('차단하지 못했어요.')) },
+    toggleBoardNotifications: (boardId) => { toggleBoardNotifications(boardId); server.setBoardAlert(boardId, !alertBoardIds.includes(boardId)).catch(fail('알림 설정을 바꾸지 못했어요.')) },
+    updateNotificationSettings: (settings) => { updateNotificationSettings(settings); server.saveSettings(settings).catch(fail('알림 설정을 저장하지 못했어요.')) },
+  }
+  // 서버 연동이 켜지면(로그인 직후 · 로그인 상태로 앱 실행) 목업 데이터를 비우고 서버 데이터로 채운다
+  useEffect(() => {
+    if (!server.live) return
+    setBoards([]); setComments([]); setNotices([])
+    server.loadNearby()
+    server.loadNotices().catch(() => undefined)
+    server.loadSettings().catch(() => undefined)
+    server.loadLevel().catch(() => undefined)
+  }, [server.live])
+  // 지도 · 게시판으로 돌아오면 주변 글을 다시 받는다
+  useEffect(() => { if (server.live && (screen === 'home' || screen === 'board')) server.loadNearby() }, [screen])
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast])
+    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, loadRanking: server.loadRanking, findSimilar: server.findSimilar,
+    ...liveActions,
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, server.live, server.boardsLoading, server.boardsError, server.level])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

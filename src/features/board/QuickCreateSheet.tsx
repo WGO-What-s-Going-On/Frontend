@@ -13,7 +13,7 @@ import { findSimilarBoards } from './similarBoards'
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
 export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
-  const { boards, createBoard, go, inRange } = useApp()
+  const { boards, createBoard, go, inRange, live, findSimilar } = useApp()
   const [category, setCategory] = useState<Category>('긴급 사고')
   const [body, setBody] = useState('')
   const [imageName, setImageName] = useState<string>()
@@ -33,10 +33,12 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
     return () => document.removeEventListener('pointerdown', close)
   }, [reachTip])
 
-  const submit = () => {
+  // 게시하기: 비슷한 진행 중 글이 있으면 먼저 보여준다 (서버 연동 중이면 서버가 판별, 실패하면 그냥 올린다)
+  const submit = async () => {
     const content = body.trim()
     if (!content) return
-    const found = findSimilarBoards(boards, { category, body: content })
+    const title = content.split(/\n|[.!?。！？]/)[0].trim().slice(0, 50) || `${category} 상황 공유`
+    const found = live ? await findSimilar({ category, title, body: content, reach }).catch(() => []) : findSimilarBoards(boards, { category, body: content })
     if (found.length) { setSimilar(found); return }
     publishNow()
   }
