@@ -42,7 +42,8 @@ async function send<T>(method: string, path: string, { body, query, auth = true 
   if (body !== undefined) headers['Content-Type'] = 'application/json'
   const session = auth ? readSession() : null
   if (session) headers.Authorization = `Bearer ${session.accessToken}`
-  const response = await fetch(url, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) })
+  // 로그인 · 갱신 응답이 WebSocket용 인증 쿠키(wgo_access_token)를 심으므로 쿠키를 함께 주고받는다 (HTTP 인증은 계속 Bearer)
+  const response = await fetch(url, { method, headers, credentials: 'include', body: body === undefined ? undefined : JSON.stringify(body) })
   if (response.status === 204) return undefined as T
   const text = await response.text()
   // 하위 서비스 응답은 빈 body나 JSON이 아닐 수 있다

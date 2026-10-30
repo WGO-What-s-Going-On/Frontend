@@ -11,6 +11,6 @@ export const kakaoEnabled = apiEnabled && KAKAO_REST_API_KEY !== ''
 export const serverFeatures = {
   // 로그인 · 약관 · 닉네임 · 내 정보: 연결됨
   users: apiEnabled,
-  // 게시글 · 댓글 · 공감 · 투표 · 위치: staging 503 (백엔드 사용자 인증 연결 전)
+  // 게시글 · 댓글 · 공감 · 투표 · 위치 · 알림: API 준비됨, 실제 로그인으로 확인한 뒤 켠다 (토큰 없이는 401)
   posts: false,
 }
