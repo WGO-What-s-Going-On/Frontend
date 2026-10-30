@@ -14,11 +14,13 @@
 | 1-2 | `GET /api/v1/notifications` 404 | `GATEWAY_ROUTE_NOT_FOUND`. 하위 경로(`/unread-count`, `/settings`)는 401로 정상 라우팅. requestId `ec3274dc-a66b-41e2-9816-bc1d3695563a` |
 | 1-3 | 카카오 REST API 키 | 프론트 인가 URL의 `client_id`에 필요. 키가 없어 실제 로그인 불가 |
 | 1-4 | Swagger 응답 스키마 누락 | `/notifications/unread-count`, `/posts/me/level`, `/posts/me/ranking`, `/posts/me/activity` |
+| 1-5 | 댓글 수정 API 없음 | 댓글 ⋯ → 수정 화면 있음, `PATCH /posts/{postId}/comments/{commentId}` 없음 |
 
 - 1-1: 약관 동의 화면에서 필수 약관 목록 조회 불가
 - 1-2: gateway allowlist 코드에는 경로 있음, staging 배포 버전 확인 필요
 - 1-3: 실제 로그인이 안 되어 토큰이 필요한 API 전체 미확인
 - 1-4: 응답 형식은 백엔드 코드로 확인해 프론트에 반영함
+- 1-5: 현재 프론트는 서버 연동 중 댓글 수정을 막아 둠
 
 ---
 
