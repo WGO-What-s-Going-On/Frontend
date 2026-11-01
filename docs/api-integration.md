@@ -10,18 +10,18 @@
 
 ## 1. 미해결
 
-| # | 항목 | 확인 결과 |
-| --- | --- | --- |
-| 1-1 | WebSocket origin 차단 | `http://localhost:5173`, `capacitor://localhost` 등 프론트 origin 모두 403 `WS_ORIGIN_FORBIDDEN` |
-| 1-2 | 카카오 redirect URI | 변경된 `https://api.136-81-245-176.sslip.io/auth/kakao/callback`은 백엔드 주소라 404 |
-| 1-3 | 카카오 REST API 키 | 프론트 인가 URL의 `client_id`에 필요 |
-| 1-4 | 테스트 계정 토큰 | 토큰 없이 호출 가능한 API는 4개(`/auth/kakao`, `/auth/refresh`, `/terms`, `/users/nickname/availability`). 나머지 전부 401 |
-| 1-5 | 약관 데이터 없음 | `GET /api/v1/terms` 200 `{"terms":[]}` |
-| 1-6 | Swagger 응답 스키마 누락 | `/notifications/unread-count`, `/posts/me/level`, `/posts/me/ranking`, `/posts/me/activity` |
-| 1-7 | 댓글 수정 API 없음 | 댓글 ⋯ → 수정 화면 있음, `PATCH /posts/{postId}/comments/{commentId}` 없음 |
+| # | 항목 | 확인 결과 | 담당 |
+| --- | --- | --- | --- |
+| 1-1 | WebSocket origin 차단 | `http://localhost:5173`, `capacitor://localhost` 등 프론트 origin 모두 403 `WS_ORIGIN_FORBIDDEN` | 도현 |
+| 1-2 | 카카오 redirect URI | 변경된 `https://api.136-81-245-176.sslip.io/auth/kakao/callback`은 백엔드 주소라 404 | 대준(설정) · 도현(재배포) |
+| 1-3 | 카카오 REST API 키 | 프론트 인가 URL의 `client_id`에 필요 | 대준 |
+| 1-4 | 테스트 계정 토큰 | 토큰 없이 호출 가능한 API는 4개(`/auth/kakao`, `/auth/refresh`, `/terms`, `/users/nickname/availability`). 나머지 전부 401 | 도현 |
+| 1-5 | 약관 데이터 없음 | `GET /api/v1/terms` 200 `{"terms":[]}` | 백엔드 |
+| 1-6 | Swagger 응답 스키마 누락 | `/notifications/unread-count`, `/posts/me/level`, `/posts/me/ranking`, `/posts/me/activity` | 백엔드 |
+| 1-7 | 댓글 수정 API 없음 | 댓글 ⋯ → 수정 화면 있음, `PATCH /posts/{postId}/comments/{commentId}` 없음 | 백엔드 |
 
-- 1-1: ws-gateway `WS_ALLOWED_ORIGINS`에 프론트 origin 추가 필요
-- 1-2: 카카오 → 프론트 `/auth/kakao/callback`(code 수신) → `POST /api/v1/auth/kakao` 구조라 redirect URI는 프론트 주소여야 함. 개발용 `http://localhost:5173/auth/kakao/callback`을 카카오 콘솔 · 백엔드 `KAKAO_REDIRECT_URI`에 동일하게 설정 후 재배포 필요
+- 1-1: ws-gateway `WS_ALLOWED_ORIGINS`에 프론트 origin 추가 필요. 2-1 쿠키 Domain 설정과 함께 재배포
+- 1-2: 카카오 → 프론트 `/auth/kakao/callback`(code 수신) → `POST /api/v1/auth/kakao` 구조라 redirect URI는 프론트 주소여야 함. 개발용 `http://localhost:5173/auth/kakao/callback`을 카카오 콘솔 · 깃헙 환경변수 `KAKAO_REDIRECT_URI`에 동일하게 설정(대준) 후 재배포(도현) 필요
 - 1-3: 백엔드 `KAKAO_REST_API_KEY`와 같은 키
 - 1-4: 카카오 로그인 해결 전 HTTP 연동 확인용 accessToken 1개 필요. 만료 30분 이상. WebSocket은 로그인 응답 쿠키가 필요해 대상 외
 - 1-5: `seed:terms` 미실행. 현재 프론트는 약관 목록이 비면 동의 저장 없이 진행
@@ -32,10 +32,10 @@
 
 ## 2. 로그인 후 확인할 것
 
-| # | 항목 | 내용 |
-| --- | --- | --- |
-| 2-1 | WebSocket 쿠키 인증 | HTTP(`api.`)와 WebSocket(`ws.`) 호스트가 달라 `wgo_access_token` 쿠키의 `Domain` 설정(`AUTH_COOKIE_DOMAIN`) 필요. localhost ↔ sslip.io는 다른 사이트라 타사 쿠키 차단 가능 |
-| 2-2 | 행정동 · 랭킹 설정 | `POST_REGION_ENABLED`, Map `KAKAO_LOCAL_REST_API_KEY` 적용 여부 |
+| # | 항목 | 내용 | 담당 |
+| --- | --- | --- | --- |
+| 2-1 | WebSocket 쿠키 인증 | HTTP(`api.`)와 WebSocket(`ws.`) 호스트가 달라 `wgo_access_token` 쿠키의 `Domain` 설정(`AUTH_COOKIE_DOMAIN`) 필요. localhost ↔ sslip.io는 다른 사이트라 타사 쿠키 차단 가능 | 도현 |
+| 2-2 | 행정동 · 랭킹 설정 | `POST_REGION_ENABLED`, Map `KAKAO_LOCAL_REST_API_KEY` 적용 여부 | 도현 |
 
 ---
 
