@@ -27,6 +27,8 @@ export const consentTerms = (termIds: string[]) => api<{ termIds: string[] }>('P
 // 서버는 지금 중복만 확인한다 (글자 규칙은 domain/nickname.ts에서 먼저 확인)
 export const checkNickname = (nickname: string) => api<{ available: boolean; reason: 'DUPLICATED' | null }>('GET', '/api/v1/users/nickname/availability', { query: { nickname }, auth: false })
 export const requestWithdrawal = () => api<unknown>('POST', '/api/v1/users/me/withdrawal')
+// 내가 받은 뱃지 (회수된 뱃지는 빠진다)
+export const getMyBadges = () => api<{ badges: { badgeId: string; code: string; name: string; description: string | null; imageKey: string | null; grantedAt: string }[] }>('GET', '/api/v1/users/me/badges').then((result) => result.badges)
 
 // 필수 약관 code → 화면 이름
 export const termLabel: Record<string, string> = { SERVICE: '서비스 이용약관', PRIVACY_COLLECTION_USE: '개인정보 수집 · 이용 동의', LOCATION: '위치정보 이용약관' }

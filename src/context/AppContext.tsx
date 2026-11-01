@@ -6,10 +6,10 @@ import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { RADIUS, mapSeedBoards } from '../features/map/mapWorld'
 import { pickCandidates } from '../features/board/commentVote'
 import { apiEnabled, kakaoEnabled } from '../api/config'
-import { ApiError } from '../api/client'
+import { ApiError, SESSION_EXPIRED_EVENT } from '../api/client'
 import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/auth'
-import { readSession } from '../api/session'
-import { consentTerms, getMe, getTerms, updateMe } from '../api/users'
+import { clearSession, readSession } from '../api/session'
+import { consentTerms, getMe, getTerms, requestWithdrawal, updateMe } from '../api/users'
 import type { MeResponse } from '../api/users'
 import { useServerSync, type RankingView } from './useServerSync'
 import type { LevelStats } from '../features/level/levels'
@@ -89,6 +89,7 @@ interface AppContextValue {
   agreeTerms: () => Promise<void>
   completeNickname: (nickname: string) => Promise<void>
   logout: () => Promise<void>
+  withdraw: () => Promise<void>
   setLocationPermission: (permission: LocationPermission) => void
   updateComment: (id: string, body: string) => void
   setInRange: (value: boolean) => void
@@ -123,6 +124,8 @@ interface AppContextValue {
   boardsError: boolean
   reloadBoards: () => void
   serverLevel: LevelStats | null
+  // 서버 연동 중 받은 뱃지 이름 (목업이면 null → 화면에서 계산)
+  serverBadges: string[] | null
   loadRanking: () => Promise<RankingView>
   findSimilar: (draft: { category: Category; title: string; body: string; reach?: Reach }) => Promise<Board[]>
 }
@@ -230,8 +233,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // 로그인 흐름: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도 (실제 카카오 인증은 백엔드 연동 때)
   // 로그인 다음 화면: 처음이면 약관 → 닉네임 → 위치 권한, 이후에는 바로 지도
   const afterLogin = (onboarded: boolean) => go(!onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home')
-  // 실제 서버 사용자 정보를 앱 사용자에 반영 (목업 글의 작성자 비교용 id는 그대로)
-  const applyMe = (me: MeResponse) => setUser((value) => ({ ...value, serverId: me.userId, nickname: me.nickname || value.nickname, realName: me.realName ?? value.realName, onboarded: !me.onboardingRequired }))
+  // 실제 서버 사용자 정보를 앱 사용자에 반영 (목업 글의 작성자 비교용 id는 그대로).
+  // 실명은 서버 값만 쓴다: 비어 있을 때 목업 실명이 남으면 화면에 보이고 저장할 때 서버로 올라간다
+  const applyMe = (me: MeResponse) => setUser((value) => ({ ...value, serverId: me.userId, nickname: me.nickname || value.nickname, realName: me.realName ?? undefined, onboarded: !me.onboardingRequired }))
   // 카카오 앱 키가 있으면 카카오 인가 화면으로, 없으면 목업 로그인 (실제 인증은 /auth/kakao/callback에서 이어진다)
   const startLogin = () => {
     if (kakaoEnabled) { window.location.assign(kakaoAuthorizeUrl()); return }
@@ -266,6 +270,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     setUser((value) => ({ ...value, nickname, onboarded: true }))
     go('location-permission')
+  }
+  // 회원 탈퇴: 서버는 30일 복구 기간을 두고 refresh 세션만 지운다(이미 받은 access 토큰은 만료 전까지 유효) → 기기의 세션도 바로 지운다
+  const withdraw = async () => {
+    if (apiEnabled && readSession()) {
+      try { await requestWithdrawal() } catch { showToast('탈퇴를 처리하지 못했어요. 다시 시도해 주세요.'); return }
+      server.stopRealtime()
+      clearSession()
+    }
+    setUser((value) => ({ ...value, serverId: undefined }))
+    showToast('회원 탈퇴 처리되었습니다.')
+    go('login')
   }
   const logout = async () => {
     server.stopRealtime()
@@ -434,7 +449,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     server.loadNotices().catch(() => undefined)
     server.loadSettings().catch(() => undefined)
     server.loadLevel().catch(() => undefined)
+    server.loadBadges().catch(() => undefined)
   }, [server.live])
+  // 토큰 갱신까지 실패하면(만료 · 다른 기기 로그아웃 · 탈퇴) 실시간을 끊고 로그인 화면으로
+  useEffect(() => {
+    const expired = () => {
+      server.stopRealtime()
+      setUser((value) => ({ ...value, serverId: undefined }))
+      showToast('로그인이 만료됐어요. 다시 로그인해 주세요.')
+      navigate(pathForScreen('login', currentBoardId), { replace: true })
+    }
+    window.addEventListener(SESSION_EXPIRED_EVENT, expired)
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expired)
+  })
   // 지도 · 게시판으로 돌아오면 주변 글을 다시 받는다
   useEffect(() => { if (server.live && (screen === 'home' || screen === 'board')) server.loadNearby() }, [screen])
   // 게시글 상세는 목록에서 열든 주소로 바로 들어오든(새로고침 포함) 상세 · 댓글 · 투표를 새로 받는다
@@ -448,11 +475,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [screen, currentBoardId, server.live])
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
-    go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
+    go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, loadRanking: server.loadRanking, findSimilar: server.findSimilar,
+    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, loadRanking: server.loadRanking, findSimilar: server.findSimilar,
     ...liveActions,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, server.live, server.boardsLoading, server.boardsError, server.level])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, server.live, server.boardsLoading, server.boardsError, server.level, server.badges])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

@@ -32,12 +32,14 @@ function LevelEmblem({ index, size = 'small', locked = false }: { index: number;
 }
 
 function BadgePanel({ stats }: { stats: LevelStats }) {
-  const { user, boards, comments } = useApp()
+  const { user, boards, comments, live, serverBadges } = useApp()
   const current = levelIndex(stats)
   const progress = levelProgress(stats)
   const myBoards = boards.filter((board) => board.authorId === user.id)
   const myComments = comments.filter((comment) => comment.authorId === user.id)
   const badges = earnedBadges({ posts: myBoards.length, comments: myComments.length, likes: myComments.reduce((sum, comment) => sum + (comment.likes ?? 0), 0), finished: myBoards.filter((board) => board.status === '종료됨').length })
+  // 서버 연동 중에는 서버가 준 뱃지만 획득으로 (불러오기 전에는 모두 미획득)
+  const shownBadges = live ? badges.map((badge) => ({ ...badge, earned: Boolean(serverBadges?.includes(badge.name)) })) : badges
   return <>
     <section className="level-hero">
       <div className="level-hero-head"><LevelEmblem index={current} size="large"/><div><small>Lv.{current + 1}</small><h2>{levels[current].name}</h2><p>{levels[current].tagline}</p></div></div>
@@ -59,7 +61,7 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
     {/* 뱃지는 화면 아래쪽(작성 버튼 위)에 붙인다: 남는 세로 공간은 칭호 단계와 뱃지 사이로 */}
     <div className="level-badges">
       <h4>뱃지</h4>
-      <ul className="badge-list">{badges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul>
+      <ul className="badge-list">{shownBadges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul>
     </div>
     {/* 뱃지와 작성 버튼 사이 여백: 화면이 낮으면 이것부터 줄어든다 */}
     <div className="level-bottom-gap" aria-hidden="true"/>

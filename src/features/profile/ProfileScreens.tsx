@@ -36,10 +36,10 @@ function ThemeSwitch({ dark, onToggle }: { dark: boolean; onToggle: () => void }
 }
 
 export function ProfileScreen() {
-  const { user, boards, comments, go, showToast, themeMode, toggleTheme, logout } = useApp()
+  const { user, boards, comments, go, themeMode, toggleTheme, logout, withdraw, live, serverLevel } = useApp()
   const [withdrawOpen, setWithdrawOpen] = useState(false)
-  const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="탈퇴 후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { showToast('회원 탈퇴 처리되었습니다.'); go('login') }}/>
-  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={levelStats(boards, comments, user.id)} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
+  const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="30일 안에 다시 로그인하면 탈퇴가 취소돼요. 이후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { setWithdrawOpen(false); withdraw() }}/>
+  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
 
 export function ActivityScreen() {

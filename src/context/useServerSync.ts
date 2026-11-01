@@ -5,7 +5,7 @@ import { currentCoords, toWorldPoint, type Coords } from '../api/geo'
 import * as posts from '../api/posts'
 import * as notifications from '../api/notifications'
 import { createRealtime, type Realtime, type RealtimeEvent } from '../api/realtime'
-import { blockUser as blockUserApi } from '../api/users'
+import { blockUser as blockUserApi, getMyBadges } from '../api/users'
 import { uploadImage } from '../api/media'
 import { timeAgo } from '../domain/time'
 import type { LevelStats } from '../features/level/levels'
@@ -33,6 +33,8 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const [boardsLoading, setBoardsLoading] = useState(false)
   const [boardsError, setBoardsError] = useState(false)
   const [level, setLevel] = useState<LevelStats | null>(null)
+  // 서버가 준 뱃지 이름 (뱃지 획득 여부는 서버 기준)
+  const [badges, setBadges] = useState<string[] | null>(null)
   const realtime = useRef<Realtime | null>(null)
   const reloadTimers = useRef(new Map<string, number>())
   const boardDeleted = useRef(onBoardDeleted)
@@ -154,6 +156,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const setBoardAlert = (postId: string, enabled: boolean) => notifications.setBoardNotification(postId, enabled)
 
   // 활동: 칭호 점수, 내 행정동 랭킹
+  const loadBadges = async () => { setBadges((await getMyBadges()).map((badge) => badge.name)) }
   const loadLevel = async () => { const result = await posts.getMyLevel(); setLevel({ participation: result.participation, agreeReceived: result.agreeReceived, picks: result.picks }) }
   const loadRanking = async (): Promise<RankingView> => {
     const region = await posts.getMyRegion(await ensureCoords())
@@ -197,9 +200,9 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const stopRealtime = () => { realtime.current?.dispose(); realtime.current = null }
 
   return {
-    live, boardsLoading, boardsError, level,
+    live, boardsLoading, boardsError, level, badges,
     locate, loadNearby, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
     editPost, setClosed, deletePost, report, block, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
-    loadLevel, loadRanking, watchBoard, stopRealtime,
+    loadLevel, loadBadges, loadRanking, watchBoard, stopRealtime,
   }
 }

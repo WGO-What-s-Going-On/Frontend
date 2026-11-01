@@ -15,6 +15,9 @@ interface RequestOptions {
   auth?: boolean
 }
 
+// 갱신까지 실패해 로그인이 끝났을 때 앱에 알리는 이벤트 (AppContext가 로그인 화면으로 보낸다)
+export const SESSION_EXPIRED_EVENT = 'wgo:session-expired'
+
 // 동시에 여러 요청이 401을 받아도 갱신은 한 번만 (이전 refreshToken 재사용 금지)
 let refreshing: Promise<boolean> | null = null
 function refreshOnce() {
@@ -27,6 +30,7 @@ function refreshOnce() {
       return true
     } catch {
       clearSession()
+      window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
       return false
     } finally {
       refreshing = null
