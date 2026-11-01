@@ -1,6 +1,8 @@
 // 백엔드 연동 설정. .env.local에 주소가 있으면 실제 서버, 없으면 지금처럼 목업으로 동작한다 (.env.example 참고)
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
 export const apiEnabled = API_BASE_URL !== ''
+// 실시간(WebSocket) 주소. HTTP와 호스트가 다르다. 비우면 실시간 없이 HTTP만 쓴다
+export const WS_URL = import.meta.env.VITE_WS_URL ?? ''
 
 export const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY ?? ''
 // 카카오 로그인 후 돌아올 주소. 백엔드 KAKAO_REDIRECT_URI · Kakao Developers 등록 주소와 똑같아야 한다

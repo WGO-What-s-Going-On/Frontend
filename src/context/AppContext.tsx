@@ -156,7 +156,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [locationPermission, setLocationPermissionState] = useState<LocationPermission>(persisted.locationPermission ?? 'unknown')
   const [themeMode, setThemeMode] = useState<ThemeMode>(persisted.themeMode === 'dark' ? 'dark' : 'light')
   const [toast, setToast] = useState('')
-  const server = useServerSync({ setBoards, setComments, setNotices, setNotificationSettings })
+  // 실시간 콜백에서 지금 보고 있는 화면을 읽는다 (콜백은 연결 때 한 번 만들어진다)
+  const view = useRef({ screen, currentBoardId })
+  view.current = { screen, currentBoardId }
+  const server = useServerSync({
+    setBoards, setComments, setNotices, setNotificationSettings,
+    onBoardDeleted: (boardId) => {
+      if (view.current.currentBoardId !== boardId || (view.current.screen !== 'detail' && view.current.screen !== 'outside')) return
+      showToast('작성자가 게시글을 삭제했어요.')
+      navigate(pathForScreen('board', boardId), { replace: true })
+    },
+  })
   // 서버 데이터는 목업 저장소에 섞지 않는다: 서버 연동 중에는 마지막 목업 글 · 댓글 · 알림을 그대로 저장해 둔다
   const mockData = useRef({ boards, comments, notices })
   if (!server.live) mockData.current = { boards, comments, notices }
@@ -257,6 +267,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     go('location-permission')
   }
   const logout = async () => {
+    server.stopRealtime()
     await logoutApi()
     setUser((value) => ({ ...value, serverId: undefined }))
     showToast('로그아웃했습니다.')
@@ -426,6 +437,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // 게시글 상세는 목록에서 열든 주소로 바로 들어오든(새로고침 포함) 상세 · 댓글 · 투표를 새로 받는다
   useEffect(() => {
     if (server.live && (screen === 'detail' || screen === 'outside') && currentBoardId) server.loadBoard(currentBoardId).catch(fail('게시글을 불러오지 못했어요.'))
+  }, [screen, currentBoardId, server.live])
+  // 상세 화면을 보는 동안만 실시간 구독 (다른 사람의 댓글 · 반응 · 종료 · 삭제를 바로 반영)
+  useEffect(() => {
+    if (!server.live || screen !== 'detail' || !currentBoardId) return
+    return server.watchBoard(currentBoardId)
   }, [screen, currentBoardId, server.live])
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,

@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
-import { serverFeatures } from '../api/config'
+import { serverFeatures, WS_URL } from '../api/config'
 import { readSession } from '../api/session'
 import { currentCoords, toWorldPoint, type Coords } from '../api/geo'
 import * as posts from '../api/posts'
 import * as notifications from '../api/notifications'
+import { createRealtime, type Realtime, type RealtimeEvent } from '../api/realtime'
 import { blockUser as blockUserApi } from '../api/users'
 import { timeAgo } from '../domain/time'
 import type { LevelStats } from '../features/level/levels'
@@ -17,18 +18,24 @@ interface Setters {
   setComments: Setter<Comment[]>
   setNotices: Setter<Notice[]>
   setNotificationSettings: Setter<NotificationSettings>
+  // 보고 있던 게시글이 다른 곳에서 삭제됐을 때 (실시간)
+  onBoardDeleted: (boardId: string) => void
 }
 
 export interface RankingView { regionName: string; items: { rank: number; name: string; picks: number; score: number; me: boolean }[]; myRank: number | null; myScore: number }
 
 // 실제 서버 연동 (serverFeatures.posts가 켜져 있고 로그인했을 때만).
 // 화면은 그대로 두고, 앱 상태(boards · comments · notices)를 서버 데이터로 채우고 사용자 동작을 서버로 보낸다.
-export function useServerSync({ setBoards, setComments, setNotices, setNotificationSettings }: Setters) {
+export function useServerSync({ setBoards, setComments, setNotices, setNotificationSettings, onBoardDeleted }: Setters) {
   const live = serverFeatures.posts && Boolean(readSession())
   const coords = useRef<Coords | null>(null)
   const [boardsLoading, setBoardsLoading] = useState(false)
   const [boardsError, setBoardsError] = useState(false)
   const [level, setLevel] = useState<LevelStats | null>(null)
+  const realtime = useRef<Realtime | null>(null)
+  const reloadTimers = useRef(new Map<string, number>())
+  const boardDeleted = useRef(onBoardDeleted)
+  boardDeleted.current = onBoardDeleted
 
   // 내 글 · 댓글은 화면에서 작성자 비교에 쓰는 'me'로 바꿔 둔다 (목업과 같은 비교 코드를 그대로 쓰기 위해)
   const mine = (authorId: string) => authorId !== '' && authorId === readSession()?.userId ? 'me' : authorId
@@ -117,7 +124,12 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   }
   const editPost = async (postId: string, title: string, body: string) => { await posts.editPost(postId, { title, content: body }); await loadBoard(postId) }
   const setClosed = async (postId: string, closed: boolean) => { await posts.setPostClosed(postId, closed); await loadBoard(postId) }
-  const deletePost = async (postId: string) => { await posts.deletePost(postId); setBoards((items) => items.filter((board) => board.id !== postId)) }
+  const deletePost = async (postId: string) => {
+    // 내 삭제 이벤트로 '삭제됐어요' 안내가 뜨지 않게 먼저 구독을 끊는다
+    realtime.current?.leave(postId)
+    await posts.deletePost(postId)
+    setBoards((items) => items.filter((board) => board.id !== postId))
+  }
   const report = (targetType: Report['targetType'], targetId: string, reason: string) => posts.reportTarget(targetType === '게시글' ? 'POST' : 'COMMENT', targetId, reason)
   const block = (userId: string) => blockUserApi(userId)
 
@@ -149,10 +161,41 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     }
   }
 
+  // 실시간: 같은 게시글 이벤트가 몰려도 상세 · 댓글 · 투표는 잠깐 모아서 한 번만 다시 읽는다
+  const scheduleReload = (postId: string) => {
+    window.clearTimeout(reloadTimers.current.get(postId))
+    reloadTimers.current.set(postId, window.setTimeout(() => { reloadTimers.current.delete(postId); loadBoard(postId).catch(() => undefined) }, 250))
+  }
+  const onRealtimeEvent = (event: RealtimeEvent) => {
+    const postId = event.boardId ?? event.postId
+    if (!postId) return
+    if (event.type === 'post.deleted') {
+      setBoards((items) => items.filter((board) => board.id !== postId))
+      setComments((items) => items.filter((comment) => comment.boardId !== postId))
+      boardDeleted.current(postId)
+      return
+    }
+    if (event.type === 'comment.deleted') {
+      const commentId = (event.comment as { commentId?: string } | undefined)?.commentId
+      if (commentId) setComments((items) => items.filter((comment) => comment.id !== commentId))
+    }
+    scheduleReload(postId)
+  }
+  // 상세 화면을 보는 동안만 그 게시판에 실시간 참여한다. 참여는 서버가 최근 위치(5분)로 판단해서 위치를 먼저 알린다
+  const watchBoard = (postId: string) => {
+    if (!live || !WS_URL) return () => undefined
+    realtime.current ??= createRealtime({ url: WS_URL, onEvent: (event) => onRealtimeEvent(event), onRejoin: scheduleReload })
+    const client = realtime.current
+    let active = true
+    locate().catch(() => undefined).then(() => { if (active) return client.join(postId) }).catch(() => undefined)
+    return () => { active = false; client.leave(postId) }
+  }
+  const stopRealtime = () => { realtime.current?.dispose(); realtime.current = null }
+
   return {
     live, boardsLoading, boardsError, level,
     locate, loadNearby, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
     editPost, setClosed, deletePost, report, block, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
-    loadLevel, loadRanking,
+    loadLevel, loadRanking, watchBoard, stopRealtime,
   }
 }
