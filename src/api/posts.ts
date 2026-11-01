@@ -89,7 +89,7 @@ export const cancelCommentReaction = (postId: string, commentId: string, reactio
 export const getVote = (postId: string) => api<VoteResponse>('GET', path(postId, '/vote'))
 export const castVote = (postId: string, commentId: string) => api<VoteResponse>('PUT', path(postId, '/vote'), { body: { commentId } })
 export const cancelVote = (postId: string) => api<void>('DELETE', path(postId, '/vote'))
-export const joinPost = (postId: string) => api<unknown>('POST', path(postId, '/participants'))
+export const joinPost = (postId: string) => api<unknown>('POST', path(postId, '/participants'), { body: {} })
 export const updateLocation = ({ latitude, longitude }: Coords) => api<{ updatedAt: string }>('PUT', '/api/v1/location', { body: { latitude, longitude } })
 export const reportTarget = (targetType: 'POST' | 'COMMENT', targetId: string, reason: string) => api<{ reportId: string; status: 'PENDING' }>('POST', '/api/v1/moderation/reports', { body: { targetType, targetId, reason } })
 
@@ -106,14 +106,14 @@ const postReactionFromCode = (code: PostReactionCode) => (Object.entries(postRea
 const commentReactionFromCode = (code: CommentReactionCode) => (Object.entries(commentReactionCode).find(([, value]) => value === code)?.[0]) as CommentReaction
 
 export function toBoard(post: PostResponse): Board {
-  const counts = post.reactionCounts
+  const counts = post.reactionCounts ?? { CURIOUS: 0, STILL_HAPPENING: 0, HELPFUL: 0, ENDED: 0 }
   return {
     id: post.postId, authorId: post.authorId === null ? '' : String(post.authorId), authorName: post.anonymous ? '익명' : post.authorNickname ?? '알 수 없음',
     anonymous: post.anonymous, category: categoryFromCode(post.category), title: post.title, body: post.content,
     distance: Math.round(post.distanceM ?? 0), createdAt: timeAgo(post.createdAt), status: post.status === 'ACTIVE' && !post.closedAt ? '실시간' : '종료됨', views: post.counters.viewCount, commentCount: post.counters.commentCount,
     reactions: { '저도 궁금해요': counts.CURIOUS, '지금도 그래요': counts.STILL_HAPPENING, '도움 됐어요': counts.HELPFUL, '이제 끝났어요': counts.ENDED },
     myReactions: post.myReaction ? [postReactionFromCode(post.myReaction)] : [],
-    imageUrl: post.media.find((media) => media.type === 'IMAGE')?.url, reach: ([150, 250, 350] as const).find((value) => value === post.radiusM),
+    imageUrl: post.media?.find((media) => media.type === 'IMAGE')?.url, reach: ([150, 250, 350] as const).find((value) => value === post.radiusM),
   }
 }
 

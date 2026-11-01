@@ -75,8 +75,8 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const createPost = async (input: { category: Category; title: string; body: string; anonymous?: boolean; reach?: Reach }) => {
     const here = await ensureCoords()
     const post = await posts.createPost({ title: input.title, content: input.body, category: input.category, latitude: here.latitude, longitude: here.longitude, radiusM: input.reach ?? 150, anonymous: input.anonymous })
-    const board = placeBoard(post)
-    upsertBoard(board)
+    // 생성 응답에는 작성자 닉네임 · 반응 수 · 사진이 없어 상세를 다시 받아 채운다
+    const board = await loadBoard(post.postId)
     return board.id
   }
 
@@ -102,7 +102,13 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     if (current !== reaction) await posts.reactToComment(postId, commentId, reaction)
     await loadBoard(postId)
   }
-  const addComment = async (postId: string, body: string, parentId?: string) => { await posts.createComment(postId, body, parentId); await loadBoard(postId) }
+  // 댓글은 게시판 참여자만 쓸 수 있어 먼저 참여한다 (재참여는 서버가 그대로 받아 준다)
+  const addComment = async (postId: string, body: string, parentId?: string) => {
+    await locate()
+    await posts.joinPost(postId)
+    await posts.createComment(postId, body, parentId)
+    await loadBoard(postId)
+  }
   const deleteComment = async (postId: string, commentId: string) => { await posts.deleteComment(postId, commentId); await loadBoard(postId) }
   // 한 사람 한 표: 내 후보를 다시 누르면 취소
   const castVote = async (postId: string, commentId: string, current?: string) => {

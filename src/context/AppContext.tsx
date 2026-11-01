@@ -377,7 +377,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const fail = (message: string) => () => showToast(message)
   const commentOf = (id: string) => comments.find((comment) => comment.id === id)
   const liveActions: Partial<AppContextValue> = !server.live ? {} : {
-    openBoard: (id) => { server.loadBoard(id).catch(fail('게시글을 불러오지 못했어요.')); openBoard(id) },
     relocate: (boardId) => {
       server.locate().then(() => server.loadBoard(boardId)).then((board) => {
         const ok = inRange && board.distance <= RADIUS
@@ -424,6 +423,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [server.live])
   // 지도 · 게시판으로 돌아오면 주변 글을 다시 받는다
   useEffect(() => { if (server.live && (screen === 'home' || screen === 'board')) server.loadNearby() }, [screen])
+  // 게시글 상세는 목록에서 열든 주소로 바로 들어오든(새로고침 포함) 상세 · 댓글 · 투표를 새로 받는다
+  useEffect(() => {
+    if (server.live && (screen === 'detail' || screen === 'outside') && currentBoardId) server.loadBoard(currentBoardId).catch(fail('게시글을 불러오지 못했어요.'))
+  }, [screen, currentBoardId, server.live])
   const value = useMemo<AppContextValue>(() => ({
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
