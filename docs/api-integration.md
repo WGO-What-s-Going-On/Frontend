@@ -13,16 +13,20 @@
 | # | 항목 | 확인 결과 |
 | --- | --- | --- |
 | 1-1 | WebSocket origin 차단 | `http://localhost:5173`, `capacitor://localhost` 등 프론트 origin 모두 403 `WS_ORIGIN_FORBIDDEN` |
-| 1-2 | 카카오 REST API 키 · redirect URI | 프론트 인가 URL의 `client_id`, `redirect_uri`에 필요. 변경된 콜백 주소 미공유 |
-| 1-3 | 약관 데이터 없음 | `GET /api/v1/terms` 200 `{"terms":[]}` |
-| 1-4 | Swagger 응답 스키마 누락 | `/notifications/unread-count`, `/posts/me/level`, `/posts/me/ranking`, `/posts/me/activity` |
-| 1-5 | 댓글 수정 API 없음 | 댓글 ⋯ → 수정 화면 있음, `PATCH /posts/{postId}/comments/{commentId}` 없음 |
+| 1-2 | 카카오 redirect URI | 변경된 `https://api.136-81-245-176.sslip.io/auth/kakao/callback`은 백엔드 주소라 404 |
+| 1-3 | 카카오 REST API 키 | 프론트 인가 URL의 `client_id`에 필요 |
+| 1-4 | 테스트 계정 토큰 | 토큰 없이 호출 가능한 API는 4개(`/auth/kakao`, `/auth/refresh`, `/terms`, `/users/nickname/availability`). 나머지 전부 401 |
+| 1-5 | 약관 데이터 없음 | `GET /api/v1/terms` 200 `{"terms":[]}` |
+| 1-6 | Swagger 응답 스키마 누락 | `/notifications/unread-count`, `/posts/me/level`, `/posts/me/ranking`, `/posts/me/activity` |
+| 1-7 | 댓글 수정 API 없음 | 댓글 ⋯ → 수정 화면 있음, `PATCH /posts/{postId}/comments/{commentId}` 없음 |
 
 - 1-1: ws-gateway `WS_ALLOWED_ORIGINS`에 프론트 origin 추가 필요
-- 1-2: 카카오 콘솔 등록 값과 백엔드 토큰 교환 값이 프론트 값과 같아야 함
-- 1-3: `seed:terms` 미실행. 현재 프론트는 약관 목록이 비면 동의 저장 없이 진행
-- 1-4: 응답 형식은 백엔드 코드로 확인해 프론트에 반영함
-- 1-5: 현재 프론트는 서버 연동 중 댓글 수정을 막아 둠
+- 1-2: 카카오 → 프론트 `/auth/kakao/callback`(code 수신) → `POST /api/v1/auth/kakao` 구조라 redirect URI는 프론트 주소여야 함. 개발용 `http://localhost:5173/auth/kakao/callback`을 카카오 콘솔 · 백엔드 `KAKAO_REDIRECT_URI`에 동일하게 설정 후 재배포 필요
+- 1-3: 백엔드 `KAKAO_REST_API_KEY`와 같은 키
+- 1-4: 카카오 로그인 해결 전 HTTP 연동 확인용 accessToken 1개 필요. 만료 30분 이상. WebSocket은 로그인 응답 쿠키가 필요해 대상 외
+- 1-5: `seed:terms` 미실행. 현재 프론트는 약관 목록이 비면 동의 저장 없이 진행
+- 1-6: 응답 형식은 백엔드 코드로 확인해 프론트에 반영함
+- 1-7: 현재 프론트는 서버 연동 중 댓글 수정을 막아 둠
 
 ---
 
