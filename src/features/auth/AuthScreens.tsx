@@ -3,6 +3,7 @@ import { Bell, MapPin } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { Button } from '../../components/ui/Button'
 import { useApp } from '../../context/AppContext'
+import { consumeKakaoState } from '../../api/auth'
 
 // 첫 화면 연출: 밤거리 사건 현장에서 반경 150m 사람들이 궁금한 걸 묻는 장면.
 // 말풍선은 차례로 떠올라 둥둥 떠 있다가 함께 사라지고, 다시 반복된다.
@@ -92,11 +93,14 @@ const usedKakaoCodes = new Set<string>()
 export function KakaoCallbackScreen() {
   const { finishKakaoLogin, go } = useApp()
   const [failed, setFailed] = useState(false)
+  // 주소의 code · state는 처음 그릴 때 한 번만 읽는다 (아래에서 주소창을 비워도 같은 값을 쓴다)
+  const [params] = useState(() => new URLSearchParams(window.location.search))
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
     const code = params.get('code')
-    if (!code || params.get('error')) { setFailed(true); return }
-    if (usedKakaoCodes.has(code)) return
+    if (code && usedKakaoCodes.has(code)) return
+    // 인가 code는 한 번만 쓰고 주소창 · 방문 기록에 남기지 않는다
+    window.history.replaceState(window.history.state, '', window.location.pathname)
+    if (!code || params.get('error') || !consumeKakaoState(params.get('state'))) { setFailed(true); return }
     usedKakaoCodes.add(code)
     finishKakaoLogin(code).catch(() => setFailed(true))
   }, [])

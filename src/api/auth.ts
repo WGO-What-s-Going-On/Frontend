@@ -12,13 +12,26 @@ interface KakaoLoginResponse {
   restoredFromWithdrawal: boolean
 }
 
-// 카카오 인가 화면 주소. 로그인 후 KAKAO_REDIRECT_URI?code=... 로 돌아온다
+// 로그인 CSRF 방지: 인가 요청마다 임의 state를 만들어 두고, 돌아온 state가 같을 때만 code를 쓴다
+const KAKAO_STATE_KEY = 'wgo-kakao-state'
+
+// 카카오 인가 화면 주소. 로그인 후 KAKAO_REDIRECT_URI?code=...&state=... 로 돌아온다
 export function kakaoAuthorizeUrl() {
+  const state = crypto.randomUUID()
+  try { sessionStorage.setItem(KAKAO_STATE_KEY, state) } catch { /* 저장 못 하면 돌아와서 state 확인에 실패해 다시 로그인 */ }
   const url = new URL('https://kauth.kakao.com/oauth/authorize')
   url.searchParams.set('client_id', KAKAO_REST_API_KEY)
   url.searchParams.set('redirect_uri', KAKAO_REDIRECT_URI)
   url.searchParams.set('response_type', 'code')
+  url.searchParams.set('state', state)
   return url.toString()
+}
+
+// 돌아온 state가 이 브라우저에서 보낸 것인지 (한 번 쓰면 지운다)
+export function consumeKakaoState(state: string | null) {
+  let saved: string | null = null
+  try { saved = sessionStorage.getItem(KAKAO_STATE_KEY); sessionStorage.removeItem(KAKAO_STATE_KEY) } catch { /* 없음 */ }
+  return Boolean(state && saved && state === saved)
 }
 
 // 인가 코드로 로그인(또는 가입). 토큰을 저장하고 온보딩이 필요한지 돌려준다
