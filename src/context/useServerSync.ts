@@ -6,6 +6,7 @@ import * as posts from '../api/posts'
 import * as notifications from '../api/notifications'
 import { createRealtime, type Realtime, type RealtimeEvent } from '../api/realtime'
 import { blockUser as blockUserApi } from '../api/users'
+import { uploadImage } from '../api/media'
 import { timeAgo } from '../domain/time'
 import type { LevelStats } from '../features/level/levels'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach, Report } from '../types/domain'
@@ -79,9 +80,11 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     return board
   }
 
-  const createPost = async (input: { category: Category; title: string; body: string; anonymous?: boolean; reach?: Reach }) => {
-    const here = await ensureCoords()
-    const post = await posts.createPost({ title: input.title, content: input.body, category: input.category, latitude: here.latitude, longitude: here.longitude, radiusM: input.reach ?? 150, anonymous: input.anonymous })
+  const createPost = async (input: { category: Category; title: string; body: string; anonymous?: boolean; reach?: Reach; imageFile?: File }) => {
+    // 사진을 먼저 올려 mediaId를 받는다 (실패하면 글도 올리지 않는다)
+    const mediaIds = input.imageFile ? [await uploadImage(input.imageFile)] : undefined
+    const here = await locate()
+    const post = await posts.createPost({ title: input.title, content: input.body, category: input.category, latitude: here.latitude, longitude: here.longitude, radiusM: input.reach ?? 150, anonymous: input.anonymous, mediaIds })
     // 생성 응답에는 작성자 닉네임 · 반응 수 · 사진이 없어 상세를 다시 받아 채운다
     const board = await loadBoard(post.postId)
     return board.id
@@ -110,10 +113,11 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     await loadBoard(postId)
   }
   // 댓글은 게시판 참여자만 쓸 수 있어 먼저 참여한다 (재참여는 서버가 그대로 받아 준다)
-  const addComment = async (postId: string, body: string, parentId?: string) => {
+  const addComment = async (postId: string, body: string, parentId?: string, imageFile?: File) => {
+    const mediaIds = imageFile ? [await uploadImage(imageFile)] : undefined
     await locate()
     await posts.joinPost(postId)
-    await posts.createComment(postId, body, parentId)
+    await posts.createComment(postId, body, parentId, mediaIds)
     await loadBoard(postId)
   }
   const deleteComment = async (postId: string, commentId: string) => { await posts.deleteComment(postId, commentId); await loadBoard(postId) }

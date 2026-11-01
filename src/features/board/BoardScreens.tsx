@@ -22,6 +22,8 @@ import { EditBoardSheet } from './EditBoardSheet'
 import { FeedItem } from './FeedItem'
 import { AlbumTile } from './AlbumTile'
 import { CommentVoteSection } from './CommentVoteSection'
+import { BoardImage } from './BoardImage'
+import { imageProblem } from '../../api/media'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 type BoardSort = '거리' | '최신' | '활발' | '참여 가능'
@@ -220,9 +222,12 @@ function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, 
 export function BoardDetailScreen() {
   // 다른 화면에서 게시글을 열고 들어왔을 때만 들어오는 애니메이션을 쓴다
   const entering = Boolean((useLocation().state as { enter?: boolean } | null)?.enter)
-  const { screen, currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers, relocate } = useApp()
+  const { screen, currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers, relocate, showToast } = useApp()
   const [body, setBody] = useState('')
   const [commentImageUrl, setCommentImageUrl] = useState('')
+  const [commentFile, setCommentFile] = useState<File>()
+  // 서버에 보내는 중에는 다시 누르지 못하게 (사진 업로드가 길어도 같은 댓글이 두 번 올라가지 않게)
+  const [sending, setSending] = useState(false)
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
   const [editing, setEditing] = useState<Comment | null>(null)
   const [menu, setMenu] = useState(false)
@@ -243,12 +248,24 @@ export function BoardDetailScreen() {
   if (!board) return null
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))
   const submit = () => {
-    if (!body.trim() && !commentImageUrl) return
-    if (editing) { updateComment(editing.id, body.trim()); setEditing(null) }
-    else { addComment(body.trim(), replyTo?.parentId || replyTo?.id, commentImageUrl || undefined); setReplyTo(null); setVisibleComments(boardComments.length + 1) }
-    setBody(''); setCommentImageUrl('')
+    if ((!body.trim() && !commentImageUrl) || sending) return
+    if (editing) { updateComment(editing.id, body.trim()); setEditing(null); setBody(''); return }
+    const draft = { text: body.trim(), imageUrl: commentImageUrl, file: commentFile, replyTo }
+    const sent = addComment(draft.text, replyTo?.parentId || replyTo?.id, commentImageUrl || undefined, commentFile)
+    setReplyTo(null); setVisibleComments(boardComments.length + 1)
+    setBody(''); setCommentImageUrl(''); setCommentFile(undefined)
+    if (!sent) return
+    // 서버 연동: 실패하면 쓰던 내용을 그대로 되돌려 다시 보낼 수 있게
+    setSending(true)
+    sent.catch(() => { setBody(draft.text); setCommentImageUrl(draft.imageUrl); setCommentFile(draft.file); setReplyTo(draft.replyTo) }).finally(() => setSending(false))
   }
-  const addPhoto = (file?: File) => { if (file) setCommentImageUrl(URL.createObjectURL(file)) }
+  const addPhoto = (file?: File) => {
+    if (!file) return
+    const problem = imageProblem(file)
+    if (problem) { showToast(problem); return }
+    setCommentFile(file)
+    setCommentImageUrl(URL.createObjectURL(file))
+  }
   const startComment = (comment: Comment) => { setEditing(null); setReplyTo(comment); requestAnimationFrame(() => commentInputRef.current?.focus()) }
   // 내 댓글 수정 (PST-F08): 입력창에 기존 내용을 넣고 수정 모드로
   const startEdit = (comment: Comment) => { setReplyTo(null); setEditing(comment); setBody(comment.body); requestAnimationFrame(() => commentInputRef.current?.focus()) }
@@ -260,7 +277,7 @@ export function BoardDetailScreen() {
   const outOfRange = !inRange || board.distance > RADIUS
   const canParticipate = !outOfRange && board.status === '실시간'
   const readOnlyBar = outOfRange ? <div className="outside-bottom"><div className="outside-readonly-bar"><Lock size={16}/><span>150m 안에서만 댓글 가능</span></div></div> : null
-  const commentComposer = canParticipate ? <div className="detail-comment-input">{editing ? <div className="replying"><span>댓글 수정 중</span><button onClick={cancelCompose}>취소</button></div> : replyTo && <div className="replying reply-to"><span><b>@{replyTo.authorName}</b> 님에게 답글</span><button onClick={() => { setReplyTo(null); commentInputRef.current?.focus() }}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => setCommentImageUrl('')} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><IconButton className="comment-photo-add" label="댓글에 사진 첨부" onClick={() => commentFileRef.current?.click()}><Camera size={20}/></IconButton><span className="composer-input-wrap"><input ref={commentInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder={replyTo && !editing ? '답글을 입력하세요' : '댓글을 입력하세요'} aria-label={replyTo && !editing ? `${replyTo.authorName}님에게 답글` : '댓글'}/></span><IconButton className="comment-submit" label={editing ? '댓글 수정' : '댓글 등록'} onClick={submit} disabled={!body.trim() && !commentImageUrl}><Send size={19}/></IconButton></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => addPhoto(event.target.files?.[0])}/></div> : null
+  const commentComposer = canParticipate ? <div className="detail-comment-input">{editing ? <div className="replying"><span>댓글 수정 중</span><button onClick={cancelCompose}>취소</button></div> : replyTo && <div className="replying reply-to"><span><b>@{replyTo.authorName}</b> 님에게 답글</span><button onClick={() => { setReplyTo(null); commentInputRef.current?.focus() }}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => { setCommentImageUrl(''); setCommentFile(undefined) }} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><IconButton className="comment-photo-add" label="댓글에 사진 첨부" onClick={() => commentFileRef.current?.click()}><Camera size={20}/></IconButton><span className="composer-input-wrap"><input ref={commentInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder={replyTo && !editing ? '답글을 입력하세요' : '댓글을 입력하세요'} aria-label={replyTo && !editing ? `${replyTo.authorName}님에게 답글` : '댓글'}/></span><IconButton className="comment-submit" label={editing ? '댓글 수정' : '댓글 등록'} onClick={submit} disabled={(!body.trim() && !commentImageUrl) || sending}><Send size={19}/></IconButton></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => { addPhoto(event.target.files?.[0]); event.target.value = '' }}/></div> : null
   return <AppShell nav={false} contentClassName={`board-detail-screen ${entering ? 'detail-enter' : ''}`} shellClassName={entering ? 'detail-enter-shell' : ''} bottomContent={<>{commentComposer ?? readOnlyBar}
     {editOpen && <EditBoardSheet board={board} canEdit={!outOfRange} onClose={closeEdit}/>}
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="삭제한 게시글은 다시 볼 수 없어요." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
@@ -273,7 +290,7 @@ export function BoardDetailScreen() {
       <div className="detail-title-row"><h1 title={board.title}>{board.title}</h1><span className="detail-title-menu-wrap"><IconButton className="detail-title-menu" label="게시글 메뉴" onClick={() => setMenu(!menu)} expanded={menu}><MoreHorizontal size={18}/></IconButton>{menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => { setEditOpen(true); setMenu(false) }}>수정</button><button onClick={() => { setConfirm('finish'); setMenu(false) }}>종료</button><button onClick={() => { setConfirm('delete'); setMenu(false) }}>삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>차단</button></>}</div>}</span></div>
       <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span>{board.edited && <span className="detail-edited">수정됨</span>}<span><MapPin size={12}/>{board.distance}m</span><span>조회 {board.views}</span></div>
       <p className="detail-body">{board.body}</p>
-      {(board.imagePlaceholder || board.imageName) && <div className="board-image-placeholder detail-image">[이미지]</div>}
+      <BoardImage board={board} variant="detail-image" block/>
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={canParticipate} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
     </article>
     <CommentVoteSection board={board} canChoose={canParticipate}/>

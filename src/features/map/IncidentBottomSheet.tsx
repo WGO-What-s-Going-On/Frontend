@@ -3,6 +3,7 @@ import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
 import { categoryLabel } from '../../domain/labels'
 import type { Board } from '../../types/domain'
+import { BoardImage } from '../board/BoardImage'
 
 interface IncidentBottomSheetProps {
   board: Board
@@ -20,7 +21,7 @@ export function IncidentBottomSheet({ board, onClose, onOpen }: IncidentBottomSh
       <span className="preview-road"/>
       <span className="preview-marker"><MapPin size={20}/></span>
     </div>
-    {(board.imagePlaceholder || board.imageName) && <div className="board-image-placeholder sheet-image">[이미지]</div>}
+    <BoardImage board={board} variant="sheet-image" block/>
     <span className="sheet-category" data-category={board.category}>{categoryLabel[board.category]}</span>
     <h2>{board.title}</h2>
     <p>{board.body}</p>

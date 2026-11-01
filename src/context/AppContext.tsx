@@ -16,7 +16,7 @@ import type { LevelStats } from '../features/level/levels'
 import { myCommentReactions, myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
 
-interface BoardInput { category: Category; title: string; body: string; imageName?: string; anonymous?: boolean; reach?: Reach }
+interface BoardInput { category: Category; title: string; body: string; imageName?: string; imageFile?: File; anonymous?: boolean; reach?: Reach }
 export type LocationPermission = 'unknown' | 'granted' | 'denied'
 // 화면 모드: 라이트(기본) · 다크
 export type ThemeMode = 'light' | 'dark'
@@ -93,13 +93,14 @@ interface AppContextValue {
   updateComment: (id: string, body: string) => void
   setInRange: (value: boolean) => void
   relocate: (boardId: string) => void
-  createBoard: (input: BoardInput) => void
+  // 서버 연동 중에는 올리기가 끝날 때까지 기다릴 수 있게 Promise를 돌려준다 (실패하면 reject)
+  createBoard: (input: BoardInput) => void | Promise<void>
   updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous' | 'imageName'>) => void
   deleteBoard: (id: string) => void
   finishBoard: (id: string) => void
   reopenBoard: (id: string) => void
   reactToBoard: (id: string, reaction: PostReaction) => void
-  addComment: (body: string, parentId?: string, imageUrl?: string) => void
+  addComment: (body: string, parentId?: string, imageUrl?: string, imageFile?: File) => void | Promise<void>
   deleteComment: (id: string) => void
   markCommentRead: (id: string) => void
   reactToComment: (id: string, reaction: CommentReaction) => void
@@ -386,6 +387,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   // 실제 서버 연동: 켜져 있으면 아래 동작은 서버로 보내고, 결과를 다시 받아 화면에 반영한다 (목업 동작을 덮어쓴다)
   const fail = (message: string) => () => showToast(message)
+  // 사진 문제(형식 · 크기 · 업로드 실패)는 그 내용을 그대로 안내한다
+  const mediaMessage = (error: unknown) => error instanceof ApiError && error.code.startsWith('MEDIA_') ? error.message : null
   const commentOf = (id: string) => comments.find((comment) => comment.id === id)
   const liveActions: Partial<AppContextValue> = !server.live ? {} : {
     relocate: (boardId) => {
@@ -395,20 +398,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         showToast(ok ? '150m 안이에요. 이제 참여할 수 있어요' : `아직 범위 밖이에요 · ${board.distance}m`)
       }).catch(fail('위치를 확인하지 못했어요.'))
     },
-    createBoard: (input) => {
-      server.createPost(input).then((id) => {
-        setCurrentBoardId(id)
-        navigate(pathForScreen('detail', id), { state: { enter: true } })
-        showToast('게시판이 생성되었습니다.')
-      }).catch(fail('글을 올리지 못했어요. 다시 시도해 주세요.'))
-    },
+    createBoard: (input) => server.createPost(input).then((id) => {
+      setCurrentBoardId(id)
+      navigate(pathForScreen('detail', id), { state: { enter: true } })
+      showToast('게시판이 생성되었습니다.')
+    }).catch((error) => { showToast(mediaMessage(error) ?? '글을 올리지 못했어요. 다시 시도해 주세요.'); throw error }),
     // 서버는 제목 · 본문만 수정할 수 있다 (카테고리 · 작성자 표시 · 사진은 그대로)
     updateBoard: (id, input) => { server.editPost(id, input.title, input.body).then(() => showToast('게시글을 수정했습니다.')).catch(fail('게시글을 수정하지 못했어요.')) },
     deleteBoard: (id) => { server.deletePost(id).then(() => { showToast('게시글을 삭제했습니다.'); go('board') }).catch(fail('게시글을 삭제하지 못했어요.')) },
     finishBoard: (id) => { server.setClosed(id, true).then(() => showToast('게시판을 종료했습니다.')).catch(fail('게시판을 종료하지 못했어요.')) },
     reopenBoard: (id) => { server.setClosed(id, false).then(() => showToast('게시판을 다시 열었어요.')).catch(fail('게시판을 다시 열지 못했어요.')) },
     reactToBoard: (id, reaction) => { const board = boards.find((item) => item.id === id); server.reactToPost(id, reaction, board ? myReactions(board)[0] : undefined).catch(fail('반응을 남기지 못했어요.')) },
-    addComment: (body, parentId) => { server.addComment(currentBoardId, body, parentId).then(() => showToast('댓글을 등록했습니다.')).catch(fail('댓글을 등록하지 못했어요.')) },
+    addComment: (body, parentId, _imageUrl, imageFile) => server.addComment(currentBoardId, body, parentId, imageFile)
+      .then(() => showToast('댓글을 등록했습니다.'))
+      .catch((error) => { showToast(mediaMessage(error) ?? '댓글을 등록하지 못했어요.'); throw error }),
     updateComment: () => showToast('댓글 수정은 아직 지원하지 않아요.'),
     deleteComment: (id) => { const comment = commentOf(id); if (comment) server.deleteComment(comment.boardId, id).catch(fail('댓글을 삭제하지 못했어요.')) },
     reactToComment: (id, reaction) => { const comment = commentOf(id); if (comment) server.reactToComment(comment.boardId, id, reaction, myCommentReactions(comment)[0]).catch(fail('공감을 남기지 못했어요.')) },

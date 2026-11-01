@@ -7,6 +7,7 @@ import { isHotBoard, myReactions } from '../../types/domain'
 import type { Board, Comment, PostReaction } from '../../types/domain'
 import { voteStatus } from './commentVote'
 import { RADIUS } from '../map/mapWorld'
+import { BoardImage } from './BoardImage'
 
 // 읽기 전용(150m 밖) 표시: 선 아이콘보다 작고 단단해 보이는 채운 자물쇠
 export function SolidLock({ size = 13, label = '읽기 전용' }: { size?: number; label?: string }) {
@@ -42,7 +43,7 @@ export function FeedItem({ board, comments }: { board: Board; comments: Comment[
       <span className="feed-meta"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, commentCount) && <b className="board-tag tag-hot">HOT</b>}{!canReact && <SolidLock/>}</span>
       <strong className="feed-title">{board.title}</strong>
       <span className="feed-body">{board.body}</span>
-      {(board.imagePlaceholder || board.imageName) && <span className="board-image-placeholder feed-image">[이미지]</span>}
+      <BoardImage board={board} variant="feed-image"/>
     </button>
     {/* 반응 버튼(무엇을 눌렀든 이모티콘 그대로, 내가 반응했으면 파랗게) + 반응 합계, 댓글 수. 버튼을 누르면 반응 판 */}
     <div ref={actionsRef} className="feed-actions">

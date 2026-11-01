@@ -10,8 +10,9 @@ import { AuthorToggle } from './AuthorToggle'
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
 // 게시글 수정: 글쓰기 시트와 같은 모양으로 상세 화면 위에 바로 열린다. 카테고리 · 제목 · 내용 · 사진 · 작성자 표시를 한 화면에서 고친다.
+// 실제 서버는 제목 · 내용만 고칠 수 있어서 서버 연동 중에는 그 둘만 보여준다
 export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canEdit: boolean; onClose: () => void }) {
-  const { updateBoard } = useApp()
+  const { updateBoard, live } = useApp()
   const [category, setCategory] = useState<Category>(board.category)
   const [title, setTitle] = useState(board.title)
   const [body, setBody] = useState(board.body)
@@ -31,15 +32,15 @@ export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canE
       <div className="quick-compose-grabber"/>
       <header><h2>게시글 수정</h2><IconButton className="quick-compose-close" label="닫기" onClick={onClose}><X size={21}/></IconButton></header>
       {!canEdit ? <div className="quick-compose-blocked"><strong>지금 위치에서는 수정할 수 없어요</strong><p>150m 참여 범위 안에서 다시 시도해 주세요.</p><button onClick={onClose}>닫기</button></div> : <>
-        <div className="quick-category-grid">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} data-category={item} onClick={() => setCategory(item)}>{categoryLabel[item]}</button>)}</div>
+        {!live && <div className="quick-category-grid">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} data-category={item} onClick={() => setCategory(item)}>{categoryLabel[item]}</button>)}</div>}
         <label className="quick-field"><span>제목</span><input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={50}/></label>
         <label className="quick-field quick-detail-field"><span>내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={500}/></label>
-        <div className="edit-photo-row">
+        {!live && <><div className="edit-photo-row">
           <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>
           {imageName && <IconButton className="edit-photo-remove" label="첨부 사진 빼기" onClick={() => { setImageName(undefined); if (fileRef.current) fileRef.current.value = '' }}><X size={16}/></IconButton>}
         </div>
         <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name ?? imageName)}/>
-        <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>
+        <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div></>}
         <Button className="quick-submit" onClick={save} disabled={!changed || !title.trim() || !body.trim()}>수정 완료</Button>
       </>}
     </section>
