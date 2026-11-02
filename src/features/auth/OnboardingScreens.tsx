@@ -8,25 +8,35 @@ import { nicknameError } from '../../domain/nickname'
 import { apiEnabled } from '../../api/config'
 import { checkNickname } from '../../api/users'
 
-// 필수 약관 (USR-F02)
+// 필수 약관 (USR-F02). 본문은 public/terms의 정적 페이지 (서버 약관 documentUrl도 같은 문서를 가리킨다)
 const terms = [
-  { id: 'service', label: '서비스 이용약관' },
-  { id: 'privacy', label: '개인정보 처리방침' },
-  { id: 'location', label: '위치정보 이용약관' },
+  { id: 'service', label: '서비스 이용약관', url: '/terms/service.html' },
+  { id: 'privacy', label: '개인정보 수집 · 이용 동의', url: '/terms/privacy.html' },
+  { id: 'location', label: '위치정보 이용약관', url: '/terms/location.html' },
 ] as const
+type TermDoc = (typeof terms)[number]
+
+// 약관 본문 보기: 새 창 대신 앱 안에서 전체 화면으로 띄운다 (iOS 앱 웹뷰에서도 같은 동작). 닫기는 엄지 닿는 아래쪽
+function TermDocumentSheet({ term, onClose }: { term: TermDoc; onClose: () => void }) {
+  return <div className="term-document" role="dialog" aria-modal="true" aria-label={term.label}>
+    <iframe src={term.url} title={term.label}/>
+    <div className="term-document-bottom"><Button className="primary" onClick={onClose}>확인</Button></div>
+  </div>
+}
 
 export function TermsScreen() {
   const { agreeTerms, go } = useApp()
   const [agreed, setAgreed] = useState<string[]>([])
+  const [reading, setReading] = useState<TermDoc | null>(null)
   const allAgreed = agreed.length === terms.length
   const toggle = (id: string) => setAgreed((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items, id])
-  return <AppShell nav={false} contentClassName="onboarding-screen">
+  return <AppShell nav={false} contentClassName="onboarding-screen" bottomContent={reading && <TermDocumentSheet term={reading} onClose={() => setReading(null)}/>}>
     <BackHeader title="" onBack={() => go('login')}/>
     <h1 className="onboarding-title">서비스 이용을 위해<br/>약관에 동의해 주세요</h1>
     <button className={`terms-all ${allAgreed ? 'checked' : ''}`} onClick={() => setAgreed(allAgreed ? [] : terms.map((term) => term.id))} aria-pressed={allAgreed}><span className="terms-check"><Check size={16}/></span>전체 동의</button>
     <ul className="terms-list">{terms.map((term) => <li key={term.id}>
       <button className={`terms-item ${agreed.includes(term.id) ? 'checked' : ''}`} onClick={() => toggle(term.id)} aria-pressed={agreed.includes(term.id)}><span className="terms-check"><Check size={14}/></span><span><b>[필수]</b> {term.label}</span></button>
-      <ChevronRight size={18} aria-hidden="true"/>
+      <button className="terms-view" onClick={() => setReading(term)} aria-label={`${term.label} 보기`}><ChevronRight size={18}/></button>
     </li>)}</ul>
     <div className="onboarding-bottom"><Button className="primary" onClick={agreeTerms} disabled={!allAgreed}>다음</Button></div>
   </AppShell>
