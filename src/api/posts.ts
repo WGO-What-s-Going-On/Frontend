@@ -59,7 +59,8 @@ export interface VoteResponse {
   status: 'PENDING' | 'OPEN' | 'CLOSED' | 'CANCELLED' | 'NONE'
   candidates: { commentId: string; content: string; votes: number }[]
   winner: { commentId: string; content: string; votes: number } | null
-  mySelection: { commentId: string } | null
+  // 내가 고른 후보 댓글 ID (문자열). winner는 후보 객체
+  mySelection: string | null
 }
 
 import type { Coords } from './geo'
@@ -122,6 +123,8 @@ export function toBoard(post: PostResponse): Board {
     distance: Math.round(post.distanceM ?? 0), createdAt: timeAgo(post.createdAt), status: post.status === 'ACTIVE' && !post.closedAt ? '실시간' : '종료됨', views: post.counters.viewCount, commentCount: post.counters.commentCount,
     reactions: { '저도 궁금해요': counts.CURIOUS, '지금도 그래요': counts.STILL_HAPPENING, '도움 됐어요': counts.HELPFUL, '이제 끝났어요': counts.ENDED },
     myReactions: post.myReaction ? [postReactionFromCode(post.myReaction)] : [],
+    // 투표 상태는 상세에서 GET /vote로 받는다. 그 전에는 목업 규칙(작성 시각 · 댓글 수)으로 추측하지 않게 '없음'
+    voteStatus: 'NONE',
     imageUrl: post.media?.find((media) => media.type === 'IMAGE')?.url, reach: ([150, 250, 350] as const).find((value) => value === post.radiusM),
   }
 }
@@ -143,6 +146,6 @@ export function toBoardVote(vote: VoteResponse | null): Pick<Board, 'vote' | 'vo
   const shown = vote.status === 'OPEN' || vote.status === 'CLOSED' || vote.status === 'CANCELLED'
   return {
     voteStatus: vote.status,
-    vote: shown ? { candidates: vote.candidates.map(({ commentId, content, votes }) => ({ commentId, content, votes })), mine: vote.mySelection?.commentId, cancelled: vote.status === 'CANCELLED' } : undefined,
+    vote: shown ? { candidates: vote.candidates.map(({ commentId, content, votes }) => ({ commentId, content, votes })), mine: vote.mySelection ?? undefined, cancelled: vote.status === 'CANCELLED' } : undefined,
   }
 }

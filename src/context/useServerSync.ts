@@ -39,6 +39,8 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   // 안 읽은 알림 수 (목록은 20개씩이라 서버 집계를 따로 받는다)
   const [unreadCount, setUnreadCount] = useState<number | null>(null)
   const realtime = useRef<Realtime | null>(null)
+  // 상세를 연 게시글: 주변 목록을 새로 받아도 목록 밖이면 남겨 둔다 (멀리 있는 글 상세 · 투표 정보가 사라지지 않게)
+  const opened = useRef(new Set<string>())
   const reloadTimers = useRef(new Map<string, number>())
   const boardDeleted = useRef(onBoardDeleted)
   boardDeleted.current = onBoardDeleted
@@ -50,6 +52,8 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     return { ...board, authorId: mine(board.authorId), location: post.locationSnapshot, position: coords.current ? toWorldPoint(coords.current, post.locationSnapshot) : undefined }
   }
   const placeComment = (comment: posts.CommentResponse): Comment => { const mapped = posts.toComment(comment); return { ...mapped, authorId: mine(mapped.authorId) } }
+  // 목록 · 활동 · 지역 조회 응답에는 투표 정보가 없어 상세에서 받아 둔 값을 이어 붙인다
+  const keepVote = (items: Board[], board: Board) => { const old = items.find((item) => item.id === board.id); return old ? { ...board, vote: old.vote, voteStatus: old.voteStatus } : board }
   const upsertBoard = (board: Board) => setBoards((items) => items.some((item) => item.id === board.id) ? items.map((item) => item.id === board.id ? { ...item, ...board } : item) : [board, ...items])
 
   // 위치를 잡고 서버에 알린다 (게시판 참여 · 글쓰기 위치 인가는 서버가 최근 위치로 판단)
@@ -68,7 +72,13 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     try {
       const here = await locate()
       const result = await posts.getNearbyPosts({ ...here, radiusM: 350, sort: 'distance', limit: 100 })
-      setBoards(result.posts.map(placeBoard))
+      const fresh = result.posts.map(placeBoard)
+      const freshIds = new Set(fresh.map((board) => board.id))
+      // 목록 응답에는 투표 정보가 없어서, 상세에서 받아 둔 투표 상태는 그대로 이어 붙인다
+      setBoards((items) => [
+        ...fresh.map((board) => keepVote(items, board)),
+        ...items.filter((item) => !freshIds.has(item.id) && opened.current.has(item.id)),
+      ])
     } catch { setBoardsError(true) } finally { setBoardsLoading(false) }
   }
 
@@ -78,12 +88,13 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     const target = fromWorldPoint(here, center)
     const result = await posts.getNearbyPosts({ ...target, radiusM: 350, sort: 'distance', limit: 100 })
     const found = result.posts.map((post) => ({ ...placeBoard(post), distance: Math.round(distanceMeters(here, post.locationSnapshot)) }))
-    setBoards((items) => [...items.filter((item) => !found.some((board) => board.id === item.id)), ...found])
+    setBoards((items) => [...items.filter((item) => !found.some((board) => board.id === item.id)), ...found.map((board) => keepVote(items, board))])
     return found.length
   }
 
   // 게시글 하나: 상세 · 댓글 · 투표를 함께 새로 받는다
   const loadBoard = async (postId: string) => {
+    opened.current.add(postId)
     const [post, comments, vote] = await Promise.all([
       posts.getPost(postId, coords.current ?? undefined),
       posts.getComments(postId),
@@ -147,6 +158,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     // 내 삭제 이벤트로 '삭제됐어요' 안내가 뜨지 않게 먼저 구독을 끊는다
     realtime.current?.leave(postId)
     await posts.deletePost(postId)
+    opened.current.delete(postId)
     setBoards((items) => items.filter((board) => board.id !== postId))
   }
   const report = (target: { postId: string; commentId?: string }, reason: string) => posts.reportTarget(target, reason)
@@ -194,7 +206,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     const all = [...new Set(items.map((item) => item.postId))].slice(0, 30)
     const fetched = await Promise.all(all.map((postId) => posts.getPost(postId, coords.current ?? undefined).then(placeBoard).catch(() => null)))
     const found = fetched.filter((board): board is Board => board !== null)
-    setBoards((list) => [...list.filter((item) => !found.some((board) => board.id === item.id)), ...found])
+    setBoards((list) => [...list.filter((item) => !found.some((board) => board.id === item.id)), ...found.map((board) => keepVote(list, board))])
     return { written: [...activity.written], commented: [...activity.commented], reacted: [...activity.reacted] }
   }
 
@@ -220,6 +232,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     const postId = event.boardId ?? event.postId
     if (!postId) return
     if (event.type === 'post.deleted') {
+      opened.current.delete(postId)
       setBoards((items) => items.filter((board) => board.id !== postId))
       setComments((items) => items.filter((comment) => comment.boardId !== postId))
       boardDeleted.current(postId)
