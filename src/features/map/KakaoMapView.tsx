@@ -83,7 +83,8 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
 
   useEffect(() => { currentCoords().then(setMe).catch(onFail) }, [])
 
-  // 지도 만들기 + 반경 원 + 지도 빈 곳 탭 / 끌기 끝
+  // 지도 만들기 + 반경 원 + 지도 빈 곳 탭 / 끌기 끝. 처음 위치를 받았을 때 한 번만 (이후 위치 변화는 오버레이 · 원만 옮긴다)
+  const located = me !== null
   useEffect(() => {
     if (!me || !frameRef.current) return
     let cancelled = false
@@ -93,9 +94,17 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
       const created = new maps.Map(frameRef.current, { center, level: START_LEVEL })
       circle.current = new maps.Circle({ center, radius: RADIUS, strokeWeight: 2, strokeColor: '#2b5ce6', strokeOpacity: .45, fillColor: '#2b5ce6', fillOpacity: .07 })
       circle.current.setMap(created)
-      // 화면 크기가 바뀌면(시트 · 창 크기) 지도도 다시 맞춘다
-      resize.current = new ResizeObserver(() => created.relayout())
-      resize.current.observe(frameRef.current)
+      // 지도 아래 끝을 하단 탭 위로 맞춘다: 카카오 로고(이용 약관상 가리면 안 됨)가 탭에 덮이지 않게.
+      // 탭 높이는 기기 아래 여백(safe area)에 따라 달라서 실제 높이를 잰다. 크기가 바뀌면 지도도 다시 맞춘다
+      const fit = () => {
+        const frame = frameRef.current
+        const nav = frame?.closest('.map-shell')?.querySelector<HTMLElement>('.bottom-nav')
+        if (frame) frame.style.bottom = `${nav?.offsetHeight ?? 0}px`
+        created.relayout()
+      }
+      fit()
+      resize.current = new ResizeObserver(fit)
+      resize.current.observe(frameRef.current.parentElement ?? frameRef.current)
       maps.event.addListener(created, 'click', () => latest.current.onSelect(undefined))
       maps.event.addListener(created, 'dragend', () => {
         const position = created.getCenter()
@@ -104,7 +113,7 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
       setMap({ maps, map: created })
     }).catch(() => { if (!cancelled) onFail() })
     return () => { cancelled = true }
-  }, [me])
+  }, [located])
 
   // 오버레이: 내 위치 + 게시판마다 하나. 없어진 게시판은 지도에서 뗀다
   useEffect(() => {
@@ -145,7 +154,12 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
 
   const zoomBy = (step: number) => { if (map) map.map.setLevel(Math.min(10, Math.max(1, map.map.getLevel() + step)), { animate: true }) }
   const locate = () => {
-    currentCoords().then((next) => { setMe(next); map?.map.panTo(new map.maps.LatLng(next.latitude, next.longitude)) }).catch(() => undefined)
+    currentCoords().then((next) => {
+      setMe(next)
+      map?.map.panTo(new map.maps.LatLng(next.latitude, next.longitude))
+      // 내 위치로 돌아오면 '이 지역에서 다시 찾기'를 닫는다
+      latest.current.onMoved?.(toWorldPoint(next, next))
+    }).catch(() => undefined)
   }
 
   return <div className="map-canvas kakao-map-canvas">
