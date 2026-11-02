@@ -24,3 +24,13 @@ export function clearSession() {
 export function sessionFromTokens(tokens: { accessToken: string; refreshToken: string; expiresIn: number }, userId: string): Session {
   return { accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, expiresAt: Date.now() + tokens.expiresIn * 1000, userId }
 }
+
+// 개발용 테스트 토큰: 카카오 로그인이 열리기 전에 .env.local의 VITE_DEV_ACCESS_TOKEN으로 세션을 채운다.
+// 개발 서버(npm run dev)에서만 동작하고 배포 빌드 · iOS 앱 번들에는 들어가지 않는다
+if (import.meta.env.DEV && import.meta.env.VITE_DEV_ACCESS_TOKEN && !readSession()) {
+  try {
+    const token = import.meta.env.VITE_DEV_ACCESS_TOKEN
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))) as { sub: string; exp: number }
+    saveSession({ accessToken: token, refreshToken: '', expiresAt: payload.exp * 1000, userId: payload.sub })
+  } catch { /* 형식이 틀린 토큰은 무시하고 목업으로 */ }
+}

@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_SERVER_POSTS?: string
   // 브라우저 위치를 못 받을 때 쓰는 개발용 위치 "위도,경도"
   readonly VITE_DEV_LATLNG?: string
+  // 개발 서버 전용 테스트 계정 토큰 (.env.local에만, 커밋 금지)
+  readonly VITE_DEV_ACCESS_TOKEN?: string
 }
 
 interface ImportMeta {
