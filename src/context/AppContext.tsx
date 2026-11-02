@@ -126,6 +126,8 @@ interface AppContextValue {
   serverLevel: LevelStats | null
   // 서버 연동 중 받은 뱃지 이름 (목업이면 null → 화면에서 계산)
   serverBadges: string[] | null
+  // 서버 연동 중 안 읽은 알림 수 (목업이면 null → 목록에서 셈)
+  serverUnread: number | null
   loadRanking: () => Promise<RankingView>
   findSimilar: (draft: { category: Category; title: string; body: string; reach?: Reach }) => Promise<Board[]>
   // 서버 연동 중 지도 옮긴 곳 주변 글 다시 받기 (찾은 개수)
@@ -440,9 +442,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // 투표 후보는 서버가 고른다
     startVote: () => undefined,
     castVote: (boardId, commentId) => { server.castVote(boardId, commentId, boards.find((board) => board.id === boardId)?.vote?.mine).catch(fail('투표하지 못했어요.')) },
-    markNoticeRead: (id) => { markNoticeRead(id); server.readNotice(id).catch(() => undefined) },
-    markAllNoticesRead: () => { markAllNoticesRead(); server.readAllNotices().catch(fail('알림을 읽음 처리하지 못했어요.')) },
-    deleteNotice: (id) => { deleteNotice(id); server.removeNotice(id).catch(fail('알림을 삭제하지 못했어요.')) },
+    markNoticeRead: (id) => { markNoticeRead(id); server.readNotice(id).then(server.loadUnread).catch(() => undefined) },
+    markAllNoticesRead: () => { markAllNoticesRead(); server.readAllNotices().then(server.loadUnread).catch(fail('알림을 읽음 처리하지 못했어요.')) },
+    deleteNotice: (id) => { deleteNotice(id); server.removeNotice(id).then(server.loadUnread).catch(fail('알림을 삭제하지 못했어요.')) },
     // 신고: 댓글은 그 댓글이 달린 게시글 ID도 함께 보낸다
     reportTarget: (targetType, targetId, reason) => {
       const target = targetType === '댓글' ? { postId: commentOf(targetId)?.boardId ?? currentBoardId, commentId: targetId } : { postId: targetId }
@@ -468,6 +470,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     server.loadBadges().catch(() => undefined)
     server.loadBlocks().then(setServerBlocked).catch(() => undefined)
   }, [server.live])
+  // 알림 종 숫자: 화면이 보이는 동안 1분마다, 알림 화면을 열 때 목록과 함께 새로 받는다 (알림은 실시간 연결이 없다)
+  useEffect(() => {
+    if (!server.live) return
+    const refresh = () => { if (document.visibilityState === 'visible') server.loadUnread().catch(() => undefined) }
+    refresh()
+    const timer = window.setInterval(refresh, 60_000)
+    document.addEventListener('visibilitychange', refresh)
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
+  }, [server.live])
+  useEffect(() => { if (server.live && screen === 'alerts') server.loadNotices().catch(() => undefined) }, [screen])
   // 토큰 갱신까지 실패하면(만료 · 다른 기기 로그아웃 · 탈퇴) 실시간을 끊고 로그인 화면으로
   useEffect(() => {
     const expired = () => {
@@ -500,9 +512,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
+    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

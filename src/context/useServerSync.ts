@@ -36,6 +36,8 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const [level, setLevel] = useState<LevelStats | null>(null)
   // 서버가 준 뱃지 이름 (뱃지 획득 여부는 서버 기준)
   const [badges, setBadges] = useState<string[] | null>(null)
+  // 안 읽은 알림 수 (목록은 20개씩이라 서버 집계를 따로 받는다)
+  const [unreadCount, setUnreadCount] = useState<number | null>(null)
   const realtime = useRef<Realtime | null>(null)
   const reloadTimers = useRef(new Map<string, number>())
   const boardDeleted = useRef(onBoardDeleted)
@@ -169,6 +171,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
       boardId: item.targetId ?? undefined,
     })))
   }
+  const loadUnread = async () => { setUnreadCount((await notifications.getUnreadCount()).count) }
   const loadSettings = async () => { setNotificationSettings(await notifications.getNotificationSettings()) }
   const saveSettings = (settings: NotificationSettings) => notifications.updateNotificationSettings(settings)
   const readNotice = (id: string) => notifications.markNotificationRead(id)
@@ -240,7 +243,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const stopRealtime = () => { realtime.current?.dispose(); realtime.current = null }
 
   return {
-    live, boardsLoading, boardsError, level, badges,
+    live, boardsLoading, boardsError, level, badges, unreadCount, loadUnread,
     locate, loadNearby, searchArea, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
     editPost, setClosed, deletePost, report, editComment, loadBlocks, getBoardAlert, block, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
     loadLevel, loadBadges, loadActivity, loadRanking, watchBoard, stopRealtime,
