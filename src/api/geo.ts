@@ -20,6 +20,15 @@ export function currentCoords(): Promise<Coords> {
   })
 }
 
+// 두 위경도 사이 거리 (m)
+export function distanceMeters(a: Coords, b: Coords) {
+  const rad = Math.PI / 180
+  const dLat = (b.latitude - a.latitude) * rad
+  const dLon = (b.longitude - a.longitude) * rad
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.latitude * rad) * Math.cos(b.latitude * rad) * Math.sin(dLon / 2) ** 2
+  return 6371000 * 2 * Math.asin(Math.sqrt(h))
+}
+
 // 목업 지도 좌표 → 위경도 (toWorldPoint의 반대). 실제 지도에 목업 글을 내 위치 주변으로 찍을 때 쓴다
 export function fromWorldPoint(me: Coords, point: Point): Coords {
   const metersPerLat = 110540

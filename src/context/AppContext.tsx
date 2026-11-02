@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
-import { RADIUS, mapSeedBoards } from '../features/map/mapWorld'
+import { RADIUS, mapSeedBoards, type Point } from '../features/map/mapWorld'
 import { pickCandidates } from '../features/board/commentVote'
 import { apiEnabled, kakaoEnabled } from '../api/config'
 import { ApiError, SESSION_EXPIRED_EVENT } from '../api/client'
@@ -128,6 +128,10 @@ interface AppContextValue {
   serverBadges: string[] | null
   loadRanking: () => Promise<RankingView>
   findSimilar: (draft: { category: Category; title: string; body: string; reach?: Reach }) => Promise<Board[]>
+  // 서버 연동 중 지도 옮긴 곳 주변 글 다시 받기 (찾은 개수)
+  searchArea: (center: Point) => Promise<number>
+  // 서버 연동 중 최근 활동 (작성 · 댓글 · 반응한 게시판 id)
+  loadActivity: () => Promise<{ written: string[]; commented: string[]; reacted: string[] }>
 }
 
 const AppContext = createContext<AppContextValue | null>(null)
@@ -155,6 +159,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [inRange, setInRange] = useState(persisted.inRange ?? true)
   const [blockedUsers, setBlockedUsers] = useState<string[]>(persisted.blockedUsers ?? [])
   const [alertBoardIds, setAlertBoardIds] = useState<string[]>(persisted.alertBoardIds ?? [])
+  // 서버 연동 중: 서버는 게시판별 알림이 기본 켜짐이라 '끈 게시판'만 기억한다. 차단 목록도 서버 것을 따로 둔다 (목업 저장값과 섞지 않음)
+  const [mutedBoardIds, setMutedBoardIds] = useState<string[]>([])
+  const [serverBlocked, setServerBlocked] = useState<string[]>([])
   const [recentBoardIds, setRecentBoardIds] = useState<string[]>(persisted.recentBoardIds ?? [])
   const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({ nearby: true, replies: true, reactions: true, lifecycle: true, ...persisted.notificationSettings })
   const [locationPermission, setLocationPermissionState] = useState<LocationPermission>(persisted.locationPermission ?? 'unknown')
@@ -427,7 +434,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     addComment: (body, parentId, _imageUrl, imageFile) => server.addComment(currentBoardId, body, parentId, imageFile)
       .then(() => showToast('댓글을 등록했습니다.'))
       .catch((error) => { showToast(mediaMessage(error) ?? '댓글을 등록하지 못했어요.'); throw error }),
-    updateComment: () => showToast('댓글 수정은 아직 지원하지 않아요.'),
+    updateComment: (id, body) => { const comment = commentOf(id); if (comment) server.editComment(comment.boardId, id, body).then(() => showToast('댓글을 수정했습니다.')).catch(fail('댓글을 수정하지 못했어요.')) },
     deleteComment: (id) => { const comment = commentOf(id); if (comment) server.deleteComment(comment.boardId, id).catch(fail('댓글을 삭제하지 못했어요.')) },
     reactToComment: (id, reaction) => { const comment = commentOf(id); if (comment) server.reactToComment(comment.boardId, id, reaction, myCommentReactions(comment)[0]).catch(fail('공감을 남기지 못했어요.')) },
     // 투표 후보는 서버가 고른다
@@ -436,9 +443,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     markNoticeRead: (id) => { markNoticeRead(id); server.readNotice(id).catch(() => undefined) },
     markAllNoticesRead: () => { markAllNoticesRead(); server.readAllNotices().catch(fail('알림을 읽음 처리하지 못했어요.')) },
     deleteNotice: (id) => { deleteNotice(id); server.removeNotice(id).catch(fail('알림을 삭제하지 못했어요.')) },
-    reportTarget: (targetType, targetId, reason) => { server.report(targetType, targetId, reason).then(() => showToast('신고가 접수되었습니다.')).catch(fail('신고하지 못했어요.')) },
-    blockUser: (userId) => { server.block(userId).then(() => blockUser(userId)).catch(fail('차단하지 못했어요.')) },
-    toggleBoardNotifications: (boardId) => { toggleBoardNotifications(boardId); server.setBoardAlert(boardId, !alertBoardIds.includes(boardId)).catch(fail('알림 설정을 바꾸지 못했어요.')) },
+    // 신고: 댓글은 그 댓글이 달린 게시글 ID도 함께 보낸다
+    reportTarget: (targetType, targetId, reason) => {
+      const target = targetType === '댓글' ? { postId: commentOf(targetId)?.boardId ?? currentBoardId, commentId: targetId } : { postId: targetId }
+      server.report(target, reason).then(() => showToast('신고가 접수되었습니다.'))
+        .catch((error) => showToast(error instanceof ApiError && error.status === 503 ? '지금은 신고를 받을 수 없어요. 잠시 후 다시 시도해 주세요.' : '신고하지 못했어요.'))
+    },
+    blockUser: (userId) => { server.block(userId).then(() => { setServerBlocked((items) => [...new Set([...items, userId])]); showToast('사용자를 차단했습니다.') }).catch(fail('차단하지 못했어요.')) },
+    toggleBoardNotifications: (boardId) => {
+      const muted = mutedBoardIds.includes(boardId)
+      setMutedBoardIds((items) => muted ? items.filter((id) => id !== boardId) : [...items, boardId])
+      server.setBoardAlert(boardId, muted).catch(() => { setMutedBoardIds((items) => muted ? [...items, boardId] : items.filter((id) => id !== boardId)); showToast('알림 설정을 바꾸지 못했어요.') })
+    },
     updateNotificationSettings: (settings) => { updateNotificationSettings(settings); server.saveSettings(settings).catch(fail('알림 설정을 저장하지 못했어요.')) },
   }
   // 서버 연동이 켜지면(로그인 직후 · 로그인 상태로 앱 실행) 목업 데이터를 비우고 서버 데이터로 채운다
@@ -450,6 +466,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     server.loadSettings().catch(() => undefined)
     server.loadLevel().catch(() => undefined)
     server.loadBadges().catch(() => undefined)
+    server.loadBlocks().then(setServerBlocked).catch(() => undefined)
   }, [server.live])
   // 토큰 갱신까지 실패하면(만료 · 다른 기기 로그아웃 · 탈퇴) 실시간을 끊고 로그인 화면으로
   useEffect(() => {
@@ -466,7 +483,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => { if (server.live && (screen === 'home' || screen === 'board')) server.loadNearby() }, [screen])
   // 게시글 상세는 목록에서 열든 주소로 바로 들어오든(새로고침 포함) 상세 · 댓글 · 투표를 새로 받는다
   useEffect(() => {
-    if (server.live && (screen === 'detail' || screen === 'outside') && currentBoardId) server.loadBoard(currentBoardId).catch(fail('게시글을 불러오지 못했어요.'))
+    if (!server.live || (screen !== 'detail' && screen !== 'outside') || !currentBoardId) return
+    server.loadBoard(currentBoardId).catch(fail('게시글을 불러오지 못했어요.'))
+    // 이 게시판 알림을 다른 기기에서 껐을 수도 있어 상세를 열 때 맞춘다
+    server.getBoardAlert(currentBoardId).then((enabled) => setMutedBoardIds((items) => enabled ? items.filter((id) => id !== currentBoardId) : [...new Set([...items, currentBoardId])])).catch(() => undefined)
   }, [screen, currentBoardId, server.live])
   // 상세 화면을 보는 동안만 실시간 구독 (다른 사람의 댓글 · 반응 · 종료 · 삭제를 바로 반영)
   useEffect(() => {
@@ -474,12 +494,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return server.watchBoard(currentBoardId)
   }, [screen, currentBoardId, server.live])
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange,
+    blockedUsers: server.live ? serverBlocked : blockedUsers,
+    alertBoardIds: server.live ? boards.filter((board) => !mutedBoardIds.includes(board.id)).map((board) => board.id) : alertBoardIds,
+    recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, loadRanking: server.loadRanking, findSimilar: server.findSimilar,
+    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, server.live, server.boardsLoading, server.boardsError, server.level, server.badges])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

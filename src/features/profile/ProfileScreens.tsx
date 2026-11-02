@@ -43,16 +43,21 @@ export function ProfileScreen() {
 }
 
 export function ActivityScreen() {
-  const { boards, comments, user, recentBoardIds, openBoard, go, reopenBoard } = useApp()
+  const { boards, comments, user, recentBoardIds, openBoard, go, reopenBoard, live, loadActivity } = useApp()
   const [filter, setFilter] = useState<'최근 본' | '댓글 단' | '공감한' | '내가 작성한'>('최근 본')
+  // 서버 연동 중에는 서버 활동 기록으로 (주변 목록에 없는 글 · 종료된 글도 포함)
+  const [serverActivity, setServerActivity] = useState<{ written: string[]; commented: string[]; reacted: string[] } | null>(null)
+  useEffect(() => { if (live) loadActivity().then(setServerActivity).catch(() => undefined) }, [live])
+  const byIds = (ids: string[]) => ids.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] })
   const participatingIds = new Set(comments.filter((comment) => comment.authorId === user.id).map((comment) => comment.boardId))
-  const filters = [
-    { label: '최근 본', count: recentBoardIds.length },
-    { label: '댓글 단', count: participatingIds.size },
-    { label: '공감한', count: boards.filter((board) => myReactions(board).length > 0).length },
-    { label: '내가 작성한', count: boards.filter((board) => board.authorId === user.id).length },
-  ] as const
-  const filtered = useMemo(() => filter === '최근 본' ? recentBoardIds.flatMap((id) => { const board = boards.find((item) => item.id === id); return board ? [board] : [] }) : boards.filter((board) => filter === '댓글 단' && participatingIds.has(board.id) || filter === '공감한' && myReactions(board).length > 0 || filter === '내가 작성한' && board.authorId === user.id), [boards, filter, user.id, comments, recentBoardIds])
+  const lists = {
+    '최근 본': byIds(recentBoardIds),
+    '댓글 단': serverActivity ? byIds(serverActivity.commented) : boards.filter((board) => participatingIds.has(board.id)),
+    '공감한': serverActivity ? byIds(serverActivity.reacted) : boards.filter((board) => myReactions(board).length > 0),
+    '내가 작성한': serverActivity ? byIds(serverActivity.written) : boards.filter((board) => board.authorId === user.id),
+  }
+  const filters = (['최근 본', '댓글 단', '공감한', '내가 작성한'] as const).map((label) => ({ label, count: lists[label].length }))
+  const filtered = lists[filter]
   const emptyText = { '최근 본': '최근에 본 게시판이 없어요.', '댓글 단': '댓글을 단 게시판이 없어요.', '공감한': '반응을 남긴 게시판이 없어요.', '내가 작성한': '작성한 게시판이 없어요.' }
   // 게시판 목록과 같은 여백·칩·카드를 써서 같은 화면처럼 보이게 한다
   return <AppShell contentClassName="ux-board-screen activity-screen"><BackHeader title="최근 활동" onBack={() => go('my')}/>

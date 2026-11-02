@@ -36,7 +36,7 @@ const mapMemory: { filter: MapFilter; selectedId?: string; searchCenter: Point; 
 let kakaoMapFailed = false
 
 export function MapScreen() {
-  const { boards, comments, openBoard, showToast } = useApp()
+  const { boards, comments, openBoard, showToast, live, searchArea } = useApp()
   const [realMap, setRealMap] = useState(KAKAO_MAP_KEY !== '' && !kakaoMapFailed)
   const [filter, setFilter] = useState<MapFilter>(filters.some((item) => item.value === mapMemory.filter) ? mapMemory.filter : '전체')
   const [selectedBoard, setSelectedBoard] = useState<Board | undefined>(() => boards.find((board) => board.id === mapMemory.selectedId))
@@ -48,10 +48,18 @@ export function MapScreen() {
   const selectFilter = (next: MapFilter) => { setFilter(next); setSelectedBoard(undefined) }
   // 지도를 멀리 옮기면 '이 지역에서 다시 찾기' (MAP-F09, 실제로는 화면 영역으로 게시판을 다시 조회)
   const movedFar = Math.hypot(viewCenter.x - searchCenter.x, viewCenter.y - searchCenter.y) > 260
+  const [searching, setSearching] = useState(false)
+  const announce = (count: number) => showToast(count ? `이 지역 게시판 ${count}개를 찾았어요.` : '이 지역에는 아직 게시판이 없어요.')
   const searchHere = () => {
-    const count = nearby.filter((board) => { const point = boardPosition(board); return Math.hypot(point.x - viewCenter.x, point.y - viewCenter.y) <= 400 }).length
     setSearchCenter(viewCenter)
-    showToast(count ? `이 지역 게시판 ${count}개를 찾았어요.` : '이 지역에는 아직 게시판이 없어요.')
+    // 서버 연동 중에는 옮긴 곳 주변을 서버에서 다시 받는다
+    if (live) {
+      if (searching) return
+      setSearching(true)
+      searchArea(viewCenter).then(announce).catch(() => showToast('이 지역 게시판을 불러오지 못했어요.')).finally(() => setSearching(false))
+      return
+    }
+    announce(nearby.filter((board) => { const point = boardPosition(board); return Math.hypot(point.x - viewCenter.x, point.y - viewCenter.y) <= 400 }).length)
   }
   return <AppShell shellClassName="map-shell" contentClassName="map-screen">
     {realMap

@@ -1,15 +1,16 @@
 import { useRef, useState } from 'react'
 import { serverFeatures, WS_URL } from '../api/config'
 import { readSession } from '../api/session'
-import { currentCoords, toWorldPoint, type Coords } from '../api/geo'
+import { currentCoords, distanceMeters, fromWorldPoint, toWorldPoint, type Coords } from '../api/geo'
+import type { Point } from '../features/map/mapWorld'
 import * as posts from '../api/posts'
 import * as notifications from '../api/notifications'
 import { createRealtime, type Realtime, type RealtimeEvent } from '../api/realtime'
-import { blockUser as blockUserApi, getMyBadges } from '../api/users'
+import { blockUser as blockUserApi, getBlocks, getMyBadges } from '../api/users'
 import { uploadImage } from '../api/media'
 import { timeAgo } from '../domain/time'
 import type { LevelStats } from '../features/level/levels'
-import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach, Report } from '../types/domain'
+import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach } from '../types/domain'
 import type { NotificationSettings } from './AppContext'
 
 type Setter<T> = React.Dispatch<React.SetStateAction<T>>
@@ -67,6 +68,16 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
       const result = await posts.getNearbyPosts({ ...here, radiusM: 350, sort: 'distance', limit: 100 })
       setBoards(result.posts.map(placeBoard))
     } catch { setBoardsError(true) } finally { setBoardsLoading(false) }
+  }
+
+  // 지도를 옮긴 곳 주변 글 (이 지역에서 다시 찾기). 서버 거리는 지도 가운데 기준이라 내 위치 기준으로 다시 잰다 (150m 참여 판단용)
+  const searchArea = async (center: Point) => {
+    const here = await ensureCoords()
+    const target = fromWorldPoint(here, center)
+    const result = await posts.getNearbyPosts({ ...target, radiusM: 350, sort: 'distance', limit: 100 })
+    const found = result.posts.map((post) => ({ ...placeBoard(post), distance: Math.round(distanceMeters(here, post.locationSnapshot)) }))
+    setBoards((items) => [...items.filter((item) => !found.some((board) => board.id === item.id)), ...found])
+    return found.length
   }
 
   // 게시글 하나: 상세 · 댓글 · 투표를 함께 새로 받는다
@@ -136,7 +147,16 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     await posts.deletePost(postId)
     setBoards((items) => items.filter((board) => board.id !== postId))
   }
-  const report = (targetType: Report['targetType'], targetId: string, reason: string) => posts.reportTarget(targetType === '게시글' ? 'POST' : 'COMMENT', targetId, reason)
+  const report = (target: { postId: string; commentId?: string }, reason: string) => posts.reportTarget(target, reason)
+  const editComment = async (postId: string, commentId: string, body: string) => { await posts.editComment(postId, commentId, body); await loadBoard(postId) }
+  // 차단 목록 (프론트가 이 사람들의 글 · 댓글을 숨긴다). 여러 페이지면 끝까지
+  const loadBlocks = async () => {
+    const ids: string[] = []
+    let cursor: string | undefined
+    do { const page = await getBlocks(cursor); ids.push(...page.items.map((item) => item.userId)); cursor = page.nextCursor ?? undefined } while (cursor)
+    return ids
+  }
+  const getBoardAlert = (postId: string) => notifications.getBoardNotification(postId).then((result) => result.enabled)
   const block = (userId: string) => blockUserApi(userId)
 
   // 알림 목록 · 설정
@@ -145,7 +165,8 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     setNotices(result.items.map((item) => ({
       id: item.notificationId, text: item.body ? `${item.title} ${item.body}` : item.title, createdAt: timeAgo(item.createdAt), read: item.isRead,
       type: /COMMENT|REPLY/.test(item.type) ? 'reply' : /REACTION/.test(item.type) ? 'reaction' : /CLOSE|EXPIRE/.test(item.type) ? 'lifecycle' : 'nearby',
-      boardId: item.targetType === 'COMMENT' ? undefined : item.targetId ?? undefined,
+      // 알림의 targetId는 댓글 알림이어도 게시글 ID다 (Notification 서비스 기준)
+      boardId: item.targetId ?? undefined,
     })))
   }
   const loadSettings = async () => { setNotificationSettings(await notifications.getNotificationSettings()) }
@@ -154,6 +175,25 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const readAllNotices = () => notifications.markAllNotificationsRead()
   const removeNotice = (id: string) => notifications.deleteNotification(id)
   const setBoardAlert = (postId: string, enabled: boolean) => notifications.setBoardNotification(postId, enabled)
+
+  // 최근 활동: 서버 기록(작성 · 댓글 · 반응)으로 게시판을 모은다. 주변 목록에 없는 글(멀리 있거나 종료된 글)은 하나씩 받아 채운다
+  const loadActivity = async () => {
+    const items: posts.ActivityItem[] = []
+    let cursor: string | undefined
+    for (let page = 0; page < 3; page++) {
+      const result = await posts.getMyActivity(cursor)
+      items.push(...result.items)
+      if (!result.nextCursor) break
+      cursor = result.nextCursor
+    }
+    const ids = (kinds: posts.ActivityItem['kind'][]) => new Set(items.filter((item) => kinds.includes(item.kind)).map((item) => item.postId))
+    const activity = { written: ids(['POST']), commented: ids(['COMMENT']), reacted: ids(['REACTION', 'COMMENT_REACTION']) }
+    const all = [...new Set(items.map((item) => item.postId))].slice(0, 30)
+    const fetched = await Promise.all(all.map((postId) => posts.getPost(postId, coords.current ?? undefined).then(placeBoard).catch(() => null)))
+    const found = fetched.filter((board): board is Board => board !== null)
+    setBoards((list) => [...list.filter((item) => !found.some((board) => board.id === item.id)), ...found])
+    return { written: [...activity.written], commented: [...activity.commented], reacted: [...activity.reacted] }
+  }
 
   // 활동: 칭호 점수, 내 행정동 랭킹
   const loadBadges = async () => { setBadges((await getMyBadges()).map((badge) => badge.name)) }
@@ -201,8 +241,8 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
 
   return {
     live, boardsLoading, boardsError, level, badges,
-    locate, loadNearby, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
-    editPost, setClosed, deletePost, report, block, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
-    loadLevel, loadBadges, loadRanking, watchBoard, stopRealtime,
+    locate, loadNearby, searchArea, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
+    editPost, setClosed, deletePost, report, editComment, loadBlocks, getBoardAlert, block, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
+    loadLevel, loadBadges, loadActivity, loadRanking, watchBoard, stopRealtime,
   }
 }

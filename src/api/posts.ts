@@ -51,6 +51,8 @@ export interface CommentResponse {
   verified: boolean
   media: { mediaId: string; url: string }[]
   createdAt: string
+  // 수정한 적이 있으면 시각 (없으면 null)
+  updatedAt?: string | null
 }
 
 export interface VoteResponse {
@@ -80,6 +82,7 @@ export const setPostClosed = (postId: string, closed: boolean) => api<void>('PUT
 export const deletePost = (postId: string) => api<void>('DELETE', path(postId))
 export const getComments = (postId: string, cursor?: string) => api<{ comments: CommentResponse[]; nextCursor: string | null }>('GET', path(postId, '/comments'), { query: { limit: 100, cursor } })
 export const createComment = (postId: string, content: string, parentCommentId?: string, mediaIds?: string[]) => api<CommentResponse>('POST', path(postId, '/comments'), { body: { content, parentCommentId, mediaIds } })
+export const editComment = (postId: string, commentId: string, content: string) => api<void>('PATCH', path(postId, `/comments/${encodeURIComponent(commentId)}`), { body: { content } })
 export const deleteComment = (postId: string, commentId: string) => api<void>('DELETE', path(postId, `/comments/${encodeURIComponent(commentId)}`))
 // 반응 변경은 기존 종류 DELETE 후 새 종류 POST
 export const reactToPost = (postId: string, reaction: PostReaction) => api<unknown>('POST', path(postId, '/reactions'), { body: { type: postReactionCode[reaction] } })
@@ -91,12 +94,18 @@ export const castVote = (postId: string, commentId: string) => api<VoteResponse>
 export const cancelVote = (postId: string) => api<void>('DELETE', path(postId, '/vote'))
 export const joinPost = (postId: string) => api<unknown>('POST', path(postId, '/participants'), { body: {} })
 export const updateLocation = ({ latitude, longitude }: Coords) => api<{ updatedAt: string }>('PUT', '/api/v1/location', { body: { latitude, longitude } })
-export const reportTarget = (targetType: 'POST' | 'COMMENT', targetId: string, reason: string) => api<{ reportId: string; status: 'PENDING' }>('POST', '/api/v1/moderation/reports', { body: { targetType, targetId, reason } })
+// 신고: 사유는 서버 enum으로, 화면에서 고른 문구는 description으로 함께 보낸다
+export type ReportReason = 'SPAM' | 'HARASSMENT' | 'INAPPROPRIATE_CONTENT' | 'FALSE_INFORMATION' | 'OTHER'
+const reportReasonCode: Record<string, ReportReason> = { '부정확한 정보': 'FALSE_INFORMATION', '허위 또는 부적절한 정보': 'FALSE_INFORMATION', '광고·홍보': 'SPAM', '욕설·비방': 'HARASSMENT', '개인정보 노출': 'INAPPROPRIATE_CONTENT' }
+export const reportTarget = (target: { postId: string; commentId?: string }, reasonLabel: string) => api<{ reportId: string; status: 'PENDING' | 'WITHDRAWN' | 'REVIEWED' }>('POST', '/api/v1/moderation/reports', {
+  body: { targetType: target.commentId ? 'COMMENT' : 'POST', postId: target.postId, commentId: target.commentId, reason: reportReasonCode[reasonLabel] ?? 'OTHER', description: reasonLabel },
+})
 
 // 활동 · 칭호 · 행정동 랭킹
 export interface LevelResponse { participation: number; agreeReceived: number; picks: number; score: number; level: 1 | 2 | 3 | 4; title: string }
 export const getMyLevel = () => api<LevelResponse>('GET', '/api/v1/posts/me/level')
-export const getMyActivity = (cursor?: string) => api<{ items: { kind: 'POST' | 'COMMENT' | 'REACTION' | 'COMMENT_REACTION' | 'VOTE'; postId: string; commentId?: string; createdAt: string; closedAt: string | null }[]; nextCursor: string | null }>('GET', '/api/v1/posts/me/activity', { query: { cursor } })
+export interface ActivityItem { kind: 'POST' | 'COMMENT' | 'REACTION' | 'COMMENT_REACTION' | 'VOTE'; postId: string; commentId?: string | null; createdAt: string; closedAt: string | null }
+export const getMyActivity = (cursor?: string) => api<{ items: ActivityItem[]; nextCursor: string | null }>('GET', '/api/v1/posts/me/activity', { query: { cursor } })
 export const getMyRegion = ({ latitude, longitude }: Coords) => api<{ code: string; name: string }>('GET', '/api/v1/posts/me/region', { query: { latitude, longitude } })
 export const getRanking = (regionCode: string) => api<{ regionCode: string; items: { rank: number; userId: number; authorNickname: string | null; picks: number; score: number }[]; myRank: number | null; myScore: number }>('GET', '/api/v1/posts/me/ranking', { query: { regionCode } })
 
@@ -124,6 +133,7 @@ export function toComment(comment: CommentResponse): Comment {
     imageUrl: comment.media[0]?.url, createdAt: timeAgo(comment.createdAt), verified: comment.verified, parentId: comment.parentCommentId ?? undefined,
     reactions: { '도움돼요': counts.HELPFUL, '맞아요': counts.AGREE, '정보가 달라요': counts.DIFFERENT },
     myReactions: comment.myReaction ? [commentReactionFromCode(comment.myReaction)] : [],
+    edited: Boolean(comment.updatedAt),
   }
 }
 
