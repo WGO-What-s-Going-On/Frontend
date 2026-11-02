@@ -20,6 +20,13 @@ export function currentCoords(): Promise<Coords> {
   })
 }
 
+// 목업 지도 좌표 → 위경도 (toWorldPoint의 반대). 실제 지도에 목업 글을 내 위치 주변으로 찍을 때 쓴다
+export function fromWorldPoint(me: Coords, point: Point): Coords {
+  const metersPerLat = 110540
+  const metersPerLon = 111320 * Math.cos(me.latitude * Math.PI / 180)
+  return { latitude: me.latitude - (point.y - ME.y) / metersPerLat, longitude: me.longitude + (point.x - ME.x) / metersPerLon }
+}
+
 // 목업 지도(1 = 1m)에 실제 위경도 올리기: 내 위치를 지도 가운데(ME)에 두고 위경도 차이를 m로 바꾼다
 export function toWorldPoint(me: Coords, target: Coords): Point {
   const metersPerLat = 110540

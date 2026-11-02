@@ -2009,3 +2009,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .term-document iframe { flex: 1; width: 100%; border: 0; }
 .term-document-bottom { padding: 12px 20px calc(env(safe-area-inset-bottom) + 12px); border-top: 1px solid var(--c-line); }
 .term-document-bottom .primary { width: 100%; }
+
+/* 카카오 지도: 지도 틀을 꽉 채우고, 핀 · 내 위치 점은 오버레이 칸(크기 0) 가운데에 그림 지도와 같은 모양으로 */
+.kakao-map-frame { position: absolute; inset: 0; }
+.kakao-overlay-slot { position: relative; width: 0; height: 0; }

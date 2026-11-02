@@ -44,7 +44,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const mine = (authorId: string) => authorId !== '' && authorId === readSession()?.userId ? 'me' : authorId
   const placeBoard = (post: posts.PostResponse): Board => {
     const board = posts.toBoard(post)
-    return { ...board, authorId: mine(board.authorId), position: coords.current ? toWorldPoint(coords.current, post.locationSnapshot) : undefined }
+    return { ...board, authorId: mine(board.authorId), location: post.locationSnapshot, position: coords.current ? toWorldPoint(coords.current, post.locationSnapshot) : undefined }
   }
   const placeComment = (comment: posts.CommentResponse): Comment => { const mapped = posts.toComment(comment); return { ...mapped, authorId: mine(mapped.authorId) } }
   const upsertBoard = (board: Board) => setBoards((items) => items.some((item) => item.id === board.id) ? items.map((item) => item.id === board.id ? { ...item, ...board } : item) : [board, ...items])

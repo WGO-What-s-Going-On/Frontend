@@ -8,6 +8,8 @@ export const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY ?? ''
 // 카카오 로그인 후 돌아올 주소. 백엔드 KAKAO_REDIRECT_URI · Kakao Developers 등록 주소와 똑같아야 한다
 export const KAKAO_REDIRECT_URI = import.meta.env.VITE_KAKAO_REDIRECT_URI ?? `${window.location.origin}/auth/kakao/callback`
 export const kakaoEnabled = apiEnabled && KAKAO_REST_API_KEY !== ''
+// 카카오 지도 JavaScript 키 (REST 키와 다름). 비우면 그림 지도를 쓴다. Kakao Developers > 플랫폼 > Web에 접속 주소 등록 필요
+export const KAKAO_MAP_KEY = import.meta.env.VITE_KAKAO_JS_KEY ?? ''
 
 // 기능별로 실제 서버를 쓸지. 서버에서 막혀 있는 기능은 목업으로 두고, 풀리는 대로 켠다 (docs/api-integration.md 현황표)
 export const serverFeatures = {

@@ -50,6 +50,8 @@ export interface Board {
   anonymous?: boolean
   // 목업 지도 좌표 (m 단위). 실제로는 백엔드가 주는 근사 좌표
   position?: { x: number; y: number }
+  // 서버 글의 실제 위경도 (실제 지도에 핀을 찍을 때 사용)
+  location?: { latitude: number; longitude: number }
   // 공개 범위 (m). 예전 데이터에는 없어서 없으면 150m
   reach?: Reach
   // 작성 후 수정한 적이 있으면 true (상세에 '수정됨' 표시)

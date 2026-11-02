@@ -9,6 +9,8 @@ import type { Board, Category } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { IncidentBottomSheet } from './IncidentBottomSheet'
 import { MapView } from './MapView'
+import { KakaoMapView } from './KakaoMapView'
+import { KAKAO_MAP_KEY } from '../../api/config'
 import { ME, boardPosition, type Point } from './mapWorld'
 
 // 지도 필터: 게시판과 같은 카테고리 순서 + HOT. 칸이 넘치면 옆으로 밀어 넘긴다
@@ -30,9 +32,12 @@ function filterBoards(boards: Board[], filter: MapFilter, hotIds: Set<string>) {
 
 // 게시글을 보러 갔다가 돌아와도 보던 지도 상태(필터·고른 핀·검색 기준)를 그대로 보여주기 위한 기억 (새로고침하면 처음부터)
 const mapMemory: { filter: MapFilter; selectedId?: string; searchCenter: Point; viewCenter: Point } = { filter: '전체', searchCenter: ME, viewCenter: ME }
+// 카카오 지도를 못 불러오면(키 · 도메인 등록 문제) 이번 실행 동안은 그림 지도로
+let kakaoMapFailed = false
 
 export function MapScreen() {
   const { boards, comments, openBoard, showToast } = useApp()
+  const [realMap, setRealMap] = useState(KAKAO_MAP_KEY !== '' && !kakaoMapFailed)
   const [filter, setFilter] = useState<MapFilter>(filters.some((item) => item.value === mapMemory.filter) ? mapMemory.filter : '전체')
   const [selectedBoard, setSelectedBoard] = useState<Board | undefined>(() => boards.find((board) => board.id === mapMemory.selectedId))
   const [searchCenter, setSearchCenter] = useState<Point>(mapMemory.searchCenter)
@@ -49,7 +54,9 @@ export function MapScreen() {
     showToast(count ? `이 지역 게시판 ${count}개를 찾았어요.` : '이 지역에는 아직 게시판이 없어요.')
   }
   return <AppShell shellClassName="map-shell" contentClassName="map-screen">
-    <MapView boards={nearby} selectedId={selectedBoard?.id} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>
+    {realMap
+      ? <KakaoMapView appKey={KAKAO_MAP_KEY} boards={nearby} selectedId={selectedBoard?.id} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} onFail={() => { kakaoMapFailed = true; setRealMap(false) }} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>
+      : <MapView boards={nearby} selectedId={selectedBoard?.id} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>}
     <div className="map-top-overlay">
       <header><h1>내 주변</h1><NoticeBell/></header>
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
