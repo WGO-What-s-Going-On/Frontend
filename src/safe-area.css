@@ -50,3 +50,10 @@
 .outside-bottom { padding-bottom: max(10px, calc(24px + var(--bottom-shift))); }
 .quick-compose-sheet { padding-bottom: max(16px, calc(34px + var(--bottom-shift))); }
 .login-screen { padding-bottom: max(16px, calc(44px + var(--bottom-shift))); }
+
+@media (max-width: 450px) {
+  /* 첫 화면: 상태바 뒤 색을 화면 위쪽 색(연한 파랑)과 맞춘다 */
+  html:has(.login-day-shell), html:has(.login-day-shell) body, .app-bg:has(.login-day-shell) { background: #f3f6fe; }
+  /* 시작 카드 아래 여백: 홈 바가 있는 앱(안전 영역 34px)은 그대로 50px, 브라우저(안전 영역 없음)는 8px만 띄워 도구 막대 가까이 내린다 */
+  .login-screen { padding-bottom: max(8px, calc(var(--bottom-inset) * 2 - 18px)); }
+}
