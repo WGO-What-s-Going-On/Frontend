@@ -1,5 +1,5 @@
 import { api } from './client'
-import { KAKAO_REDIRECT_URI, KAKAO_REST_API_KEY } from './config'
+import { KAKAO_CLIENT_ID, KAKAO_REDIRECT_URI } from './config'
 import { clearSession, readSession, saveSession, sessionFromTokens } from './session'
 
 interface KakaoLoginResponse {
@@ -20,7 +20,7 @@ export function kakaoAuthorizeUrl() {
   const state = crypto.randomUUID()
   try { sessionStorage.setItem(KAKAO_STATE_KEY, state) } catch { /* 저장 못 하면 돌아와서 state 확인에 실패해 다시 로그인 */ }
   const url = new URL('https://kauth.kakao.com/oauth/authorize')
-  url.searchParams.set('client_id', KAKAO_REST_API_KEY)
+  url.searchParams.set('client_id', KAKAO_CLIENT_ID)
   url.searchParams.set('redirect_uri', KAKAO_REDIRECT_URI)
   url.searchParams.set('response_type', 'code')
   url.searchParams.set('state', state)

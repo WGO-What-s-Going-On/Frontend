@@ -102,7 +102,7 @@ export function KakaoCallbackScreen() {
     window.history.replaceState(window.history.state, '', window.location.pathname)
     if (!code || params.get('error') || !consumeKakaoState(params.get('state'))) { setFailed(true); return }
     usedKakaoCodes.add(code)
-    finishKakaoLogin(code).catch(() => setFailed(true))
+    finishKakaoLogin(code).catch((error) => { if (import.meta.env.DEV) console.warn('[API] 카카오 로그인 실패', error); setFailed(true) })
   }, [])
   return <AppShell nav={false} contentClassName="onboarding-screen kakao-callback-screen">
     {failed
