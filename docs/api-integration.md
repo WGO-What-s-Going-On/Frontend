@@ -3,7 +3,7 @@
 - 기준: 2026-11-03 GCP 서버 호출 결과(테스트 계정 토큰 · 실제 카카오 로그인), Swagger 61개 API 대조, 백엔드 `docs/contracts/frontend-integration.md`
 - HTTP: https://api.136-81-245-176.sslip.io (Swagger `/docs`)
 - WebSocket: wss://ws.136-81-245-176.sslip.io/ws/v1
-- 프론트 배포: https://wgo-sigma.vercel.app (Vercel)
+- 프론트 배포: https://wgo-app.vercel.app (Vercel)
 - 노션 "연동 관련"과 같은 내용
 
 ---
@@ -43,7 +43,7 @@
 | 1-8 | Swagger 응답 스키마 누락 | `/posts/me/region`, `/notifications/settings`, `/notifications/boards/{postId}`, `/notifications/read-all` | 백엔드 |
 | 1-9 | 푸시 알림 | `PUT /notifications/push-subscriptions`(FCM) 연결에 Firebase 프로젝트 · iOS 설정 파일 필요 | 백엔드 |
 | 1-10 | 프로필 사진 업로드 미배포 | 백엔드 dev 병합(#96), Swagger에 API 없음 | 도현 |
-| 1-11 | 배포 주소 허용 | `https://wgo-sigma.vercel.app`: HTTP API CORS 허용 헤더 없음 → 배포본 로그인 · 서버 호출 불가 | 대준(카카오 콘솔) · 도현(서버) |
+| 1-11 | 배포 주소 허용 | `https://wgo-app.vercel.app`: HTTP API CORS 허용 헤더 없음 → 배포본 로그인 · 서버 호출 불가 | 대준(카카오 콘솔) · 도현(서버) |
 
 - 1-1 · 1-2: 코드 배포(11-02 CD main)는 완료. 변경은 `environment.example.json` · `.env.example`에만 있음. 실제 GKE 환경 설정 `webOrigins`(HTTP CORS · GCS 버킷 CORS)와 `websocketOrigins`에 `http://localhost:5173`, `capacitor://localhost` 추가 후 재배포 필요. GCS는 `PUT` method, `Content-Type` · `x-goog-if-generation-match` header 허용 포함
 - 1-3: `POST_REGION_ENABLED`, Map `KAKAO_LOCAL_REST_API_KEY` 등 랭킹 설정 필요. 행정동 조회는 정상
@@ -55,4 +55,4 @@
 - 1-8: 응답 형식은 실제 응답 · 백엔드 코드로 확인해 프론트에 반영함
 - 1-9: 프론트는 Capacitor 푸시 플러그인 · APNs 설정 후 토큰 등록 연결 예정
 - 1-10: 배포 후 프론트 연결. `PATCH /users/me`의 `profileImageKey`는 제거용 `null`만 허용으로 변경됨
-- 1-11: 카카오 콘솔 REST 키 Redirect URI `https://wgo-sigma.vercel.app/auth/kakao/callback`, JavaScript 키 Web 도메인 `https://wgo-sigma.vercel.app` 추가. 서버 `webOrigins` · `websocketOrigins`에 `https://wgo-sigma.vercel.app` 추가. `KAKAO_REDIRECT_URI`는 값 1개만 받는 구조라 localhost와 배포 주소 동시 사용 방식 결정 필요
+- 1-11: 카카오 콘솔 REST 키 Redirect URI `https://wgo-app.vercel.app/auth/kakao/callback`, JavaScript 키 Web 도메인 `https://wgo-app.vercel.app` 추가. 서버 `webOrigins` · `websocketOrigins`에 `https://wgo-app.vercel.app` 추가. `KAKAO_REDIRECT_URI`는 값 1개만 받는 구조라 localhost와 배포 주소 동시 사용 방식 결정 필요
