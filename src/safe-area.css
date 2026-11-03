@@ -24,6 +24,8 @@
   .phone { height: 100dvh; }
   /* 화면 전체가 고무줄처럼 끌려 내려가지 않게 (스크롤은 안쪽 화면에서만) */
   html, body { overscroll-behavior: none; }
+  /* 모바일 Safari는 화면 밖(상태바 뒤 · 아래 도구 막대 뒤)을 바깥 배경색으로 칠한다: 회색 틀 대신 화면 바탕색 */
+  html, body, .app-bg, html:root[data-theme="dark"] :is(body, .app-bg) { background: var(--c-page); }
 }
 
 /* 위: 상태바 자리 */
