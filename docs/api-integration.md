@@ -23,35 +23,35 @@
 - 코드 확정: 카테고리 `EMERGENCY` · `HELP` · `NEWS` · `ETC`, 약관 `SERVICE` · `PRIVACY_COLLECTION_USE` · `LOCATION`
 - WebSocket 인증: 로그인 · 갱신 응답에서 `wgo_access_token` HttpOnly 쿠키 발급 방식으로 결정
 - iOS 앱 카카오 로그인 복귀: 웹 연동 이후 진행으로 정리됨
+- 카카오 로그인(웹, localhost): REST API 키 수령, 콘솔 Redirect URI 등록, 서버 `KAKAO_REDIRECT_URI` 경로 누락 수정(user-service secret v6, 11-03 21:41 배포) → 인가 · code 수신 · 토큰 교환 · 로그인 확인
 
 </details>
 
 ## 1. 처리 필요
 
-| # | 항목 | 확인 결과 (11-03 00:34) | 담당 |
+| # | 항목 | 확인 결과 (11-03 21:41) | 담당 |
 | --- | --- | --- | --- |
 | 1-1 | iOS 앱 origin 허용 | `capacitor://localhost`: HTTP API CORS 허용 헤더 없음, WebSocket 403 `WS_ORIGIN_FORBIDDEN` | 도현 |
 | 1-2 | 사진 업로드 CORS | GCS 업로드 주소에 `Access-Control-Allow-Origin` 없음 → 브라우저 PUT 차단 | 도현 |
 | 1-3 | 행정동 랭킹 미설정 | `GET /posts/me/ranking` 503 `Region ranking is not configured` | 도현 |
 | 1-4 | 약관 데이터 없음 | `GET /api/v1/terms` 200 `{"terms":[]}` | 도현 |
-| 1-5 | 카카오 redirect URI | `https://api.136-81-245-176.sslip.io/auth/kakao/callback`은 백엔드 주소라 404 | 대준(설정) · 도현(재배포) |
-| 1-6 | 카카오 REST API 키 | 프론트 인가 URL의 `client_id`에 필요 | 대준 |
-| 1-7 | 비슷한 글 검사 실패 | `POST /posts/similar` 503 `SIMILARITY_CHECK_UNAVAILABLE` | 백엔드 |
-| 1-8 | 신고 접수 불가 | `POST /moderation/reports` 503 `Authenticated Moderation-to-Post target verification is not supported` | 백엔드 |
-| 1-9 | 뱃지 지급 로직 없음 | `GET /users/me/badges` 조회만 있음, 지급 처리 없음 | 백엔드 |
-| 1-10 | Swagger 응답 스키마 누락 | `/posts/me/region`, `/notifications/settings`, `/notifications/boards/{postId}`, `/notifications/read-all` | 백엔드 |
-| 1-11 | 푸시 알림 | `PUT /notifications/push-subscriptions`(FCM) 연결에 Firebase 프로젝트 · iOS 설정 파일 필요 | 백엔드 |
+| 1-5 | 비슷한 글 검사 실패 | `POST /posts/similar` 503 `SIMILARITY_CHECK_UNAVAILABLE` | 백엔드 |
+| 1-6 | 신고 접수 불가 | `POST /moderation/reports` 503 `Authenticated Moderation-to-Post target verification is not supported` | 백엔드 |
+| 1-7 | 뱃지 지급 로직 없음 | `GET /users/me/badges` 조회만 있음, 지급 처리 없음 | 백엔드 |
+| 1-8 | Swagger 응답 스키마 누락 | `/posts/me/region`, `/notifications/settings`, `/notifications/boards/{postId}`, `/notifications/read-all` | 백엔드 |
+| 1-9 | 푸시 알림 | `PUT /notifications/push-subscriptions`(FCM) 연결에 Firebase 프로젝트 · iOS 설정 파일 필요 | 백엔드 |
+| 1-10 | 프로필 사진 업로드 미배포 | 백엔드 dev 병합(#96), Swagger에 API 없음 | 도현 |
 
 - 1-1 · 1-2: 코드 배포(11-02 CD main)는 완료. 변경은 `environment.example.json` · `.env.example`에만 있음. 실제 GKE 환경 설정 `webOrigins`(HTTP CORS · GCS 버킷 CORS)와 `websocketOrigins`에 `http://localhost:5173`, `capacitor://localhost` 추가 후 재배포 필요. GCS는 `PUT` method, `Content-Type` · `x-goog-if-generation-match` header 허용 포함
 - 1-3: `POST_REGION_ENABLED`, Map `KAKAO_LOCAL_REST_API_KEY` 등 랭킹 설정 필요. 행정동 조회는 정상
+- 1-3 관련(dev 반영, 미배포): `POST_REGION_ENABLED` 제거, 신규 글 작성 시 행정동 조회 필수. Map `KAKAO_LOCAL_REST_API_KEY` 없으면 글 작성 503
 - 1-4: 위 약관 문서 URL로 `seed:terms` 실행 필요. 현재 프론트는 약관 목록이 비면 동의 저장 없이 진행
-- 1-5: 카카오 → 프론트 `/auth/kakao/callback`(code 수신) → `POST /api/v1/auth/kakao` 구조라 redirect URI는 프론트 주소여야 함. 개발용 `http://localhost:5173/auth/kakao/callback`을 카카오 콘솔 · 깃헙 환경변수 `KAKAO_REDIRECT_URI`에 동일하게 설정 후 재배포 필요
-- 1-6: 백엔드 `KAKAO_REST_API_KEY`와 같은 키. 프론트는 인가 요청에 `state`를 붙여 돌아온 값과 비교함
-- 1-7: 현재 프론트는 검사 실패 시 비슷한 글 팝업 없이 바로 게시
-- 1-8: 프론트 요청 형식은 계약과 일치. 현재는 "지금은 신고를 받을 수 없어요" 안내
-- 1-9: 프론트 뱃지 4종(첫 소식 · 해결사 · 탐정 · 단골 이웃)과 서버 뱃지 `name` 일치 필요. 현재 프론트는 서버가 준 뱃지만 획득으로 표시
-- 1-10: 응답 형식은 실제 응답 · 백엔드 코드로 확인해 프론트에 반영함
-- 1-11: 프론트는 Capacitor 푸시 플러그인 · APNs 설정 후 토큰 등록 연결 예정
+- 1-5: 현재 프론트는 검사 실패 시 비슷한 글 팝업 없이 바로 게시
+- 1-6: 프론트 요청 형식은 계약과 일치. 현재는 "지금은 신고를 받을 수 없어요" 안내
+- 1-7: 프론트 뱃지 4종(첫 소식 · 해결사 · 탐정 · 단골 이웃)과 서버 뱃지 `name` 일치 필요. 현재 프론트는 서버가 준 뱃지만 획득으로 표시
+- 1-8: 응답 형식은 실제 응답 · 백엔드 코드로 확인해 프론트에 반영함
+- 1-9: 프론트는 Capacitor 푸시 플러그인 · APNs 설정 후 토큰 등록 연결 예정
+- 1-10: 배포 후 프론트 연결. `PATCH /users/me`의 `profileImageKey`는 제거용 `null`만 허용으로 변경됨
 
 ---
 
@@ -60,4 +60,4 @@
 | # | 항목 | 내용 | 담당 |
 | --- | --- | --- | --- |
 | 2-1 | WebSocket 쿠키 인증 | HTTP(`api.`)와 WebSocket(`ws.`) 호스트가 달라 `wgo_access_token` 쿠키의 `Domain` 설정(`AUTH_COOKIE_DOMAIN`) 필요. localhost ↔ sslip.io는 다른 사이트라 타사 쿠키 차단 가능 | 도현 |
-| 2-2 | 실제 로그인 · 로그아웃 | 카카오 로그인(1-5 · 1-6) 이후 토큰 갱신 · 로그아웃 · 쿠키 삭제 확인 | 프론트 |
+| 2-2 | 로그인 이후 흐름 | 첫 로그인 온보딩(약관 · 닉네임 · 위치 권한), 재로그인, 토큰 갱신, 로그아웃 · 쿠키 삭제 확인 | 프론트 |
