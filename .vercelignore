@@ -1,0 +1,7 @@
+# 배포 빌드에 로컬 비밀값 · 앱 빌드 산출물을 올리지 않는다
+.env*
+!.env.example
+ios
+dist
+node_modules
+docs
