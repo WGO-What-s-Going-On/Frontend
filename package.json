@@ -8,9 +8,12 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "ios": "npm run build && cap sync ios && cap open ios",
-    "ios:sync": "npm run build && cap sync ios"
+    "ios:sync": "npm run build && cap sync ios",
+    "android": "npm run build && cap sync android && cap open android",
+    "android:sync": "npm run build && cap sync android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.3",
     "@capacitor/core": "^8.5.3",
     "@capacitor/ios": "^8.5.3",
     "@vitejs/plugin-react": "latest",
