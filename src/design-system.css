@@ -810,7 +810,13 @@ html { -webkit-tap-highlight-color: transparent; }
 .badge-list li.earned small { color: var(--c-accent); }
 
 /* ---------- 프로필 수정: 흰 입력칸, 라벨 위, 닉네임 칸 안에 중복 확인 ---------- */
-.profile-edit-avatar { display: flex; justify-content: center; margin: 4px 0 24px; }
+.profile-edit-avatar { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 4px 0 24px; }
+.profile-photo-button { position: relative; padding: 0; border: 0; border-radius: 50%; background: none; }
+.profile-photo-button:disabled { opacity: .7; }
+.profile-photo-badge { position: absolute; right: -2px; bottom: -2px; display: grid; place-items: center; width: 28px; height: 28px; color: var(--c-ink); border: 2px solid var(--c-page); border-radius: 50%; background: var(--c-surface); }
+.profile-photo-remove { font-size: 13px; }
+.profile-photo-badge .spin { animation: profile-photo-spin 1s linear infinite; }
+@keyframes profile-photo-spin { to { transform: rotate(360deg); } }
 .form-field { margin-bottom: 22px; }
 .form-label { display: block; margin: 0 0 8px; color: var(--c-body); font-size: 13px; font-weight: 600; }
 .form-input {

@@ -10,6 +10,7 @@ import { ApiError, SESSION_EXPIRED_EVENT } from '../api/client'
 import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/auth'
 import { clearSession, readSession } from '../api/session'
 import { startPush, stopPush } from '../api/push'
+import { getMyProfileImage, removeProfileImage as removeProfileImageApi, shrinkImage, uploadProfileImage } from '../api/profileImage'
 import { consentTerms, getMe, getTerms, requestWithdrawal, updateMe } from '../api/users'
 import type { MeResponse } from '../api/users'
 import { useServerSync, type RankingView } from './useServerSync'
@@ -110,6 +111,10 @@ interface AppContextValue {
   castVote: (boardId: string, commentId: string) => void
   toggleCommentLike: (id: string) => void
   updateUser: (input: Pick<User, 'nickname' | 'realName'>) => Promise<void>
+  // 내 프로필 사진 주소 (없으면 기본 아바타). 서버 주소는 서명된 값이라 기기에 저장하지 않는다
+  profileImageUrl: string | null
+  changeProfileImage: (file: File) => Promise<void>
+  removeProfileImage: () => Promise<void>
   markNoticeRead: (id: string) => void
   markAllNoticesRead: () => void
   deleteNotice: (id: string) => void
@@ -408,6 +413,34 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
     setUser((value) => ({ ...value, ...input })); showToast('프로필을 저장했습니다.'); go('my')
   }
+  // 프로필 사진: 서버 연동 중이면 서버에 올리고 보기 주소를 받는다(주소는 만료 전에 다시 받는다). 목업이면 이 기기에서만 보인다
+  const [profileImage, setProfileImage] = useState<{ url: string; expiresAt: number } | null>(null)
+  const applyProfileImage = (image: { url: string | null; expiresAt: string | null }) => setProfileImage(image.url ? { url: image.url, expiresAt: image.expiresAt ? Date.parse(image.expiresAt) : Infinity } : null)
+  useEffect(() => {
+    if (!server.live) { setProfileImage(null); return }
+    getMyProfileImage().then(applyProfileImage).catch(() => undefined)
+  }, [server.live])
+  useEffect(() => {
+    if (!server.live || !profileImage || !Number.isFinite(profileImage.expiresAt)) return
+    const timer = window.setTimeout(() => { getMyProfileImage().then(applyProfileImage).catch(() => undefined) }, Math.max(5_000, profileImage.expiresAt - Date.now() - 30_000))
+    return () => window.clearTimeout(timer)
+  }, [server.live, profileImage])
+  const changeProfileImage = async (file: File) => {
+    try {
+      if (server.live) applyProfileImage(await uploadProfileImage(file))
+      else setProfileImage({ url: URL.createObjectURL(await shrinkImage(file)), expiresAt: Infinity })
+      showToast('프로필 사진을 바꿨어요.')
+    } catch (error) {
+      showToast(error instanceof ApiError && error.status === 400 && error.message ? error.message : '프로필 사진을 바꾸지 못했어요. 다시 시도해 주세요.')
+    }
+  }
+  const removeProfileImage = async () => {
+    try {
+      if (server.live) await removeProfileImageApi()
+      setProfileImage(null)
+      showToast('프로필 사진을 지웠어요.')
+    } catch { showToast('프로필 사진을 지우지 못했어요.') }
+  }
   const markNoticeRead = (id: string) => setNotices((items) => items.map((notice) => notice.id === id ? { ...notice, read: true } : notice))
   const markAllNoticesRead = () => setNotices((items) => items.map((notice) => ({ ...notice, read: true })))
   const deleteNotice = (id: string) => setNotices((items) => items.filter((notice) => notice.id !== id))
@@ -535,10 +568,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     alertBoardIds: server.live ? boards.filter((board) => !mutedBoardIds.includes(board.id)).map((board) => board.id) : alertBoardIds,
     recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
-    updateUser, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
+    updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
     live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount])
+  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

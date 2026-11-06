@@ -8,7 +8,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { IconButton } from '../../components/ui/IconButton'
-import { Moon, Sun } from 'lucide-react'
+import { Camera, Loader2, Moon, Sun } from 'lucide-react'
 import { useApp, type NotificationSettings } from '../../context/AppContext'
 import { nicknameError, nicknameFormatError } from '../../domain/nickname'
 import { apiEnabled } from '../../api/config'
@@ -36,10 +36,10 @@ function ThemeSwitch({ dark, onToggle }: { dark: boolean; onToggle: () => void }
 }
 
 export function ProfileScreen() {
-  const { user, boards, comments, go, themeMode, toggleTheme, logout, withdraw, live, serverLevel } = useApp()
+  const { user, boards, comments, go, themeMode, toggleTheme, logout, withdraw, live, serverLevel, profileImageUrl } = useApp()
   const [withdrawOpen, setWithdrawOpen] = useState(false)
   const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="30일 안에 다시 로그인하면 탈퇴가 취소돼요. 이후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { setWithdrawOpen(false); withdraw() }}/>
-  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
+  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} photo={profileImageUrl ?? undefined} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
 
 export function ActivityScreen() {
@@ -71,8 +71,16 @@ export function ActivityScreen() {
 
 // 프로필 수정: 실명(비공개)과 닉네임. 닉네임을 바꾸면 중복 확인을 거쳐야 저장할 수 있다.
 export function ProfileEditScreen() {
-  const { user, boards, comments, updateUser, go } = useApp()
+  const { user, boards, comments, updateUser, go, profileImageUrl, changeProfileImage, removeProfileImage } = useApp()
   const [realName, setRealName] = useState(user.realName ?? '')
+  const photoRef = useRef<HTMLInputElement>(null)
+  const [photoBusy, setPhotoBusy] = useState(false)
+  const pickPhoto = async (file?: File) => {
+    if (!file) return
+    setPhotoBusy(true)
+    await changeProfileImage(file)
+    setPhotoBusy(false)
+  }
   const [nickname, setNickname] = useState(user.nickname)
   const [checked, setChecked] = useState<{ name: string; error: string } | null>(null)
   const trimmed = nickname.trim()
@@ -93,7 +101,15 @@ export function ProfileEditScreen() {
   const messageTone = !changed ? '' : formatError || result?.error ? 'error' : result ? 'ok' : 'hint'
   const canSave = Boolean(realName.trim() && trimmed) && (!changed || (result !== null && !result.error))
   return <AppShell contentClassName="profile-edit-screen"><BackHeader title="프로필 수정" onBack={() => go('my')}/>
-    <div className="profile-edit-avatar"><Avatar name={trimmed || user.nickname} size={80}/></div>
+    {/* 프로필 사진: 사진을 누르면 앨범 · 카메라에서 고른다 */}
+    <div className="profile-edit-avatar">
+      <button className="profile-photo-button" onClick={() => photoRef.current?.click()} disabled={photoBusy} aria-label="프로필 사진 바꾸기">
+        <Avatar src={profileImageUrl ?? undefined} name={trimmed || user.nickname} size={80}/>
+        <span className="profile-photo-badge" aria-hidden="true">{photoBusy ? <Loader2 size={15} className="spin"/> : <Camera size={15}/>}</span>
+      </button>
+      {profileImageUrl && <button className="text-button profile-photo-remove" onClick={removeProfileImage} disabled={photoBusy}>사진 삭제</button>}
+      <input ref={photoRef} className="quick-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/*" onChange={(event) => { pickPhoto(event.target.files?.[0]); event.target.value = '' }}/>
+    </div>
     <div className="form-field">
       <span className="form-label">실명</span>
       <input className="form-input" value={realName} onChange={(event) => setRealName(event.target.value)} placeholder="실명을 입력해 주세요" maxLength={20} autoComplete="name"/>
