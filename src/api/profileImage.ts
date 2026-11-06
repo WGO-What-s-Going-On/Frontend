@@ -44,3 +44,21 @@ export async function uploadProfileImage(file: File): Promise<ProfileImageUrl> {
 }
 
 export const removeProfileImage = () => api('PATCH', '/api/v1/users/me', { body: { profileImageKey: null } })
+
+// 다른 사람 프로필 사진 보기 주소. 차단 · 탈퇴 · 비공개면 404 → 기본 아바타.
+// 같은 사람을 여러 번 그려도 한 번만 받고, 만료 30초 전까지는 받아 둔 주소를 쓴다 (기기에 저장하지 않고 이번 실행 동안만)
+const userPhotos = new Map<number, Promise<string | null> | { url: string | null; until: number }>()
+
+export function getUserProfileImageUrl(userId: number): Promise<string | null> {
+  const cached = userPhotos.get(userId)
+  if (cached instanceof Promise) return cached
+  if (cached && cached.until > Date.now()) return Promise.resolve(cached.url)
+  const request = api<ProfileImageUrl>('GET', `/api/v1/users/${userId}/profile-image/url`)
+    .then((image) => {
+      userPhotos.set(userId, { url: image.url, until: image.expiresAt ? Date.parse(image.expiresAt) - 30_000 : Date.now() + 5 * 60_000 })
+      return image.url
+    })
+    .catch(() => { userPhotos.set(userId, { url: null, until: Date.now() + 5 * 60_000 }); return null })
+  userPhotos.set(userId, request)
+  return request
+}

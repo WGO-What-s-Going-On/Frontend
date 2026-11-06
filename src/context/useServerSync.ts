@@ -24,7 +24,7 @@ interface Setters {
   onBoardDeleted: (boardId: string) => void
 }
 
-export interface RankingView { regionName: string; items: { rank: number; name: string; picks: number; score: number; me: boolean }[]; myRank: number | null; myScore: number }
+export interface RankingView { regionName: string; items: { rank: number; userId: number; name: string; picks: number; score: number; me: boolean }[]; myRank: number | null; myScore: number }
 
 // 실제 서버 연동 (serverFeatures.posts가 켜져 있고 로그인했을 때만).
 // 화면은 그대로 두고, 앱 상태(boards · comments · notices)를 서버 데이터로 채우고 사용자 동작을 서버로 보낸다.
@@ -222,7 +222,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     const myId = Number(readSession()?.userId)
     return {
       regionName: region.name, myRank: ranking.myRank, myScore: ranking.myScore,
-      items: ranking.items.map((item) => ({ rank: item.rank, name: item.authorNickname ?? '알 수 없음', picks: item.picks, score: item.score, me: item.userId === myId })),
+      items: ranking.items.map((item) => ({ rank: item.rank, userId: item.userId, name: item.authorNickname ?? '알 수 없음', picks: item.picks, score: item.score, me: item.userId === myId })),
     }
   }
 

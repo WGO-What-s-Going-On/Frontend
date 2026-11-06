@@ -7,6 +7,7 @@ import { NoticeBell } from '../../components/ui/NoticeBell'
 import { ErrorState } from '../../components/ui/ErrorState'
 import { RowSkeleton } from '../../components/ui/Skeleton'
 import { useApp } from '../../context/AppContext'
+import { getUserProfileImageUrl } from '../../api/profileImage'
 import { SolidLock } from '../board/FeedItem'
 import { PICK_SCORE, levelIndex, levelProgress, levelStats, levels, myRegion, rankRegions, regionRanks, scoreOf } from './levels'
 import type { LevelStats } from './levels'
@@ -69,14 +70,27 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
 }
 
 // 랭킹 표: 1등은 맨 위 가운데, 2 · 3등은 그 아래 한 줄에 나란히 크게 보여 주고 4등부터는 목록
-interface RankEntry { rank: number; name: string; picks: number; score: number; me: boolean }
+interface RankEntry { rank: number; userId?: number; name: string; picks: number; score: number; me: boolean }
+
+// 랭킹 프로필 사진: 서버 연동 중이면 그 사람이 올린 사진, 나는 내 사진, 없으면 이름 첫 글자
+function RankAvatar({ entry, size }: { entry: RankEntry; size: number }) {
+  const { profileImageUrl } = useApp()
+  const [photo, setPhoto] = useState<string | null>(null)
+  useEffect(() => {
+    if (entry.me || entry.userId === undefined) return
+    let active = true
+    getUserProfileImageUrl(entry.userId).then((url) => { if (active) setPhoto(url) })
+    return () => { active = false }
+  }, [entry.userId, entry.me])
+  return <Avatar src={(entry.me ? profileImageUrl : photo) ?? undefined} name={entry.name} size={size}/>
+}
 
 function RankBoard({ entries }: { entries: RankEntry[] }) {
   const [first, second, third] = entries
   const rest = entries.slice(3)
   const podium = (entry: RankEntry | undefined, place: 1 | 2 | 3) => entry && <div className={`rank-podium-card place-${place} ${entry.me ? 'me' : ''}`}>
     <b className="rank-podium-place">{entry.rank}</b>
-    <Avatar name={entry.name} size={place === 1 ? 64 : 48}/>
+    <RankAvatar entry={entry} size={place === 1 ? 64 : 48}/>
     <strong>{entry.name}</strong>
     <span className="rank-score">{entry.score}점</span>
     <small>대표 의견 {entry.picks}회</small>
@@ -88,7 +102,7 @@ function RankBoard({ entries }: { entries: RankEntry[] }) {
     </div>}
     {rest.length > 0 && <ol className="rank-list" start={4}>{rest.map((entry) => <li key={`${entry.rank}-${entry.name}`} className={entry.me ? 'me' : ''}>
       <b>{entry.rank}</b>
-      <Avatar name={entry.name} size={36}/>
+      <RankAvatar entry={entry} size={36}/>
       <span className="rank-name"><strong>{entry.name}</strong><small>대표 의견 {entry.picks}회</small></span>
       <span className="rank-score">{entry.score}점</span>
     </li>)}</ol>}
@@ -111,7 +125,7 @@ function ServerRankPanel({ stats }: { stats: LevelStats }) {
     <div className="rank-me">{seer && ranking.myRank
       ? <><strong>내 순위 {ranking.myRank}위</strong><span className="rank-score">{ranking.myScore}점</span></>
       : <><SolidLock size={20} label="잠김"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>현재 Lv.{current + 1} {levels[current].name}</small></span></>}</div>
-    <RankBoard entries={ranking.items.map((entry) => ({ rank: entry.rank, name: entry.name, picks: entry.picks, score: entry.score, me: Boolean(entry.me) }))}/>
+    <RankBoard entries={ranking.items.map((entry) => ({ rank: entry.rank, userId: entry.userId, name: entry.name, picks: entry.picks, score: entry.score, me: Boolean(entry.me) }))}/>
   </>
 }
 
