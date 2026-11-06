@@ -537,6 +537,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       onOpen: ({ postId, toAlerts }) => navigate(toAlerts || !postId ? pathForScreen('alerts') : pathForScreen('detail', postId)),
     })
   }, [server.live, screen])
+  // 서버 연동 배포본: 로그인 없이 /map 같은 주소로 바로 들어오면 목업 데이터가 보이지 않게 로그인 화면으로 보낸다
+  useEffect(() => {
+    if (apiEnabled && !readSession() && screen !== 'login' && screen !== 'kakao-callback') navigate(pathForScreen('login'), { replace: true })
+  }, [screen])
   // 토큰 갱신까지 실패하면(만료 · 다른 기기 로그아웃 · 탈퇴) 실시간을 끊고 로그인 화면으로
   useEffect(() => {
     const expired = () => {
