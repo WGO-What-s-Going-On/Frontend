@@ -1694,6 +1694,9 @@ button.title-progress-card:active { background: #f7f8fa; }
 }
 .board-image-placeholder.sheet-image { height: 120px; margin: 4px 0 12px; }
 .board-image-placeholder.detail-image { height: 200px; margin: 14px 0 4px; }
+/* 꾹 눌러 크게 보기: 길게 누를 때 뜨는 시스템 메뉴 · 글자 선택 · 끌기를 막는다 */
+.detail-photo-press { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+.detail-photo-press img { -webkit-user-drag: none; pointer-events: none; }
 /* 게시판 카드: 본문 아래 사진 */
 .ux-board-card .board-image-placeholder.card-image { display: grid; place-items: center; height: 150px; margin: 12px 0 2px; }
 /* 지도 시트의 본문은 한 줄만 보이고 '…'로 끊는다 (나머지는 자세히 보기에서) */

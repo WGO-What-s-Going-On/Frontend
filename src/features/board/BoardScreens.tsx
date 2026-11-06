@@ -23,6 +23,7 @@ import { FeedItem } from './FeedItem'
 import { AlbumTile } from './AlbumTile'
 import { CommentVoteSection } from './CommentVoteSection'
 import { BoardImage } from './BoardImage'
+import { PhotoViewer, useLongPress } from '../../components/ui/PhotoViewer'
 import { imageProblem } from '../../api/media'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
@@ -215,7 +216,7 @@ function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, 
     {!isReply && replies.length > 0 && <div className="comment-replies">{replies.map((reply) => <CommentItem key={reply.id} comment={reply} onReply={onReply} onEdit={onEdit} isReply replyTargetId={replyTargetId} readOnly={readOnly}/>)}</div>}
     {picker !== null && <div ref={pickerRef} className="context-menu comment-reaction-picker" style={{ top: picker }} role="menu" aria-label="공감 고르기">{commentReactionList.map((reaction) => { const Icon = commentReactionIcon[reaction]; return <button key={reaction} role="menuitemradio" aria-checked={mine.includes(reaction)} className={mine.includes(reaction) ? 'selected' : ''} onClick={() => { reactToComment(comment.id, reaction); setPicker(null) }}><Icon size={16} strokeWidth={2}/><span>{reaction}</span></button> })}</div>}
     {menu && <div ref={menuRef} className={`context-menu comment-context-menu ${menu === 'report' ? 'comment-report-menu' : ''}`} role="menu" aria-label={menu === 'report' ? '댓글 신고 사유' : '댓글 메뉴'}>{comment.authorId === user.id ? <><button onClick={() => { onEdit(comment); setMenu(null) }}>수정</button><button onClick={() => deleteComment(comment.id)}>삭제</button></> : menu === 'actions' ? <><button onClick={() => setMenu('report')}>신고</button><button onClick={() => { blockUser(comment.authorId); setMenu(null) }}>차단</button></> : <><strong>신고 사유</strong>{reportReasons.map((reason) => <button key={reason} onClick={() => { reportTarget('댓글', comment.id, reason); setMenu(null) }}>{reason}</button>)}<button className="comment-report-back" onClick={() => setMenu('actions')}>뒤로</button></>}</div>}
-    {photoOpen && comment.imageUrl && <div className="comment-photo-modal" role="dialog" aria-label="현장 사진 보기" onClick={() => setPhotoOpen(false)}><button aria-label="사진 닫기"><X size={22}/></button><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></div>}
+    {photoOpen && comment.imageUrl && <PhotoViewer src={comment.imageUrl} alt="댓글에 첨부된 현장 사진" onClose={() => setPhotoOpen(false)}/>}
   </article>
 }
 
@@ -226,6 +227,8 @@ export function BoardDetailScreen() {
   const [body, setBody] = useState('')
   const [commentImageUrl, setCommentImageUrl] = useState('')
   const [commentFile, setCommentFile] = useState<File>()
+  const [boardPhotoOpen, setBoardPhotoOpen] = useState(false)
+  const photoPress = useLongPress(() => setBoardPhotoOpen(true))
   // 서버에 보내는 중에는 다시 누르지 못하게 (사진 업로드가 길어도 같은 댓글이 두 번 올라가지 않게)
   const [sending, setSending] = useState(false)
   const [replyTo, setReplyTo] = useState<Comment | null>(null)
@@ -290,9 +293,11 @@ export function BoardDetailScreen() {
       <div className="detail-title-row"><h1 title={board.title}>{board.title}</h1><span className="detail-title-menu-wrap"><IconButton className="detail-title-menu" label="게시글 메뉴" onClick={() => setMenu(!menu)} expanded={menu}><MoreHorizontal size={18}/></IconButton>{menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => { setEditOpen(true); setMenu(false) }}>수정</button><button onClick={() => { setConfirm('finish'); setMenu(false) }}>종료</button><button onClick={() => { setConfirm('delete'); setMenu(false) }}>삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>차단</button></>}</div>}</span></div>
       <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span>{board.edited && <span className="detail-edited">수정됨</span>}<span><MapPin size={12}/>{board.distance}m</span><span>조회 {board.views}</span></div>
       <p className="detail-body">{board.body}</p>
-      <BoardImage board={board} variant="detail-image" block/>
+      {/* 사진을 꾹 누르면 잘리지 않은 전체 사진 */}
+      {board.imageUrl ? <div className="detail-photo-press" {...photoPress}><BoardImage board={board} variant="detail-image" block/></div> : <BoardImage board={board} variant="detail-image" block/>}
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={canParticipate} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
     </article>
+    {boardPhotoOpen && board.imageUrl && <PhotoViewer src={board.imageUrl} alt="현장 사진" onClose={() => setBoardPhotoOpen(false)}/>}
     <CommentVoteSection board={board} canChoose={canParticipate}/>
     <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={canParticipate ? startComment : () => undefined} onEdit={startEdit} replyTargetId={replyTo?.id} readOnly={!canParticipate}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong>{canParticipate && <p>가장 먼저 상황을 알려주세요</p>}</div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>접기 <ChevronUp size={17}/></button>}</section>
   </AppShell>
