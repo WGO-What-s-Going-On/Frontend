@@ -11,3 +11,6 @@ capacitor-cordova-ios-plugins
 # Generated Config files
 App/App/capacitor.config.json
 App/App/config.xml
+
+# 플러그인 링크 (npx cap sync가 컴퓨터마다 다시 만든다)
+App/CapApp-SPM/symlinks

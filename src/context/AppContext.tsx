@@ -9,6 +9,7 @@ import { apiEnabled, kakaoEnabled } from '../api/config'
 import { ApiError, SESSION_EXPIRED_EVENT } from '../api/client'
 import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/auth'
 import { clearSession, readSession } from '../api/session'
+import { startPush, stopPush } from '../api/push'
 import { consentTerms, getMe, getTerms, requestWithdrawal, updateMe } from '../api/users'
 import type { MeResponse } from '../api/users'
 import { useServerSync, type RankingView } from './useServerSync'
@@ -285,6 +286,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (apiEnabled && readSession()) {
       try { await requestWithdrawal() } catch { showToast('탈퇴를 처리하지 못했어요. 다시 시도해 주세요.'); return }
       server.stopRealtime()
+      await stopPush()
+      pushStarted.current = false
       clearSession()
     }
     setUser((value) => ({ ...value, serverId: undefined }))
@@ -293,6 +296,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }
   const logout = async () => {
     server.stopRealtime()
+    await stopPush()
+    pushStarted.current = false
     await logoutApi()
     setUser((value) => ({ ...value, serverId: undefined }))
     showToast('로그아웃했습니다.')
@@ -487,6 +492,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
   }, [server.live])
   useEffect(() => { if (server.live && screen === 'alerts') server.loadNotices().catch(() => undefined) }, [screen])
+  // 앱 푸시 알림: 로그인 · 온보딩을 마치고 지도 · 게시판에 처음 들어왔을 때 권한을 묻고 이 기기 토큰을 등록한다 (앱에서만)
+  const pushStarted = useRef(false)
+  const latestServer = useRef(server)
+  latestServer.current = server
+  useEffect(() => {
+    if (!server.live || pushStarted.current || (screen !== 'home' && screen !== 'board')) return
+    pushStarted.current = true
+    startPush({
+      onReceive: () => { latestServer.current.loadUnread().catch(() => undefined); latestServer.current.loadNotices().catch(() => undefined) },
+      onOpen: ({ postId, toAlerts }) => navigate(toAlerts || !postId ? pathForScreen('alerts') : pathForScreen('detail', postId)),
+    })
+  }, [server.live, screen])
   // 토큰 갱신까지 실패하면(만료 · 다른 기기 로그아웃 · 탈퇴) 실시간을 끊고 로그인 화면으로
   useEffect(() => {
     const expired = () => {
