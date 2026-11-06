@@ -1,12 +1,27 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
 import { X } from 'lucide-react'
 
-// 사진 크게 보기: 어두운 바탕에 원본 비율 그대로. 바탕이나 닫기 버튼을 누르면 닫힌다
+// 사진 크게 보기: 어두운 바탕 위에 원본 비율 그대로. 열 때는 바탕이 서서히 어두워지며 사진이 살짝 커지며 나타나고, 닫을 때는 반대로
+// 바탕 · 사진 · 닫기 버튼 어디를 눌러도 닫힌다. 꾹 눌러 연 손가락이 그대로 있어도 사진이 선택(파란 칠)되지 않게 막는다
+const CLOSE_MS = 180
+
 export function PhotoViewer({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
-  return <div className="comment-photo-modal" role="dialog" aria-label="사진 크게 보기" onClick={onClose}>
-    <button aria-label="사진 닫기"><X size={22}/></button>
-    <img src={src} alt={alt}/>
+  const [closing, setClosing] = useState(false)
+  useEffect(() => {
+    window.getSelection()?.removeAllRanges()
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') close() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+  const close = () => {
+    if (closing) return
+    setClosing(true)
+    window.setTimeout(onClose, CLOSE_MS)
+  }
+  return <div className={`photo-viewer ${closing ? 'closing' : ''}`} role="dialog" aria-modal="true" aria-label="사진 크게 보기" onClick={close} onContextMenu={(event) => event.preventDefault()}>
+    <button className="photo-viewer-close" aria-label="사진 닫기"><X size={20} strokeWidth={2.4}/></button>
+    <img src={src} alt={alt} draggable={false}/>
   </div>
 }
 

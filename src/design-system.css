@@ -1697,6 +1697,58 @@ button.title-progress-card:active { background: #f7f8fa; }
 /* 꾹 눌러 크게 보기: 길게 누를 때 뜨는 시스템 메뉴 · 글자 선택 · 끌기를 막는다 */
 .detail-photo-press { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 .detail-photo-press img { -webkit-user-drag: none; pointer-events: none; }
+/* 사진 크게 보기 */
+.photo-viewer {
+  position: fixed;
+  z-index: 40;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: calc(var(--top-inset) + 56px) 16px calc(var(--bottom-inset) + 24px);
+  background: rgba(10, 11, 14, .92);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  animation: photo-viewer-fade .2s ease-out both;
+}
+.photo-viewer img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 10px;
+  object-fit: contain;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  animation: photo-viewer-zoom .26s cubic-bezier(.2, .8, .2, 1) both;
+}
+.photo-viewer-close {
+  position: absolute;
+  top: calc(var(--top-inset) + 8px);
+  right: 16px;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: #fff;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .14);
+  -webkit-user-select: none;
+  user-select: none;
+}
+.photo-viewer-close:active { background: rgba(255, 255, 255, .24); }
+.photo-viewer.closing { animation: photo-viewer-fade-out .18s ease-in both; }
+.photo-viewer.closing img { animation: photo-viewer-zoom-out .18s ease-in both; }
+@keyframes photo-viewer-fade { from { opacity: 0; } }
+@keyframes photo-viewer-zoom { from { opacity: 0; transform: scale(.94); } }
+@keyframes photo-viewer-fade-out { to { opacity: 0; } }
+@keyframes photo-viewer-zoom-out { to { opacity: 0; transform: scale(.96); } }
+@media (prefers-reduced-motion: reduce) {
+  .photo-viewer, .photo-viewer img, .photo-viewer.closing, .photo-viewer.closing img { animation-duration: .01s; }
+}
 /* 게시판 카드: 본문 아래 사진 */
 .ux-board-card .board-image-placeholder.card-image { display: grid; place-items: center; height: 150px; margin: 12px 0 2px; }
 /* 지도 시트의 본문은 한 줄만 보이고 '…'로 끊는다 (나머지는 자세히 보기에서) */
