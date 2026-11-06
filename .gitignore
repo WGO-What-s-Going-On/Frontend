@@ -6,3 +6,7 @@ dist/
 *.local
 !.env.example
 .vercel
+
+# Firebase 설정 파일: 공개 저장소라 올리지 않고 팀원끼리 따로 주고받는다
+android/app/google-services.json
+ios/App/App/GoogleService-Info.plist
