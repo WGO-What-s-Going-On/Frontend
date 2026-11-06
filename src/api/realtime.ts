@@ -44,6 +44,8 @@ export function createRealtime({ url, open = (address) => new WebSocket(address)
   const boards = new Set<string>()
   // 한 번이라도 참여에 성공한 게시판 (재연결 후 참여면 onRejoin)
   const joinedOnce = new Set<string>()
+  // 지금 연결에서 참여가 끝난 게시판 (끊기면 비운다). 참여 전 · 실패면 화면이 HTTP로 대신 새로 읽는다
+  const joined = new Set<string>()
   const pending = new Map<string, { resolve: (value: unknown) => void; reject: (error: RealtimeError) => void; timer: number }>()
   const seen = new Set<string>()
 
@@ -59,6 +61,7 @@ export function createRealtime({ url, open = (address) => new WebSocket(address)
     .then(() => {
       if (joinedOnce.has(boardId)) onRejoin(boardId)
       joinedOnce.add(boardId)
+      joined.add(boardId)
     })
     .catch((error: RealtimeError) => {
       // 150m 밖 · 위치 만료 · 종료된 글은 실시간 없이 HTTP 화면만 쓴다
@@ -109,6 +112,7 @@ export function createRealtime({ url, open = (address) => new WebSocket(address)
       if (socket !== ws) return
       socket = null
       ready = false
+      joined.clear()
       pending.forEach((request) => { window.clearTimeout(request.timer); request.reject(new RealtimeError('WS_CLOSED', '실시간 연결 끊김')) })
       pending.clear()
       if (!boards.size) return
@@ -141,15 +145,21 @@ export function createRealtime({ url, open = (address) => new WebSocket(address)
       connect()
       return Promise.resolve()
     },
+    // 이 게시판 실시간을 받고 있는지
+    isJoined(boardId: string) {
+      return ready && joined.has(boardId)
+    },
     leave(boardId: string) {
       boards.delete(boardId)
       joinedOnce.delete(boardId)
+      joined.delete(boardId)
       if (ready) send('board.leave', { boardId }).catch(() => undefined)
       if (!boards.size) this.close()
     },
     close() {
       boards.clear()
       joinedOnce.clear()
+      joined.clear()
       window.clearTimeout(retryTimer)
       const ws = socket
       socket = null

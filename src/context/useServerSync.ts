@@ -28,6 +28,9 @@ export interface RankingView { regionName: string; items: { rank: number; name: 
 
 // 실제 서버 연동 (serverFeatures.posts가 켜져 있고 로그인했을 때만).
 // 화면은 그대로 두고, 앱 상태(boards · comments · notices)를 서버 데이터로 채우고 사용자 동작을 서버로 보낸다.
+// 실시간이 안 될 때 상세 화면을 새로 읽는 간격
+const POLL_MS = 5_000
+
 export function useServerSync({ setBoards, setComments, setNotices, setNotificationSettings, onBoardDeleted }: Setters) {
   const live = serverFeatures.posts && Boolean(readSession())
   const coords = useRef<Coords | null>(null)
@@ -244,14 +247,17 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     }
     scheduleReload(postId)
   }
-  // 상세 화면을 보는 동안만 그 게시판에 실시간 참여한다. 참여는 서버가 최근 위치(5분)로 판단해서 위치를 먼저 알린다
+  // 상세 화면을 보는 동안만 그 게시판에 실시간 참여한다. 참여는 서버가 최근 위치(5분)로 판단해서 위치를 먼저 알린다.
+  // 실시간이 안 붙으면(Safari는 다른 사이트 쿠키를 막아 WebSocket 인증이 안 됨 · 범위 밖 · 끊김) 화면이 보이는 동안 5초마다 HTTP로 새로 읽는다
   const watchBoard = (postId: string) => {
-    if (!live || !WS_URL) return () => undefined
-    realtime.current ??= createRealtime({ url: WS_URL, onEvent: (event) => onRealtimeEvent(event), onRejoin: scheduleReload })
-    const client = realtime.current
+    if (!live) return () => undefined
+    const client = WS_URL ? (realtime.current ??= createRealtime({ url: WS_URL, onEvent: (event) => onRealtimeEvent(event), onRejoin: scheduleReload })) : null
     let active = true
-    locate().catch(() => undefined).then(() => { if (active) return client.join(postId) }).catch(() => undefined)
-    return () => { active = false; client.leave(postId) }
+    if (client) locate().catch(() => undefined).then(() => { if (active) return client.join(postId) }).catch(() => undefined)
+    const poll = window.setInterval(() => {
+      if (document.visibilityState === 'visible' && !client?.isJoined(postId)) loadBoard(postId).catch(() => undefined)
+    }, POLL_MS)
+    return () => { active = false; window.clearInterval(poll); client?.leave(postId) }
   }
   const stopRealtime = () => { realtime.current?.dispose(); realtime.current = null }
 
