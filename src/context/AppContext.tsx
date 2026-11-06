@@ -298,10 +298,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     showToast('로그아웃했습니다.')
     go('login')
   }
-  // 앱을 켰을 때 로그인 상태면 서버의 내 정보로 맞춘다 (토큰이 끝났으면 갱신, 실패하면 로그인 화면으로)
+  // 앱을 켰을 때 로그인 상태면 서버의 내 정보로 맞춘다 (토큰이 끝났으면 갱신, 실패하면 로그인 화면으로).
+  // 첫 주소(/)는 로그인 화면이라, 저장된 로그인이 있으면 카카오 버튼을 보여 주지 않고 바로 다음 화면으로 넘긴다
   useEffect(() => {
     if (!apiEnabled || !readSession()) return
-    getMe().then(applyMe).catch((error) => { if (error instanceof ApiError && error.status === 401) { setUser((value) => ({ ...value, serverId: undefined })); go('login') } })
+    const atLogin = screen === 'login'
+    const skipLogin = (onboarded: boolean) => navigate(pathForScreen(!onboarded ? 'terms' : locationPermission === 'unknown' ? 'location-permission' : 'home', currentBoardId), { replace: true })
+    if (atLogin && user.onboarded) skipLogin(true)
+    getMe().then((me) => {
+      applyMe(me)
+      if (atLogin && !user.onboarded) skipLogin(!me.onboardingRequired)
+    }).catch((error) => { if (error instanceof ApiError && error.status === 401) { setUser((value) => ({ ...value, serverId: undefined })); go('login') } })
   }, [])
   const setLocationPermission = (permission: LocationPermission) => {
     setLocationPermissionState(permission)
