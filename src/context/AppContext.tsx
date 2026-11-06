@@ -96,6 +96,9 @@ interface AppContextValue {
   updateComment: (id: string, body: string) => void
   setInRange: (value: boolean) => void
   relocate: (boardId: string) => void
+  // 당겨서 새로고침: 게시글 상세 · 알림을 서버에서 다시 받는다 (목업이면 바로 끝)
+  refreshBoard: (boardId: string) => Promise<void>
+  refreshNotices: () => Promise<void>
   // 서버 연동 중에는 올리기가 끝날 때까지 기다릴 수 있게 Promise를 돌려준다 (실패하면 reject)
   createBoard: (input: BoardInput) => void | Promise<void>
   updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous' | 'imageName'>) => void
@@ -128,7 +131,7 @@ interface AppContextValue {
   live: boolean
   boardsLoading: boolean
   boardsError: boolean
-  reloadBoards: () => void
+  reloadBoards: () => void | Promise<unknown>
   serverLevel: LevelStats | null
   // 서버 연동 중 받은 뱃지 이름 (목업이면 null → 화면에서 계산)
   serverBadges: string[] | null
@@ -571,7 +574,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     blockedUsers: server.live ? serverBlocked : blockedUsers,
     alertBoardIds: server.live ? boards.filter((board) => !mutedBoardIds.includes(board.id)).map((board) => board.id) : alertBoardIds,
     recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
-    go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate, createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
+    go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate,
+    refreshBoard: (boardId) => server.live ? server.loadBoard(boardId).then(() => undefined) : Promise.resolve(),
+    refreshNotices: () => server.live ? Promise.all([server.loadNotices(), server.loadUnread()]).then(() => undefined) : Promise.resolve(),
+    createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
     live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,

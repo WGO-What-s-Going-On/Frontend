@@ -12,6 +12,7 @@ import { IconButton } from '../../components/ui/IconButton'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { PostReactions } from '../../components/ui/PostReactions'
 import { usePullToRefresh } from '../../components/ui/usePullToRefresh'
+import { PullRefresh } from '../../components/ui/PullRefresh'
 import { useApp } from '../../context/AppContext'
 import { commentCountOf, isHotBoard, myCommentReactions } from '../../types/domain'
 import type { Board, Category, Comment, CommentReaction } from '../../types/domain'
@@ -39,6 +40,8 @@ function readBoardView(): BoardView {
 export function BoardListScreen() {
   const { boards, comments, blockedUsers, inRange, go, openBoard, live, boardsLoading, boardsError, reloadBoards } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
+  // 맨 위에서 당겨서 주변 글 새로 받기
+  const { pull, refreshing, ready } = usePullToRefresh(true, () => live ? reloadBoards() : undefined)
   const [view, setView] = useState(readBoardView)
   const switchView = (next: BoardView) => {
     if (next === view) return
@@ -80,6 +83,7 @@ export function BoardListScreen() {
     setSortMenuLeft(sortMenuLeft !== null || !chip || !row ? null : chip.left - row.left)
   }
   return <AppShell contentClassName={`ux-board-screen ${view === 'feed' ? 'feed-screen' : ''}`}>
+    <PullRefresh pull={pull} refreshing={refreshing} ready={ready}/>
     {/* 제목 옆 보기 전환: 두 방식을 나란히 두고 지금 보는 쪽만 파랗게 */}
     <header className="ux-board-header"><h1>게시판</h1><div className="board-view-switch" role="radiogroup" aria-label="보기 방식">{([['feed', '피드로 보기', AlignJustify], ['album', '앨범으로 보기', LayoutGrid]] as const).map(([value, label, Icon]) => <button key={value} role="radio" aria-checked={view === value} aria-label={label} className={view === value ? 'selected' : ''} onClick={() => switchView(value)}><Icon size={17}/></button>)}</div><NoticeBell/></header>
     {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
@@ -224,7 +228,7 @@ function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, 
 export function BoardDetailScreen() {
   // 다른 화면에서 게시글을 열고 들어왔을 때만 들어오는 애니메이션을 쓴다
   const entering = Boolean((useLocation().state as { enter?: boolean } | null)?.enter)
-  const { screen, currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers, relocate, showToast } = useApp()
+  const { screen, currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers, relocate, refreshBoard, showToast } = useApp()
   const [body, setBody] = useState('')
   const [commentImageUrl, setCommentImageUrl] = useState('')
   const [commentFile, setCommentFile] = useState<File>()
@@ -245,8 +249,9 @@ export function BoardDetailScreen() {
   const commentFileRef = useRef<HTMLInputElement>(null)
   const commentInputRef = useRef<HTMLInputElement>(null)
   // 범위 밖이면 당겨서 새로고침으로 위치를 다시 잡는다 (걸어와서 범위 안에 들어왔을 때)
-  const pullable = Boolean(board) && (!inRange || (board?.distance ?? 0) > RADIUS)
-  const { pull, refreshing, ready } = usePullToRefresh(pullable, () => { if (board) relocate(board.id) })
+  // 당겨서 새로고침: 범위 밖이면 위치를 다시 잡고, 범위 안이면 글 · 댓글을 다시 받는다
+  const pullOutside = Boolean(board) && (!inRange || (board?.distance ?? 0) > RADIUS)
+  const { pull, refreshing, ready } = usePullToRefresh(Boolean(board), () => { if (!board) return; if (pullOutside) relocate(board.id); else return refreshBoard(board.id) })
   // 오른쪽 새로고침 버튼: 당기기와 같은 위치 다시 잡기 (잠깐 돌다가 결과)
   const [checking, setChecking] = useState(false)
   const checkLocation = () => { if (checking || !board) return; setChecking(true); window.setTimeout(() => { setChecking(false); relocate(board.id) }, 800) }
@@ -288,7 +293,7 @@ export function BoardDetailScreen() {
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="삭제한 게시글은 다시 볼 수 없어요." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
     {confirm === 'finish' && <ConfirmDialog title="게시판을 종료할까요?" description={"더 이상 댓글과 반응을 받지 않아요\n마이 > 최근 활동에서 해제 가능"} confirmLabel="종료" danger onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(board.id); setConfirm(null) }}/>}
   </>}>
-    {outOfRange && <div className={`pull-refresh ${pull ? '' : 'idle'} ${refreshing ? 'refreshing' : ''}`} style={{ height: pull }} aria-live="polite"><RotateCw size={18} style={{ transform: refreshing ? undefined : `rotate(${pull * 3}deg)` }}/><span>{refreshing ? '위치 확인 중' : ready ? '놓으면 위치 새로고침' : '당겨서 위치 새로고침'}</span></div>}
+    <PullRefresh pull={pull} refreshing={refreshing} ready={ready} labels={pullOutside ? { idle: '당겨서 위치 새로고침', ready: '놓으면 위치 새로고침', busy: '위치 확인 중' } : undefined}/>
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('board')}><ArrowLeft size={22}/></IconButton></header>
     {outOfRange && <div className="outside-notice-row"><p className="outside-notice">{board.distance <= RADIUS && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '읽기 전용 · 범위 밖'}</p><IconButton className={`outside-refresh ${checking ? 'checking' : ''}`} label={checking ? '위치 확인 중' : '위치 새로고침'} onClick={checkLocation}><RotateCw size={16}/></IconButton></div>}
     <article className="detail-article">
