@@ -18,7 +18,7 @@ type MapFilter = '전체' | Category | 'HOT'
 
 const filters: { value: MapFilter; label: string }[] = [
   { value: '전체', label: '전체' },
-  ...(['긴급 사고', '도움 요청', '동네 소식', '일상 불편'] as const).map((category) => ({ value: category, label: categoryLabel[category] })),
+  ...(['긴급 사고', '도움 요청', '동네 소식', '일상 불편'] as const).map((category) => ({ value: category, label: categoryLabel[category], category })),
   { value: 'HOT', label: 'HOT' },
 ]
 

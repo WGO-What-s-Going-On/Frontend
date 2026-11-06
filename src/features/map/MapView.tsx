@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { CircleHelp, Flame, Hand, LocateFixed, Megaphone, Minus, Plus } from 'lucide-react'
+import { LocateFixed, Minus, Plus } from 'lucide-react'
+import { categoryIcon } from '../../domain/categoryIcons'
 import type { Board, Category } from '../../types/domain'
 import { ME, RADIUS, WORLD_SIZE, boardPosition, type Point } from './mapWorld'
 
@@ -13,12 +14,6 @@ const MIN_SCALE = 0.45
 const MAX_SCALE = 3
 const START_SCALE = 0.9
 
-const markerIcon: Record<Category, typeof Flame> = {
-  '긴급 사고': Flame,
-  '도움 요청': Hand,
-  '동네 소식': Megaphone,
-  '일상 불편': CircleHelp,
-}
 
 function clampView(view: View, width: number, height: number): View {
   const scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, view.scale))
@@ -201,7 +196,7 @@ export function MapView({ boards, selectedId, hotIds, onSelect, onMoved, focusOf
     {markers.map(({ board, point }) => {
       const screen = toScreen(point)
       if (screen.x < -60 || screen.y < -60 || screen.x > size.width + 60 || screen.y > size.height + 60) return null
-      const Icon = markerIcon[board.category]
+      const Icon = categoryIcon[board.category]
       const selected = board.id === selectedId
       return <button key={board.id} className={`map-marker ${selected ? 'selected' : ''} ${hotIds.has(board.id) ? 'hot' : ''} ${board.distance > RADIUS ? 'far' : ''}`} data-category={board.category} style={{ transform: `translate(${screen.x}px, ${screen.y}px)` }} onClick={() => { if (!dragged.current) onSelect(board) }} aria-label={`${board.title}, ${board.distance}m`}>
         <span className="marker-dot"><Icon size={15} strokeWidth={2.2}/></span>

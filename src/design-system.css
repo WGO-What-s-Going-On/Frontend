@@ -105,6 +105,14 @@ select:focus-visible,
   border-color: var(--c-accent) !important;
   background: var(--c-accent) !important;
 }
+/* 카테고리 칩: 고르면 지도 핀과 같은 카테고리 색 (긴급 빨강 · 도움 주황 · 동네 초록 · 기타 회색) */
+:is(.map-filters, .ux-category-filters, .quick-category-grid) button.selected[data-category] {
+  border-color: var(--cat) !important;
+  background: var(--cat) !important;
+}
+/* 글쓰기 카테고리: 지도 핀과 같은 아이콘. 고르기 전에는 아이콘만 카테고리 색 */
+.quick-category-grid button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.quick-category-grid button[data-category]:not(.selected) svg { color: var(--cat); }
 .compose-fab {
   width: 56px;
   height: 56px;
@@ -997,7 +1005,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .map-marker[data-category="긴급 사고"] .marker-dot { --cat: var(--c-urgent); }
 .map-marker[data-category="도움 요청"] .marker-dot { --cat: var(--c-help); }
 .map-marker[data-category="동네 소식"] .marker-dot { --cat: var(--c-news); }
-.map-marker[data-category="일상 불편"] .marker-dot { --cat: #7c8290; }
+.map-marker[data-category="일상 불편"] .marker-dot { --cat: var(--c-daily); }
 .map-marker.far .marker-dot { opacity: .82; }
 .map-marker:active .marker-dot { transform: scale(.92); }
 .map-marker.selected { z-index: 4; }
@@ -1962,6 +1970,20 @@ button.title-progress-card:active { background: #f7f8fa; }
 .rank-name strong { overflow: hidden; color: var(--c-ink); font-size: 14px; white-space: nowrap; text-overflow: ellipsis; }
 .rank-name small { color: var(--c-mute); font-size: 12px; }
 .rank-score { color: var(--c-ink); font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+/* 1 · 2 · 3등 강조: 1등 한 칸, 그 아래 2 · 3등 나란히 */
+.rank-me + .rank-podium { margin-top: 16px; }
+.rank-podium { display: grid; gap: 10px; margin-bottom: 14px; }
+.rank-podium-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.rank-podium-card { position: relative; display: grid; justify-items: center; gap: 4px; min-width: 0; padding: 16px 12px 14px; border: 1px solid var(--c-line); border-radius: 18px; background: var(--c-page); text-align: center; }
+.rank-podium-card.place-1 { padding: 20px 16px 18px; border-color: var(--c-accent); background: var(--c-accent-soft); }
+.rank-podium-card.me { box-shadow: 0 0 0 2px var(--c-accent) inset; }
+.rank-podium-card strong { overflow: hidden; max-width: 100%; margin-top: 4px; color: var(--c-ink); font-size: 15px; white-space: nowrap; text-overflow: ellipsis; }
+.rank-podium-card.place-1 strong { font-size: 17px; }
+.rank-podium-card small { color: var(--c-mute); font-size: 12px; }
+.rank-podium-place { position: absolute; top: 10px; left: 12px; display: grid; place-items: center; width: 26px; height: 26px; color: #fff; border-radius: 50%; background: var(--c-mute); font-size: 13px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.rank-podium-card.place-1 .rank-podium-place { background: var(--c-accent); }
+.rank-podium-card.place-1 .avatar-default { background: var(--c-page); }
+
 
 /* ---------- 답글: 하나씩 연한 회색 상자에 담고, ↳ 화살표는 상자 바깥 왼쪽 ----------
    원댓글은 지금처럼 바탕 없이 얇은 선으로 나누고, 답글 묶음이 어느 댓글에 달렸는지 한눈에 보이게 */

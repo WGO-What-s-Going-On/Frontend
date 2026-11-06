@@ -68,6 +68,33 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
   </>
 }
 
+// 랭킹 표: 1등은 맨 위 가운데, 2 · 3등은 그 아래 한 줄에 나란히 크게 보여 주고 4등부터는 목록
+interface RankEntry { rank: number; name: string; picks: number; score: number; me: boolean }
+
+function RankBoard({ entries }: { entries: RankEntry[] }) {
+  const [first, second, third] = entries
+  const rest = entries.slice(3)
+  const podium = (entry: RankEntry | undefined, place: 1 | 2 | 3) => entry && <div className={`rank-podium-card place-${place} ${entry.me ? 'me' : ''}`}>
+    <b className="rank-podium-place">{entry.rank}</b>
+    <Avatar name={entry.name} size={place === 1 ? 64 : 48}/>
+    <strong>{entry.name}</strong>
+    <span className="rank-score">{entry.score}점</span>
+    <small>대표 의견 {entry.picks}회</small>
+  </div>
+  return <>
+    {first && <div className="rank-podium">
+      {podium(first, 1)}
+      {second && <div className="rank-podium-row">{podium(second, 2)}{podium(third, 3)}</div>}
+    </div>}
+    {rest.length > 0 && <ol className="rank-list" start={4}>{rest.map((entry) => <li key={`${entry.rank}-${entry.name}`} className={entry.me ? 'me' : ''}>
+      <b>{entry.rank}</b>
+      <Avatar name={entry.name} size={36}/>
+      <span className="rank-name"><strong>{entry.name}</strong><small>대표 의견 {entry.picks}회</small></span>
+      <span className="rank-score">{entry.score}점</span>
+    </li>)}</ol>}
+  </>
+}
+
 // 서버 연동 중: 내 행정동 랭킹 (서버가 위치로 동을 정한다)
 function ServerRankPanel({ stats }: { stats: LevelStats }) {
   const { loadRanking } = useApp()
@@ -84,12 +111,7 @@ function ServerRankPanel({ stats }: { stats: LevelStats }) {
     <div className="rank-me">{seer && ranking.myRank
       ? <><strong>내 순위 {ranking.myRank}위</strong><span className="rank-score">{ranking.myScore}점</span></>
       : <><SolidLock size={20} label="잠김"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>현재 Lv.{current + 1} {levels[current].name}</small></span></>}</div>
-    <ol className="rank-list">{ranking.items.map((entry) => <li key={`${entry.rank}-${entry.name}`} className={entry.me ? 'me' : ''}>
-      <b className={entry.rank <= 3 ? 'top' : ''}>{entry.rank}</b>
-      <Avatar name={entry.name} size={36}/>
-      <span className="rank-name"><strong>{entry.name}</strong><small>대표 의견 {entry.picks}회</small></span>
-      <span className="rank-score">{entry.score}점</span>
-    </li>)}</ol>
+    <RankBoard entries={ranking.items.map((entry) => ({ rank: entry.rank, name: entry.name, picks: entry.picks, score: entry.score, me: Boolean(entry.me) }))}/>
   </>
 }
 
@@ -114,12 +136,7 @@ function RankPanel({ stats }: { stats: LevelStats }) {
     {region === myRegion && <div className="rank-me">{seer
       ? <><strong>내 순위 {myRank}위</strong><span className="rank-score">{scoreOf(stats)}점</span></>
       : <><SolidLock size={20} label="잠김"/><span><strong>천리안이 되면 랭킹에 올라요</strong><small>현재 Lv.{current + 1} {levels[current].name}</small></span></>}</div>}
-    <ol className="rank-list">{entries.map((entry, index) => <li key={entry.name} className={'me' in entry ? 'me' : ''}>
-      <b className={index < 3 ? 'top' : ''}>{index + 1}</b>
-      <Avatar name={entry.name} size={36}/>
-      <span className="rank-name"><strong>{entry.name}</strong><small>대표 의견 {entry.picks}회</small></span>
-      <span className="rank-score">{entry.picks * PICK_SCORE}점</span>
-    </li>)}</ol>
+    <RankBoard entries={entries.map((entry, index) => ({ rank: index + 1, name: entry.name, picks: entry.picks, score: entry.picks * PICK_SCORE, me: 'me' in entry }))}/>
   </>
 }
 

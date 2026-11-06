@@ -120,7 +120,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const findSimilar = async (draft: { category: Category; title: string; body: string; reach?: Reach }): Promise<Board[]> => {
     const here = await ensureCoords()
     const result = await posts.findSimilarPosts({ title: draft.title, content: draft.body, category: draft.category, latitude: here.latitude, longitude: here.longitude, radiusM: draft.reach ?? 150 })
-    return result.items.map((item) => ({
+    return result.items.slice(0, 3).map((item) => ({
       id: item.postId, authorId: '', authorName: '', category: posts.categoryFromCode(item.category), title: item.title, body: item.excerpt,
       distance: Math.round(item.distanceM), createdAt: timeAgo(item.createdAt), status: '실시간', views: 0,
       reactions: { '저도 궁금해요': 0, '지금도 그래요': 0, '도움 됐어요': 0, '이제 끝났어요': 0 },

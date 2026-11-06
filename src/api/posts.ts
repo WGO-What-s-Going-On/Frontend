@@ -74,8 +74,8 @@ const draftBody = (draft: DraftInput) => ({ ...draft, category: categoryCode[dra
 export const getNearbyPosts = ({ category, ...query }: NearbyQuery) => api<{ posts: PostResponse[]; nextCursor: string | null }>('GET', '/api/v1/posts/nearby', { query: { ...query, category: category && categoryCode[category] } })
 export const getCategories = () => api<{ code: string; label: string }[]>('GET', '/api/v1/posts/categories')
 export const createPost = (draft: DraftInput) => api<PostResponse>('POST', '/api/v1/posts', { body: draftBody(draft) })
-// 비슷한 글: 서버는 150m · 최근 24시간 안에서 찾는다 (limit 1~10)
-export const findSimilarPosts = (draft: DraftInput) => api<{ items: { postId: string; title: string; excerpt: string; category: string; distanceM: number; createdAt: string }[]; checkStatus: 'completed' | 'partial' }>('POST', '/api/v1/posts/similar', { body: { ...draftBody(draft), limit: 3 } })
+// 비슷한 글: 서버는 150m · 최근 24시간 안에서 찾는다. 글 작성과 같은 body만 받는다(다른 필드는 400 Unknown field) → 개수는 화면에서 자른다
+export const findSimilarPosts = (draft: DraftInput) => api<{ items: { postId: string; title: string; excerpt: string; category: string; distanceM: number; similarityPercent?: number; createdAt: string }[]; checkStatus: 'completed' | 'partial' }>('POST', '/api/v1/posts/similar', { body: draftBody(draft) })
 // 좌표를 같이 보내야 distanceM이 온다
 export const getPost = (postId: string, coords?: Coords) => api<PostResponse>('GET', path(postId), { query: { ...coords } })
 export const editPost = (postId: string, input: { title?: string; content?: string }) => api<void>('PATCH', path(postId), { body: input })

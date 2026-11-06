@@ -4,6 +4,7 @@ import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
 import { useApp } from '../../context/AppContext'
 import { categoryLabel } from '../../domain/labels'
+import { CategoryIcon } from '../../domain/categoryIcons'
 import type { Board, Category } from '../../types/domain'
 import { AuthorToggle } from './AuthorToggle'
 
@@ -32,7 +33,7 @@ export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canE
       <div className="quick-compose-grabber"/>
       <header><h2>게시글 수정</h2><IconButton className="quick-compose-close" label="닫기" onClick={onClose}><X size={21}/></IconButton></header>
       {!canEdit ? <div className="quick-compose-blocked"><strong>지금 위치에서는 수정할 수 없어요</strong><p>150m 참여 범위 안에서 다시 시도해 주세요.</p><button onClick={onClose}>닫기</button></div> : <>
-        {!live && <div className="quick-category-grid">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} data-category={item} onClick={() => setCategory(item)}>{categoryLabel[item]}</button>)}</div>}
+        {!live && <div className="quick-category-grid">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} data-category={item} onClick={() => setCategory(item)}><CategoryIcon category={item}/>{categoryLabel[item]}</button>)}</div>}
         <label className="quick-field"><span>제목</span><input value={title} onChange={(event) => setTitle(event.target.value)} maxLength={50}/></label>
         <label className="quick-field quick-detail-field"><span>내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} maxLength={500}/></label>
         {!live && <><div className="edit-photo-row">

@@ -44,7 +44,7 @@ export function ProfileScreen() {
 
 export function ActivityScreen() {
   const { boards, comments, user, recentBoardIds, openBoard, go, reopenBoard, live, loadActivity } = useApp()
-  const [filter, setFilter] = useState<'최근 본' | '댓글 단' | '공감한' | '내가 작성한'>('최근 본')
+  const [filter, setFilter] = useState<'최근 본' | '댓글 단' | '공감한' | '내가 작성한' | '종료된'>('최근 본')
   // 서버 연동 중에는 서버 활동 기록으로 (주변 목록에 없는 글 · 종료된 글도 포함)
   const [serverActivity, setServerActivity] = useState<{ written: string[]; commented: string[]; reacted: string[] } | null>(null)
   useEffect(() => { if (live) loadActivity().then(setServerActivity).catch(() => undefined) }, [live])
@@ -56,9 +56,12 @@ export function ActivityScreen() {
     '공감한': serverActivity ? byIds(serverActivity.reacted) : boards.filter((board) => myReactions(board).length > 0),
     '내가 작성한': serverActivity ? byIds(serverActivity.written) : boards.filter((board) => board.authorId === user.id),
   }
-  const filters = (['최근 본', '댓글 단', '공감한', '내가 작성한'] as const).map((label) => ({ label, count: lists[label].length }))
-  const filtered = lists[filter]
-  const emptyText = { '최근 본': '최근에 본 게시판이 없어요.', '댓글 단': '댓글을 단 게시판이 없어요.', '공감한': '반응을 남긴 게시판이 없어요.', '내가 작성한': '작성한 게시판이 없어요.' }
+  // 종료된: 위 활동(본 · 댓글 · 공감 · 작성) 중 종료된 게시판만 한데 모은다
+  const ended = [...new Map([...lists['최근 본'], ...lists['댓글 단'], ...lists['공감한'], ...lists['내가 작성한']].filter((board) => board.status === '종료됨').map((board) => [board.id, board])).values()]
+  const allLists = { ...lists, '종료된': ended }
+  const filters = (['최근 본', '댓글 단', '공감한', '내가 작성한', '종료된'] as const).map((label) => ({ label, count: allLists[label].length }))
+  const filtered = allLists[filter]
+  const emptyText = { '최근 본': '최근에 본 게시판이 없어요.', '댓글 단': '댓글을 단 게시판이 없어요.', '공감한': '반응을 남긴 게시판이 없어요.', '내가 작성한': '작성한 게시판이 없어요.', '종료된': '종료된 게시판이 없어요.' }
   // 게시판 목록과 같은 여백·칩·카드를 써서 같은 화면처럼 보이게 한다
   return <AppShell contentClassName="ux-board-screen activity-screen"><BackHeader title="최근 활동" onBack={() => go('my')}/>
     <div className="ux-filter-row"><FilterChips className="ux-category-filters activity-chips" options={filters.map((item) => ({ value: item.label, count: item.count }))} selected={filter} onSelect={setFilter}/></div>

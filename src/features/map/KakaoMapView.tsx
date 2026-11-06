@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { CircleHelp, Flame, Hand, LocateFixed, Megaphone, Minus, Plus } from 'lucide-react'
+import { LocateFixed, Minus, Plus } from 'lucide-react'
+import { categoryIcon } from '../../domain/categoryIcons'
 import { currentCoords, fromWorldPoint, toWorldPoint, type Coords } from '../../api/geo'
 import type { Board, Category } from '../../types/domain'
 import { RADIUS, boardPosition, type Point } from './mapWorld'
@@ -44,12 +45,6 @@ export function loadKakaoMaps(appKey: string) {
   return sdk
 }
 
-const markerIcon: Record<Category, typeof Flame> = {
-  '긴급 사고': Flame,
-  '도움 요청': Hand,
-  '동네 소식': Megaphone,
-  '일상 불편': CircleHelp,
-}
 // 150m 반경이 화면에 넉넉히 들어오는 확대 단계
 const START_LEVEL = 3
 
@@ -105,6 +100,13 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
       fit()
       resize.current = new ResizeObserver(fit)
       resize.current.observe(frameRef.current.parentElement ?? frameRef.current)
+      // 왼쪽 아래 축척(○○m + 막대)은 숨긴다. 같은 묶음 안의 카카오 로고는 이용 약관상 가리면 안 돼서 그대로 둔다
+      const hideScale = () => {
+        const logo = frameRef.current?.querySelector('img[src*="m_bi"]')
+        const group = logo?.closest('a')?.parentElement?.parentElement
+        group?.childNodes.forEach((node) => { if (node instanceof HTMLElement && !node.contains(logo!)) node.style.display = 'none' })
+      }
+      maps.event.addListener(created, 'tilesloaded', hideScale)
       maps.event.addListener(created, 'click', () => latest.current.onSelect(undefined))
       maps.event.addListener(created, 'dragend', () => {
         const position = created.getCenter()
@@ -168,7 +170,7 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
     {boards.map((board) => {
       const slot = slots.get(board.id)
       if (!slot) return null
-      const Icon = markerIcon[board.category]
+      const Icon = categoryIcon[board.category]
       const selected = board.id === selectedId
       return createPortal(<button className={`map-marker ${selected ? 'selected' : ''} ${hotIds.has(board.id) ? 'hot' : ''} ${board.distance > RADIUS ? 'far' : ''}`} data-category={board.category} onClick={(event) => { event.stopPropagation(); onSelect(board) }} aria-label={`${board.title}, ${board.distance}m`}>
         <span className="marker-dot"><Icon size={15} strokeWidth={2.2}/></span>
