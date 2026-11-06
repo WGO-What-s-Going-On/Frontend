@@ -74,7 +74,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         {/* 공개 범위: 작성자 표시와 같은 모양의 한 줄. i를 누르면 짧은 안내 */}
         <div className="write-author-row reach-row"><span ref={reachTipRef} className="reach-label">공개 범위<button className="reach-info" aria-label="공개 범위 안내" aria-expanded={reachTip} onClick={() => setReachTip(!reachTip)}><Info size={14}/></button>{reachTip && <span className="reach-tip" role="tooltip">작게 설정할수록 현장성 증가돼요</span>}</span><div className="author-toggle" role="radiogroup" aria-label="공개 범위">{reachOptions.map((option) => <button key={option} role="radio" aria-checked={reach === option} className={reach === option ? 'selected' : ''} onClick={() => setReach(option)}>{option}m</button>)}</div></div>
         <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>
-        <Button className="quick-submit" onClick={submit} disabled={!body.trim()} pending={publishing || busy}>게시하기</Button>
+        <div className="quick-submit-bar"><Button className="quick-submit" onClick={submit} disabled={!body.trim()} pending={publishing || busy}>게시하기</Button></div>
       </>}
     </section>
     {similar && <SimilarBoardsSheet boards={similar} onClose={() => setSimilar(null)} onCancelWrite={onClose} onPublish={publishNow}/>}

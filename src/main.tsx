@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
+import { Capacitor } from '@capacitor/core'
 import App from './App'
 import { AppProvider } from './context/AppContext'
 import './styles.css'
@@ -18,6 +19,9 @@ if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('rese
   sessionStorage.clear()
   window.history.replaceState(null, '', '/')
 }
+
+// 앱(Capacitor)인지 브라우저인지: 브라우저는 주소창 · 도구 막대 때문에 보이는 높이가 짧아 몇몇 화면만 따로 맞춘다 (safe-area.css)
+document.documentElement.dataset.shell = Capacitor.isNativePlatform() ? 'app' : 'browser'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><BrowserRouter><AppProvider><App /></AppProvider></BrowserRouter></React.StrictMode>,

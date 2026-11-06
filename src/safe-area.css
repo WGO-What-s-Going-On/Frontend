@@ -57,3 +57,24 @@
   /* 시작 카드 아래 여백: 홈 바가 있는 앱(안전 영역 34px)은 그대로 50px, 브라우저(안전 영역 없음)는 8px만 띄워 도구 막대 가까이 내린다 */
   .login-screen { padding-bottom: max(8px, calc(var(--bottom-inset) * 2 - 18px)); }
 }
+
+/* 브라우저(Safari 등)에서 연 글쓰기 시트: 보이는 높이가 짧아 '게시하기'가 시트 밖으로 밀린다.
+   게시하기를 시트 맨 아래에 붙여 두고 내용만 그 위에서 스크롤, 화면이 짧으면 상세 내용 칸부터 줄인다 (앱은 그대로) */
+html[data-shell="browser"] .quick-compose-sheet { max-height: 90%; padding-bottom: 0; }
+html[data-shell="browser"] .quick-submit-bar {
+  position: sticky;
+  z-index: 2;
+  bottom: 0;
+  margin: 0 -22px;
+  padding: 2px 22px max(12px, calc(var(--bottom-inset) + 4px));
+  background: inherit;
+  box-shadow: 0 -12px 12px -2px var(--c-canvas);
+}
+html[data-shell="browser"][data-theme="dark"] .quick-submit-bar { box-shadow: 0 -12px 12px -2px var(--c-raised); }
+html[data-shell="browser"] .quick-submit-bar .quick-submit { margin-top: 12px; }
+@media (max-height: 760px) {
+  html[data-shell="browser"] .quick-detail-field textarea { height: 120px; }
+}
+@media (max-height: 620px) {
+  html[data-shell="browser"] .quick-detail-field textarea { height: 84px; }
+}

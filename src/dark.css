@@ -39,6 +39,11 @@
   border-color: var(--c-accent-fill) !important;
   background: var(--c-accent-fill) !important;
 }
+/* 카테고리 칩은 고르면 파랑 대신 카테고리 색 (라이트 모드와 같게) */
+:root[data-theme="dark"] :is(.map-filters, .ux-category-filters, .quick-category-grid) button.selected[data-category] {
+  border-color: var(--cat) !important;
+  background: var(--cat) !important;
+}
 :root[data-theme="dark"] :is(.primary, .quick-submit):disabled { color: var(--c-mute) !important; border-color: var(--c-line) !important; background: var(--c-line) !important; opacity: 1; }
 :root[data-theme="dark"] .setting-toggle input:checked { background: var(--c-accent-fill); }
 
