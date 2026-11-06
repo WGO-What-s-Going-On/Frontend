@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './config'
-import { clearSession, readSession, saveSession } from './session'
+import { SESSION_KEY, clearSession, readSession, saveSession } from './session'
 
 // 서버 오류. Gateway 오류는 code · message · requestId, 하위 서비스 오류는 statusCode · message · error 모양이라 둘 다 받는다
 export class ApiError extends Error {
@@ -18,6 +18,11 @@ interface RequestOptions {
 // 갱신까지 실패해 로그인이 끝났을 때 앱에 알리는 이벤트 (AppContext가 로그인 화면으로 보낸다)
 export const SESSION_EXPIRED_EVENT = 'wgo:session-expired'
 
+// 다른 탭에서 로그아웃 · 탈퇴하거나 갱신 실패로 세션이 지워지면 이 탭도 로그인 화면으로 (안 그러면 열린 화면의 타이머가 헤더 없이 요청한다)
+window.addEventListener('storage', (event) => {
+  if (event.key === SESSION_KEY && !event.newValue) window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
+})
+
 // 동시에 여러 요청이 401을 받아도 갱신은 한 번만 (이전 refreshToken 재사용 금지)
 let refreshing: Promise<boolean> | null = null
 function refreshOnce() {
@@ -29,6 +34,9 @@ function refreshOnce() {
       saveSession({ ...session, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken, expiresAt: Date.now() + tokens.expiresIn * 1000 })
       return true
     } catch {
+      // 다른 탭이 먼저 갱신해 refreshToken이 바뀌었으면(이전 토큰은 재사용 불가) 그 세션을 그대로 쓴다
+      const latest = readSession()
+      if (latest && latest.refreshToken !== session.refreshToken) return true
       clearSession()
       window.dispatchEvent(new Event(SESSION_EXPIRED_EVENT))
       return false
@@ -64,6 +72,8 @@ async function send<T>(method: string, path: string, { body, query, auth = true 
 }
 
 export async function api<T>(method: string, path: string, options: RequestOptions = {}): Promise<T> {
+  // 로그인이 필요한 요청인데 세션이 없으면 보내지 않는다 (서버는 쿠키만으로 HTTP를 인증하지 않아 헤더 없이 가면 401 AUTH_TOKEN_MISSING)
+  if (options.auth !== false && !readSession()) throw new ApiError(401, 'SESSION_MISSING', '로그인이 필요해요.')
   try {
     return await send<T>(method, path, options)
   } catch (error) {

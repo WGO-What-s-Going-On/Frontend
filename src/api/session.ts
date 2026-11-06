@@ -1,5 +1,5 @@
 // 로그인 토큰 보관 (localStorage). 목업 상태(wgo-mockup-state-v1)와 따로 둔다
-const SESSION_KEY = 'wgo-auth-session'
+export const SESSION_KEY = 'wgo-auth-session'
 
 export interface Session {
   accessToken: string
