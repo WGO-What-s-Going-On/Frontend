@@ -1,22 +1,20 @@
 import { useRef, useState } from 'react'
 import type { PointerEvent } from 'react'
-import { X } from 'lucide-react'
 import type { ImageFocus } from '../../types/domain'
 
 // 글쓰기 사진 미리보기 + 위치 변경 (노션 커버 '위치 변경'과 같은 방식).
 // 목록 · 상세 · 지도 시트는 사진을 좁은 칸에 잘라 보여 줘서, 보일 부분(focus, 가로 · 세로 %)을 고른다.
-// - 평소: 누르면 다른 사진으로 바꾸기, 오른쪽 위 [위치 변경] · X(빼기)
-// - 위치 변경 중: 가운데 '사진을 끌어서 위치를 맞추세요', 끌면 사진이 따라오고 [위치 저장] · [취소]
+// - 평소: 누르면 다른 사진으로 바꾸기, 오른쪽 위 [위치 조정]
+// - 위치 조정 중: 가운데 '이미지 드래그해서 재배치', 끌면 사진이 따라오고 [위치 저장] · [취소]
 // 크게 보기(사진 누르기)는 늘 원본 전체라 여기서 고른 위치와 상관없다
 export const CENTER: ImageFocus = { x: 50, y: 50 }
 const clamp = (value: number) => Math.min(100, Math.max(0, value))
 
-export function PhotoRepositionPreview({ src, focus, onFocusChange, onChangePhoto, onRemove }: {
+export function PhotoRepositionPreview({ src, focus, onFocusChange, onChangePhoto }: {
   src: string
   focus: ImageFocus
   onFocusChange: (focus: ImageFocus) => void
   onChangePhoto: () => void
-  onRemove: () => void
 }) {
   const frameRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)
@@ -58,12 +56,12 @@ export function PhotoRepositionPreview({ src, focus, onFocusChange, onChangePhot
       onClick={() => { if (!editing) onChangePhoto() }} onKeyDown={(event) => { if (!editing && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onChangePhoto() } }}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
       <img ref={imgRef} src={src} alt="올릴 사진 미리보기" draggable={false} style={{ objectPosition: `${shown.x}% ${shown.y}%` }}/>
-      {editing && <span className="photo-reposition-hint" aria-live="polite">사진을 끌어서 위치를 맞추세요</span>}
+      {editing && <span className="photo-reposition-hint" aria-live="polite">이미지 드래그해서 재배치</span>}
     </div>
     <div className="photo-reposition-actions">
       {editing
         ? <><button onClick={save}>위치 저장</button><i aria-hidden="true"/><button onClick={() => setEditing(false)}>취소</button></>
-        : <><button onClick={startEditing}>위치 변경</button><i aria-hidden="true"/><button className="photo-reposition-remove" onClick={onRemove} aria-label="사진 빼기"><X size={15} strokeWidth={2.4}/></button></>}
+        : <button onClick={startEditing}>위치 조정</button>}
     </div>
   </div>
 }
