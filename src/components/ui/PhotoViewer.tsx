@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import type { PointerEvent, RefObject } from 'react'
-import { X, ZoomIn } from 'lucide-react'
+import { Maximize2, X } from 'lucide-react'
 import { haptic } from './haptics'
 
 // 사진 크게 보기 (iOS 사진 앱처럼): 화면 속 사진 자리에서 커지며 열리고, 닫을 때는 그 자리로 돌아가며 작아진다.
@@ -131,7 +132,9 @@ export function PhotoViewer({ src, alt, origin, onClose }: { src: string; alt: s
     close()
   }
 
-  return <div className="photo-viewer" role="dialog" aria-modal="true" aria-label="사진 크게 보기"
+  // 화면 맨 바깥(body)에 띄운다: 지도 시트처럼 움직임(transform)이 걸린 요소 안에서 열면 '화면 고정'이 그 요소 기준이 돼
+  // 배경이 시트 크기로만 깔리고 사진이 엉뚱한 곳에 잘려 보였다
+  return createPortal(<div className="photo-viewer" role="dialog" aria-modal="true" aria-label="사진 크게 보기"
     onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
     onClick={onClick} onContextMenu={(event) => event.preventDefault()}>
     <div ref={backdropRef} className="photo-viewer-backdrop"/>
@@ -139,12 +142,12 @@ export function PhotoViewer({ src, alt, origin, onClose }: { src: string; alt: s
       <img ref={imgRef} src={src} alt={alt} draggable={false}/>
       <button ref={closeRef} className="photo-viewer-close" aria-label="사진 닫기" onClick={(event) => { event.stopPropagation(); close() }}><X size={18} strokeWidth={2.4}/></button>
     </div>
-  </div>
+  </div>, document.body)
 }
 
-// 사진 오른쪽 아래 돋보기: 누르면 크게 볼 수 있다는 표시 (감싼 요소에 zoomable을 붙인다)
+// 사진 오른쪽 위 확대 표시: 누르면 크게 볼 수 있다는 작은 힌트 (감싼 요소에 zoomable을 붙인다)
 export function ZoomBadge() {
-  return <span className="photo-zoom-badge" aria-hidden="true"><ZoomIn size={15} strokeWidth={2.4}/></span>
+  return <span className="photo-zoom-badge" aria-hidden="true"><Maximize2 size={14} strokeWidth={2.2}/></span>
 }
 
 // 꾹 누르기: 0.45초 누르고 있으면 실행. 손가락이 움직이면(스크롤) 취소한다
