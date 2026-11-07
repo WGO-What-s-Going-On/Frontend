@@ -27,7 +27,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><BrowserRouter><AppProvider><App /></AppProvider></BrowserRouter></React.StrictMode>,
 )
 
-// 시작 화면(index.html #launch-splash) 닫기: 첫 화면이 그려진 뒤, 앱을 연 지 최소 1.5초는 보여 주고 서서히 사라진다
+// 시작 화면(index.html #launch-splash) 닫기: 첫 화면이 그려진 뒤, 앱을 연 지 최소 1.5초는 보여 주고 0.7초에 걸쳐 서서히 사라진다
 function hideLaunchSplash() {
   const root = document.documentElement
   const splash = document.getElementById('launch-splash')
@@ -39,7 +39,7 @@ function hideLaunchSplash() {
       splash.remove()
       const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
       if (meta?.dataset.default) meta.content = meta.dataset.default
-    }, 280)
+    }, 700)
   }, Math.max(0, 1500 - performance.now()))
 }
 requestAnimationFrame(() => requestAnimationFrame(hideLaunchSplash))
