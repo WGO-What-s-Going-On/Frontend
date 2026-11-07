@@ -2148,4 +2148,3 @@ button.title-progress-card:active { background: #f7f8fa; }
 .spinner { width: 16px; height: 16px; flex: none; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%; animation: spinner-turn .7s linear infinite; }
 @keyframes spinner-turn { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 1.6s; } }
-.quick-submit-note { margin: 8px 0 0; color: var(--c-mute); font-size: 12px; text-align: center; }

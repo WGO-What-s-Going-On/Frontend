@@ -54,7 +54,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
     if (found.length) { setSimilar(found); setBusy(false); setStage(null); return }
     publishNow()
   }
-  // 올리는 동안 시트는 그대로 두고 버튼에서 진행을 보여 준다 (사진이 있으면 '사진 올리는 중' → '게시하는 중').
+  // 올리는 동안 시트는 그대로 두고 버튼에서 진행을 보여 준다 (비슷한 글 확인 · 게시는 '게시하는 중', 사진이 있으면 그 사이에 '사진 올리는 중').
   // 끝나면 상세로 넘어가고, 실패하면 쓴 내용 그대로 다시 누를 수 있다
   const publishNow = () => {
     const content = body.trim()
@@ -85,8 +85,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         <div className="write-author-row reach-row"><span ref={reachTipRef} className="reach-label">공개 범위<button className="reach-info" aria-label="공개 범위 안내" aria-expanded={reachTip} onClick={() => setReachTip(!reachTip)}><Info size={14}/></button>{reachTip && <span className="reach-tip" role="tooltip">작게 설정할수록 현장성 증가돼요</span>}</span><div className="author-toggle" role="radiogroup" aria-label="공개 범위">{reachOptions.map((option) => <button key={option} role="radio" aria-checked={reach === option} className={reach === option ? 'selected' : ''} onClick={() => setReach(option)}>{option}m</button>)}</div></div>
         <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>
         <div className="quick-submit-bar">
-          <Button className="quick-submit" onClick={submit} disabled={!body.trim()} pending={busy}>{stage ? <span className="quick-submit-progress"><span className="spinner" aria-hidden="true"/>{stage === 'check' ? '비슷한 글 확인 중' : stage === 'upload' ? '사진 올리는 중' : '게시하는 중'}</span> : '게시하기'}</Button>
-          {stage === 'upload' && <p className="quick-submit-note" role="status">사진 크기에 따라 몇 초 걸릴 수 있어요</p>}
+          <Button className="quick-submit" onClick={submit} disabled={!body.trim()} pending={busy}>{stage ? <span className="quick-submit-progress"><span className="spinner" aria-hidden="true"/>{stage === 'upload' ? '사진 올리는 중' : '게시하는 중'}</span> : '게시하기'}</Button>
         </div>
       </>}
     </section>
