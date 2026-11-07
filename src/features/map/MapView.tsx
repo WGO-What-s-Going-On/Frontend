@@ -36,9 +36,11 @@ let rememberedView: View | null = null
 // 마지막으로 지도를 옮겨 보여준 핀: 돌아왔을 때 같은 핀이면 다시 옮기지 않는다
 let focusedId: string | undefined
 
-export function MapView({ boards, selectedId, hotIds, onSelect, onMoved, focusOffsetY = 0, hideControls = false }: {
+export function MapView({ boards, selectedId, focusId, hotIds, onSelect, onMoved, focusOffsetY = 0, hideControls = false }: {
   boards: Board[]
   selectedId?: string
+  // 지도를 옮겨 보여 줄 핀. 묶음 안에서 넘겨 볼 때는 그대로라 지도가 움직이지 않는다
+  focusId?: string
   hotIds: Set<string>
   onSelect: (board?: Board, group?: Board[]) => void
   // 지도를 크게 옮겼을 때 (이 지역 다시 찾기)
@@ -94,11 +96,11 @@ export function MapView({ boards, selectedId, hotIds, onSelect, onMoved, focusOf
   // 핀을 고르면 그 핀이 시트 위쪽에 보이도록 지도를 옮긴다.
   // 돌아와서 보던 상태를 되살린 첫 화면에서는 옮기지 않는다 (이미 그 자리이고, 크기를 재기 전이라 어긋난다)
   useEffect(() => {
-    if (selectedId === focusedId) return
-    focusedId = selectedId
-    const board = boards.find((item) => item.id === selectedId)
+    if (focusId === focusedId) return
+    focusedId = focusId
+    const board = boards.find((item) => item.id === focusId)
     if (board) animateTo(centerOn(boardPosition(board), Math.max(viewRef.current.scale, 1)))
-  }, [selectedId])
+  }, [focusId])
 
   // 휠·트랙패드 확대 (기본 스크롤을 막아야 해서 passive가 아닌 리스너로 단다)
   useEffect(() => {

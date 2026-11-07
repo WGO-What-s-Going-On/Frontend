@@ -51,10 +51,12 @@ const START_LEVEL = 3
 
 const boardCoords = (board: Board, me: Coords) => board.location ?? fromWorldPoint(me, boardPosition(board))
 
-export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onMoved, onFail, focusOffsetY = 0, hideControls = false }: {
+export function KakaoMapView({ appKey, boards, selectedId, focusId, hotIds, onSelect, onMoved, onFail, focusOffsetY = 0, hideControls = false }: {
   appKey: string
   boards: Board[]
   selectedId?: string
+  // 지도를 옮겨 보여 줄 핀. 묶음 안에서 넘겨 볼 때는 그대로라 지도가 움직이지 않는다
+  focusId?: string
   hotIds: Set<string>
   // 핀(묶음이면 group에 같은 자리 글들)을 고른다. 빈 곳을 누르면 undefined
   onSelect: (board?: Board, group?: Board[]) => void
@@ -156,16 +158,19 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
     setSlots(next)
   }, [map, me, groups])
 
-  // 고른 핀을 아래 시트 위쪽에 보이게 옮긴다
+  useEffect(() => {
+    groups.forEach((group) => overlays.current.get(group.key)?.overlay.setZIndex(group.boards.some((item) => item.id === selectedId) ? 4 : 3))
+  }, [selectedId])
+
+  // 고른 핀을 아래 시트 위쪽에 보이게 옮긴다 (묶음 안에서 넘길 때는 옮기지 않는다)
   useEffect(() => {
     if (!map || !me) return
-    groups.forEach((group) => overlays.current.get(group.key)?.overlay.setZIndex(group.boards.some((item) => item.id === selectedId) ? 4 : 3))
-    const board = boards.find((item) => item.id === selectedId)
+    const board = boards.find((item) => item.id === focusId)
     if (!board) return
     const coords = boardCoords(board, me)
     map.map.setCenter(new map.maps.LatLng(coords.latitude, coords.longitude))
     if (focusOffsetY) map.map.panBy(0, focusOffsetY / 2)
-  }, [map, selectedId])
+  }, [map, focusId])
 
   useEffect(() => () => { resize.current?.disconnect(); overlays.current.forEach((entry) => entry.overlay.setMap(null)); overlays.current.clear() }, [])
 

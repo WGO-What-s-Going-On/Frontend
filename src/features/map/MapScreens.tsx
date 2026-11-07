@@ -71,13 +71,13 @@ export function MapScreen() {
   }
   return <AppShell shellClassName="map-shell" contentClassName="map-screen">
     {realMap
-      ? <KakaoMapView appKey={KAKAO_MAP_KEY} boards={nearby} selectedId={selectedBoard?.id} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} onFail={() => { kakaoMapFailed = true; setRealMap(false) }} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>
-      : <MapView boards={nearby} selectedId={selectedBoard?.id} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>}
+      ? <KakaoMapView appKey={KAKAO_MAP_KEY} boards={nearby} selectedId={selectedBoard?.id} focusId={selection?.ids[0]} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} onFail={() => { kakaoMapFailed = true; setRealMap(false) }} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>
+      : <MapView boards={nearby} selectedId={selectedBoard?.id} focusId={selection?.ids[0]} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>}
     <div className="map-top-overlay">
       <header><h1>내 주변</h1><NoticeBell/></header>
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
     </div>
     {movedFar && !selectedBoard && <button className="map-search-here" onClick={searchHere}><RotateCw size={15}/>이 지역에서 다시 찾기</button>}
-    {selectedBoard && <IncidentBottomSheet board={selectedBoard} position={group.length > 1 ? { index: group.indexOf(selectedBoard), total: group.length, go: (index) => setSelection({ ids: group.map((item) => item.id), index }) } : undefined} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
+    {selectedBoard && <IncidentBottomSheet board={selectedBoard} position={group.length > 1 ? { boards: group, index: group.indexOf(selectedBoard), go: (index) => setSelection({ ids: group.map((item) => item.id), index }) } : undefined} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
   </AppShell>
 }

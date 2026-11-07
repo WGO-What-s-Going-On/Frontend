@@ -2173,3 +2173,9 @@ button.title-progress-card:active { background: #f7f8fa; }
 .sheet-pager button:active { background: var(--c-surface); }
 .map-bottom-sheet.has-pager > .sheet-handle { margin-bottom: 19px; }
 .map-bottom-sheet.has-pager .board-image-placeholder.sheet-image { margin-top: 4px; }
+
+/* 묶음 핀 요약 시트: 그 자리 글들을 한 칸(grid 1/1)에 겹쳐 두고 지금 글만 보인다.
+   시트 높이는 가장 긴 글에 맞춰져 넘겨도 그대로, 짧은 글은 '자세히 보기' 위에 여백이 남는다 */
+.sheet-slides { display: grid; }
+.sheet-slide { grid-area: 1 / 1; min-width: 0; }
+.sheet-slide:not([data-active="true"]) { visibility: hidden; }
