@@ -4,10 +4,11 @@ import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
 import { useApp } from '../../context/AppContext'
 import { reachOptions } from '../../types/domain'
-import type { Board, Category, Reach } from '../../types/domain'
+import type { Board, Category, ImageFocus, Reach } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { CategoryIcon } from '../../domain/categoryIcons'
 import { AuthorToggle } from './AuthorToggle'
+import { CENTER, PhotoRepositionPreview } from './PhotoRepositionPreview'
 import { SimilarBoardsSheet } from './SimilarBoardsSheet'
 import { findSimilarBoards } from './similarBoards'
 import { imageProblem } from '../../api/media'
@@ -20,12 +21,14 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   const [body, setBody] = useState('')
   const [imageName, setImageName] = useState<string>()
   const [imageFile, setImageFile] = useState<File>()
+  // 잘린 칸에 보일 사진 위치 (위치 변경으로 고른다, 새 사진을 고르면 가운데로)
+  const [imageFocus, setImageFocus] = useState<ImageFocus>(CENTER)
   // 게시 진행 단계 (null이면 아직 안 누름)
   const [stage, setStage] = useState<'check' | 'upload' | 'post' | null>(null)
   // 고른 사진 미리보기 (이 기기에서만 쓰는 임시 주소, 바꾸거나 닫으면 지운다)
   const previewUrl = useMemo(() => imageFile ? URL.createObjectURL(imageFile) : undefined, [imageFile])
   useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl) }, [previewUrl])
-  const removePhoto = () => { setImageFile(undefined); setImageName(undefined); if (fileRef.current) fileRef.current.value = '' }
+  const removePhoto = () => { setImageFile(undefined); setImageName(undefined); setImageFocus(CENTER); if (fileRef.current) fileRef.current.value = '' }
   const [anonymous, setAnonymous] = useState(false)
   const [reach, setReach] = useState<Reach>(150)
   const [reachTip, setReachTip] = useState(false)
@@ -63,7 +66,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
     setSimilar(null)
     setStage(imageFile ? 'upload' : 'post')
     const title = content.split(/\n|[.!?。！？]/)[0].trim().slice(0, 50) || `${category} 상황 공유`
-    Promise.resolve(createBoard({ category, title, body: content, imageName, imageFile, anonymous, reach, onStage: setStage }))
+    Promise.resolve(createBoard({ category, title, body: content, imageName, imageFile, imageFocus: imageFile ? imageFocus : undefined, anonymous, reach, onStage: setStage }))
       .catch(() => { setBusy(false); setStage(null) })
   }
   // 올리는 중에는 닫지 않는다 (닫아도 올리기는 계속돼 나중에 갑자기 상세로 넘어가게 된다)
@@ -79,9 +82,9 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         <label className="quick-field quick-detail-field"><span>상세 내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder="무슨 일이 있었는지 자세히 알려주세요" maxLength={500}/></label>
         {/* 사진을 고르면 미리보기로 바뀐다. 미리보기를 누르면 다른 사진으로 바꾸고, 오른쪽 위 X로 뺀다 */}
         {previewUrl
-          ? <div className="quick-photo-preview"><button className="quick-photo-change" onClick={() => fileRef.current?.click()} aria-label="다른 사진으로 바꾸기"><img src={previewUrl} alt="올릴 사진 미리보기"/></button><button className="quick-photo-remove" onClick={removePhoto} aria-label="사진 빼기"><X size={16} strokeWidth={2.4}/></button></div>
+          ? <PhotoRepositionPreview src={previewUrl} focus={imageFocus} onFocusChange={setImageFocus} onChangePhoto={() => fileRef.current?.click()} onRemove={removePhoto}/>
           : <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>}
-        <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; const problem = file && imageProblem(file); if (problem) { showToast(problem); event.target.value = ''; return } setImageFile(file); setImageName(file?.name) }}/>
+        <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; const problem = file && imageProblem(file); if (problem) { showToast(problem); event.target.value = ''; return } setImageFile(file); setImageFocus(CENTER); setImageName(file?.name) }}/>
         {/* 공개 범위: 작성자 표시와 같은 모양의 한 줄. i를 누르면 짧은 안내 */}
         <div className="write-author-row reach-row"><span ref={reachTipRef} className="reach-label">공개 범위<button className="reach-info" aria-label="공개 범위 안내" aria-expanded={reachTip} onClick={() => setReachTip(!reachTip)}><Info size={14}/></button>{reachTip && <span className="reach-tip" role="tooltip">작게 설정할수록 현장성 증가돼요</span>}</span><div className="author-toggle" role="radiogroup" aria-label="공개 범위">{reachOptions.map((option) => <button key={option} role="radio" aria-checked={reach === option} className={reach === option ? 'selected' : ''} onClick={() => setReach(option)}>{option}m</button>)}</div></div>
         <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div>

@@ -17,10 +17,10 @@ import type { MeResponse } from '../api/users'
 import { useServerSync, type RankingView } from './useServerSync'
 import type { LevelStats } from '../features/level/levels'
 import { myCommentReactions, myReactions } from '../types/domain'
-import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
+import type { Board, Category, Comment, CommentReaction, ImageFocus, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
 
 // onStage: 서버에 올리는 단계(사진 올리기 → 게시)를 글쓰기 버튼에 알린다
-interface BoardInput { category: Category; title: string; body: string; imageName?: string; imageFile?: File; anonymous?: boolean; reach?: Reach; onStage?: (stage: 'upload' | 'post') => void }
+interface BoardInput { category: Category; title: string; body: string; imageName?: string; imageFile?: File; imageFocus?: ImageFocus; anonymous?: boolean; reach?: Reach; onStage?: (stage: 'upload' | 'post') => void }
 export type LocationPermission = 'unknown' | 'granted' | 'denied'
 // 화면 모드: 라이트(기본) · 다크
 export type ThemeMode = 'light' | 'dark'

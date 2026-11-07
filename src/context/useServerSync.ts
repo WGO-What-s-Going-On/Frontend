@@ -11,7 +11,7 @@ import { uploadImage } from '../api/media'
 import { ApiError } from '../api/client'
 import { timeAgo } from '../domain/time'
 import type { LevelStats } from '../features/level/levels'
-import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach } from '../types/domain'
+import type { Board, Category, Comment, CommentReaction, ImageFocus, Notice, PostReaction, Reach } from '../types/domain'
 import type { NotificationSettings } from './AppContext'
 
 type Setter<T> = React.Dispatch<React.SetStateAction<T>>
@@ -120,13 +120,13 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     return board
   }
 
-  const createPost = async (input: { category: Category; title: string; body: string; anonymous?: boolean; reach?: Reach; imageFile?: File; onStage?: (stage: 'upload' | 'post') => void }) => {
+  const createPost = async (input: { category: Category; title: string; body: string; anonymous?: boolean; reach?: Reach; imageFile?: File; imageFocus?: ImageFocus; onStage?: (stage: 'upload' | 'post') => void }) => {
     // 사진을 먼저 올려 mediaId를 받는다 (실패하면 글도 올리지 않는다)
     if (input.imageFile) input.onStage?.('upload')
     const mediaIds = input.imageFile ? [await uploadImage(input.imageFile)] : undefined
     input.onStage?.('post')
     const here = await locate()
-    const post = await posts.createPost({ title: input.title, content: input.body, category: input.category, latitude: here.latitude, longitude: here.longitude, radiusM: input.reach ?? 150, anonymous: input.anonymous, mediaIds })
+    const post = await posts.createPost({ title: input.title, content: input.body, category: input.category, latitude: here.latitude, longitude: here.longitude, radiusM: input.reach ?? 150, anonymous: input.anonymous, mediaIds, ...(mediaIds && input.imageFocus && serverFeatures.coverFocus ? { coverFocus: input.imageFocus } : {}) })
     // 생성 응답에는 작성자 닉네임 · 반응 수 · 사진이 없어 상세를 다시 받아 채운다
     const board = await loadBoard(post.postId)
     return board.id

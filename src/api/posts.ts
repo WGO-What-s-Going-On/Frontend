@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { Board, Category, Comment, CommentReaction, PostReaction, Reach } from '../types/domain'
+import type { Board, Category, Comment, CommentReaction, ImageFocus, PostReaction, Reach } from '../types/domain'
 import { timeAgo } from '../domain/time'
 
 // 게시글 · 댓글 · 공감 · 투표 · 활동 API (백엔드 docs/contracts/frontend-integration.md 기준).
@@ -34,6 +34,8 @@ export interface PostResponse {
   closedAt: string | null
   createdAt: string
   expiresAt: string
+  // 사진 보일 위치 (백엔드 지원 후)
+  coverFocus?: ImageFocus | null
 }
 
 export interface CommentResponse {
@@ -64,7 +66,7 @@ export interface VoteResponse {
 }
 
 import type { Coords } from './geo'
-export interface DraftInput extends Coords { title: string; content: string; category: Category; radiusM: Reach; anonymous?: boolean; mediaIds?: string[] }
+export interface DraftInput extends Coords { title: string; content: string; category: Category; radiusM: Reach; anonymous?: boolean; mediaIds?: string[]; coverFocus?: ImageFocus }
 export interface NearbyQuery extends Coords { radiusM?: Reach; sort?: 'distance' | 'latest'; category?: Category; q?: string; cursor?: string; limit?: number }
 
 const path = (postId: string, rest = '') => `/api/v1/posts/${encodeURIComponent(postId)}${rest}`
@@ -125,7 +127,7 @@ export function toBoard(post: PostResponse): Board {
     myReactions: post.myReaction ? [postReactionFromCode(post.myReaction)] : [],
     // 투표 상태는 상세에서 GET /vote로 받는다. 그 전에는 목업 규칙(작성 시각 · 댓글 수)으로 추측하지 않게 '없음'
     voteStatus: 'NONE',
-    imageUrl: post.media?.find((media) => media.type === 'IMAGE')?.url, reach: ([150, 250, 350] as const).find((value) => value === post.radiusM),
+    imageUrl: post.media?.find((media) => media.type === 'IMAGE')?.url, imageFocus: post.coverFocus ?? undefined, reach: ([150, 250, 350] as const).find((value) => value === post.radiusM),
   }
 }
 

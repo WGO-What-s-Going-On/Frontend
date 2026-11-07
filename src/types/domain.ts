@@ -44,6 +44,8 @@ export interface Board {
   imageName?: string
   // 서버에 올라간 첨부 사진 주소 (백엔드 연동 후)
   imageUrl?: string
+  // 잘린 칸(목록 · 상세 · 지도 시트)에 보일 사진 위치. 작성자가 '위치 변경'으로 고른다 (없으면 가운데)
+  imageFocus?: ImageFocus
   // 목업용: 사진이 첨부된 게시글처럼 보이게 하는 자리 표시 ([이미지])
   imagePlaceholder?: boolean
   // 닉네임 대신 익명으로 표시한 게시글 (USR-F08)
@@ -99,6 +101,9 @@ export interface Comment {
   likes?: number
   edited?: boolean
 }
+
+// 사진에서 보일 위치: 가로 · 세로 % (0 = 왼쪽 · 위, 100 = 오른쪽 · 아래)
+export interface ImageFocus { x: number; y: number }
 
 export interface Notice {
   id: string
