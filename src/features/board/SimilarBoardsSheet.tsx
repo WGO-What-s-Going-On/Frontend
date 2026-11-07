@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { ArrowLeft, ChevronRight, MessageCircle, SmilePlus, X } from 'lucide-react'
 import { IconButton } from '../../components/ui/IconButton'
+import { useStatusTint } from '../../components/ui/statusTint'
 import { useApp } from '../../context/AppContext'
 import { categoryLabel } from '../../domain/labels'
 import { isHotBoard } from '../../types/domain'
@@ -15,6 +16,8 @@ export function SimilarBoardsSheet({ boards, onClose, onCancelWrite, onPublish }
   const [openId, setOpenId] = useState<string | null>(null)
   const opened = boards.find((board) => board.id === openId)
   const sheetRef = useRef<HTMLElement>(null)
+  const backdrop = useRef<HTMLDivElement>(null)
+  useStatusTint(backdrop)
   const [height, setHeight] = useState<number>()
   useLayoutEffect(() => { if (!openId && sheetRef.current) setHeight(sheetRef.current.offsetHeight) }, [openId, boards])
   const boardComments = (id: string) => comments.filter((comment) => comment.boardId === id)
@@ -24,7 +27,7 @@ export function SimilarBoardsSheet({ boards, onClose, onCancelWrite, onPublish }
   const tags = (board: Board) => <span className="similar-tags"><span className="feed-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, boardComments(board.id).length) && <b className="board-tag tag-hot">HOT</b>}</span>
 
   return <div className="similar-layer" role="dialog" aria-modal="true" aria-label="비슷한 글">
-    <div className="similar-backdrop" aria-hidden="true"/>
+    <div ref={backdrop} className="similar-backdrop" aria-hidden="true"/>
     <section ref={sheetRef} className="similar-sheet" style={opened ? { height } : undefined}>
       <header className="similar-head">
         {opened ? <IconButton className="similar-back" label="비슷한 글 목록으로" onClick={() => setOpenId(null)}><ArrowLeft size={20}/></IconButton>

@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import type { PointerEvent, RefObject } from 'react'
 import { Maximize2, X } from 'lucide-react'
 import { haptic } from './haptics'
+import { useStatusTint } from './statusTint'
 
 // 사진 크게 보기 (iOS 사진 앱처럼): 화면 속 사진 자리에서 커지며 열리고, 닫을 때는 그 자리로 돌아가며 작아진다.
 // - origin: 열기 전 사진이 있던 요소. 없으면 제자리에서 살짝 커지며 나타난다
@@ -35,6 +36,7 @@ const restFrame = { transform: 'none', clipPath: `inset(0px 0px round ${RADIUS}p
 
 export function PhotoViewer({ src, alt, origin, onClose }: { src: string; alt: string; origin?: RefObject<HTMLElement | null>; onClose: () => void }) {
   const backdropRef = useRef<HTMLDivElement>(null)
+  useStatusTint(backdropRef)
   // 사진 + X 한 묶음. 움직임은 이 묶음에 줘서 X가 늘 사진 오른쪽 위에 붙어 다닌다
   const frameRef = useRef<HTMLDivElement>(null)
   const imgRef = useRef<HTMLImageElement>(null)

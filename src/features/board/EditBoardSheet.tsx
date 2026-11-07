@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Camera, X } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
+import { useStatusTint } from '../../components/ui/statusTint'
 import { useApp } from '../../context/AppContext'
 import { categoryLabel } from '../../domain/labels'
 import { CategoryIcon } from '../../domain/categoryIcons'
@@ -21,6 +22,8 @@ export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canE
   const [anonymous, setAnonymous] = useState(wasAnonymous)
   const [imageName, setImageName] = useState(board.imageName)
   const fileRef = useRef<HTMLInputElement>(null)
+  const backdrop = useRef<HTMLButtonElement>(null)
+  useStatusTint(backdrop)
   const changed = title.trim() !== board.title || body.trim() !== board.body || category !== board.category || anonymous !== wasAnonymous || imageName !== board.imageName
   const save = () => {
     if (!title.trim() || !body.trim()) return
@@ -28,7 +31,7 @@ export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canE
     onClose()
   }
   return <div className="quick-compose-layer" role="dialog" aria-modal="true" aria-label="게시글 수정">
-    <button className="quick-compose-backdrop" onClick={onClose} aria-label="수정 닫기"/>
+    <button ref={backdrop} className="quick-compose-backdrop" onClick={onClose} aria-label="수정 닫기"/>
     <section className="quick-compose-sheet edit-sheet">
       <div className="quick-compose-grabber"/>
       <header><h2>게시글 수정</h2><IconButton className="quick-compose-close" label="닫기" onClick={onClose}><X size={21}/></IconButton></header>

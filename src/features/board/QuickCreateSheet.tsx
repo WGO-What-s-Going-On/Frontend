@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Camera, Info, MapPin, X } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
+import { useStatusTint } from '../../components/ui/statusTint'
 import { useApp } from '../../context/AppContext'
 import { reachOptions } from '../../types/domain'
 import type { Board, Category, ImageFocus, Reach } from '../../types/domain'
@@ -38,6 +39,8 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   // 비슷한 글 확인 · 사진 업로드 · 서버 저장 중 (버튼만 막고 시트는 그대로)
   const [busy, setBusy] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const backdrop = useRef<HTMLButtonElement>(null)
+  useStatusTint(backdrop)
 
   useEffect(() => {
     if (!reachTip) return
@@ -73,7 +76,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   const close = () => { if (!stage) onClose() }
 
   return <div className="quick-compose-layer" role="dialog" aria-modal="true" aria-label="빠른 글쓰기">
-    <button className="quick-compose-backdrop" onClick={close} aria-label="글쓰기 닫기"/>
+    <button ref={backdrop} className="quick-compose-backdrop" onClick={close} aria-label="글쓰기 닫기"/>
     <section className="quick-compose-sheet">
       <div className="quick-compose-grabber"/>
       <header><div><h2>지금 무슨 일이 있나요?</h2><p><MapPin size={13}/>주변 {reach}m에 게시</p></div><IconButton className="quick-compose-close" label="닫기" onClick={close} disabled={Boolean(stage)}><X size={21}/></IconButton></header>

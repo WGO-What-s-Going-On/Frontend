@@ -24,8 +24,9 @@
   .phone { height: 100dvh; }
   /* 화면 전체가 고무줄처럼 끌려 내려가지 않게 (스크롤은 안쪽 화면에서만) */
   html, body { overscroll-behavior: none; }
-  /* 모바일 Safari는 화면 밖(상태바 뒤 · 아래 도구 막대 뒤)을 바깥 배경색으로 칠한다: 회색 틀 대신 화면 바탕색 */
-  html, body, .app-bg, html:root[data-theme="dark"] :is(body, .app-bg) { background: var(--c-page); }
+  /* 모바일 Safari는 화면 밖(상태바 뒤 · 아래 도구 막대 뒤)을 바깥 배경색으로 칠한다: 회색 틀 대신 화면 바탕색.
+     어두운 배경 · 사진 보기가 떠 있으면 그 색을 겹친 색(--status-tint, statusTint.ts) */
+  html, body, .app-bg, html:root[data-theme="dark"] :is(body, .app-bg) { background: var(--status-tint, var(--c-page)); }
 }
 
 /* 위: 상태바 자리 */
@@ -53,7 +54,7 @@
 
 @media (max-width: 450px) {
   /* 첫 화면: 상태바 뒤 색을 화면 위쪽 색(연한 파랑)과 맞춘다 */
-  html:has(.login-day-shell), html:has(.login-day-shell) body, .app-bg:has(.login-day-shell) { background: #f3f6fe; }
+  html:has(.login-day-shell), html:has(.login-day-shell) body, .app-bg:has(.login-day-shell) { background: var(--status-tint, #f3f6fe); }
   /* 시작 카드 아래 여백: 홈 바가 있는 앱(안전 영역 34px)은 그대로 50px, 브라우저(안전 영역 없음)는 8px만 띄워 도구 막대 가까이 내린다 */
   .login-screen { padding-bottom: max(8px, calc(var(--bottom-inset) * 2 - 18px)); }
 }
