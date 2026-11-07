@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { LocateFixed, Minus, Plus } from 'lucide-react'
-import { categoryIcon } from '../../domain/categoryIcons'
 import { currentCoords, fromWorldPoint, toWorldPoint, type Coords } from '../../api/geo'
-import type { Board, Category } from '../../types/domain'
+import type { Board } from '../../types/domain'
 import { RADIUS, boardPosition, type Point } from './mapWorld'
+import { PinMarker, groupPins } from './pinGroups'
 
 // 카카오 지도 (VITE_KAKAO_JS_KEY가 있을 때). 그림 지도(MapView)와 props · 핀 모양 · 버튼 위치가 같다.
 // - 서버 글은 실제 위경도(board.location), 목업 글은 그림 지도 좌표를 내 위치 기준 위경도로 바꿔 찍는다
@@ -20,6 +20,7 @@ interface KakaoMap {
   getLevel(): number
   setLevel(level: number, options?: { animate?: boolean }): void
   relayout(): void
+  getProjection(): { containerPointFromCoords(position: LatLng): { x: number; y: number } }
 }
 interface Overlay { setMap(map: KakaoMap | null): void; setPosition(position: LatLng): void; setZIndex(zIndex: number): void }
 interface KakaoMaps {
@@ -55,7 +56,8 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
   boards: Board[]
   selectedId?: string
   hotIds: Set<string>
-  onSelect: (board?: Board) => void
+  // 핀(묶음이면 group에 같은 자리 글들)을 고른다. 빈 곳을 누르면 undefined
+  onSelect: (board?: Board, group?: Board[]) => void
   onMoved?: (center: Point) => void
   // SDK를 못 불러오면 그림 지도로 바꾼다
   onFail: () => void
@@ -75,6 +77,8 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
   const overlays = useRef(new Map<string, { overlay: Overlay; slot: HTMLElement }>())
   const circle = useRef<Overlay | null>(null)
   const resize = useRef<ResizeObserver | null>(null)
+  // 확대 단계가 바뀌면 핀 묶음을 다시 계산한다
+  const [level, setLevel] = useState(START_LEVEL)
 
   useEffect(() => { currentCoords().then(setMe).catch(onFail) }, [])
 
@@ -108,6 +112,7 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
       }
       maps.event.addListener(created, 'tilesloaded', hideScale)
       maps.event.addListener(created, 'click', () => latest.current.onSelect(undefined))
+      maps.event.addListener(created, 'zoom_changed', () => setLevel(created.getLevel()))
       maps.event.addListener(created, 'dragend', () => {
         const position = created.getCenter()
         if (meRef.current) latest.current.onMoved?.(toWorldPoint(meRef.current, { latitude: position.getLat(), longitude: position.getLng() }))
@@ -117,7 +122,17 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
     return () => { cancelled = true }
   }, [located])
 
-  // 오버레이: 내 위치 + 게시판마다 하나. 없어진 게시판은 지도에서 뗀다
+  // 화면에서 겹치는 핀은 하나로 묶는다 (확대 단계마다 다시)
+  const groups = useMemo(() => {
+    if (!map || !me) return []
+    const projection = map.map.getProjection()
+    return groupPins(boards.map((board) => {
+      const coords = boardCoords(board, me)
+      return { board, point: { ...projection.containerPointFromCoords(new map.maps.LatLng(coords.latitude, coords.longitude)), coords } }
+    }))
+  }, [map, me, boards, level])
+
+  // 오버레이: 내 위치 + 핀 묶음마다 하나 (대표 글 자리). 없어진 묶음은 지도에서 뗀다
   useEffect(() => {
     if (!map || !me) return
     const next = new Map<string, HTMLElement>()
@@ -136,15 +151,15 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
     }
     place('me', me, 2)
     circle.current?.setPosition(new map.maps.LatLng(me.latitude, me.longitude))
-    boards.forEach((board) => place(board.id, boardCoords(board, me), board.id === selectedId ? 4 : 3))
+    groups.forEach((group) => place(group.key, group.point.coords, group.boards.some((board) => board.id === selectedId) ? 4 : 3))
     overlays.current.forEach((entry, key) => { if (!next.has(key)) { entry.overlay.setMap(null); overlays.current.delete(key) } })
     setSlots(next)
-  }, [map, me, boards])
+  }, [map, me, groups])
 
   // 고른 핀을 아래 시트 위쪽에 보이게 옮긴다
   useEffect(() => {
     if (!map || !me) return
-    overlays.current.forEach((entry, key) => { if (key !== 'me') entry.overlay.setZIndex(key === selectedId ? 4 : 3) })
+    groups.forEach((group) => overlays.current.get(group.key)?.overlay.setZIndex(group.boards.some((item) => item.id === selectedId) ? 4 : 3))
     const board = boards.find((item) => item.id === selectedId)
     if (!board) return
     const coords = boardCoords(board, me)
@@ -167,15 +182,9 @@ export function KakaoMapView({ appKey, boards, selectedId, hotIds, onSelect, onM
   return <div className="map-canvas kakao-map-canvas">
     <div ref={frameRef} className="kakao-map-frame"/>
     {slots.get('me') && createPortal(<span className="map-me" aria-label="내 위치"/>, slots.get('me')!)}
-    {boards.map((board) => {
-      const slot = slots.get(board.id)
-      if (!slot) return null
-      const Icon = categoryIcon[board.category]
-      const selected = board.id === selectedId
-      return createPortal(<button className={`map-marker ${selected ? 'selected' : ''} ${hotIds.has(board.id) ? 'hot' : ''} ${board.distance > RADIUS ? 'far' : ''}`} data-category={board.category} onClick={(event) => { event.stopPropagation(); onSelect(board) }} aria-label={`${board.title}, ${board.distance}m`}>
-        <span className="marker-dot"><Icon size={15} strokeWidth={2.2}/></span>
-        {selected && <span className="marker-label">{board.title}</span>}
-      </button>, slot, board.id)
+    {groups.map((group) => {
+      const slot = slots.get(group.key)
+      return slot ? createPortal(<PinMarker group={group} selectedId={selectedId} hotIds={hotIds} onSelect={onSelect}/>, slot, group.key) : null
     })}
     {!hideControls && <div className="map-controls">
       <div className="map-zoom"><button onClick={() => zoomBy(-1)} aria-label="지도 확대"><Plus size={18}/></button><button onClick={() => zoomBy(1)} aria-label="지도 축소"><Minus size={18}/></button></div>

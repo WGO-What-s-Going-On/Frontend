@@ -31,7 +31,7 @@ function filterBoards(boards: Board[], filter: MapFilter, hotIds: Set<string>) {
 }
 
 // 게시글을 보러 갔다가 돌아와도 보던 지도 상태(필터·고른 핀·검색 기준)를 그대로 보여주기 위한 기억 (새로고침하면 처음부터)
-const mapMemory: { filter: MapFilter; selectedId?: string; searchCenter: Point; viewCenter: Point } = { filter: '전체', searchCenter: ME, viewCenter: ME }
+const mapMemory: { filter: MapFilter; selection?: { ids: string[]; index: number }; searchCenter: Point; viewCenter: Point } = { filter: '전체', searchCenter: ME, viewCenter: ME }
 // 카카오 지도를 못 불러오면(키 · 도메인 등록 문제) 이번 실행 동안은 그림 지도로
 let kakaoMapFailed = false
 
@@ -39,10 +39,18 @@ export function MapScreen() {
   const { boards, comments, openBoard, showToast, live, searchArea } = useApp()
   const [realMap, setRealMap] = useState(KAKAO_MAP_KEY !== '' && !kakaoMapFailed)
   const [filter, setFilter] = useState<MapFilter>(filters.some((item) => item.value === mapMemory.filter) ? mapMemory.filter : '전체')
-  const [selectedBoard, setSelectedBoard] = useState<Board | undefined>(() => boards.find((board) => board.id === mapMemory.selectedId))
+  // 고른 핀: 겹친 핀 묶음이면 그 자리 글들(ids)과 지금 보는 글(index). 요약 시트에서 넘겨 본다
+  const [selection, setSelection] = useState<{ ids: string[]; index: number } | undefined>(mapMemory.selection)
+  const group = (selection?.ids ?? []).flatMap((id) => boards.find((board) => board.id === id) ?? [])
+  const selectedBoard: Board | undefined = group[Math.min(selection?.index ?? 0, group.length - 1)]
+  const setSelectedBoard = (board?: Board, boardsHere?: Board[]) => {
+    if (!board) { setSelection(undefined); return }
+    const ids = (boardsHere ?? [board]).map((item) => item.id)
+    setSelection({ ids, index: Math.max(0, ids.indexOf(board.id)) })
+  }
   const [searchCenter, setSearchCenter] = useState<Point>(mapMemory.searchCenter)
   const [viewCenter, setViewCenter] = useState<Point>(mapMemory.viewCenter)
-  Object.assign(mapMemory, { filter, selectedId: selectedBoard?.id, searchCenter, viewCenter })
+  Object.assign(mapMemory, { filter, selection, searchCenter, viewCenter })
   const hotIds = useMemo(() => new Set(boards.filter((board) => isHotBoard(board, commentCountOf(board, comments))).map((board) => board.id)), [boards, comments])
   const nearby = filterBoards(boards, filter, hotIds)
   const selectFilter = (next: MapFilter) => { setFilter(next); setSelectedBoard(undefined) }
@@ -70,6 +78,6 @@ export function MapScreen() {
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
     </div>
     {movedFar && !selectedBoard && <button className="map-search-here" onClick={searchHere}><RotateCw size={15}/>이 지역에서 다시 찾기</button>}
-    {selectedBoard && <IncidentBottomSheet board={selectedBoard} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
+    {selectedBoard && <IncidentBottomSheet board={selectedBoard} position={group.length > 1 ? { index: group.indexOf(selectedBoard), total: group.length, go: (index) => setSelection({ ids: group.map((item) => item.id), index }) } : undefined} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
   </AppShell>
 }

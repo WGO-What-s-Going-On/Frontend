@@ -1,8 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { LocateFixed, Minus, Plus } from 'lucide-react'
-import { categoryIcon } from '../../domain/categoryIcons'
-import type { Board, Category } from '../../types/domain'
+import type { Board } from '../../types/domain'
 import { ME, RADIUS, WORLD_SIZE, boardPosition, type Point } from './mapWorld'
+import { PinMarker, groupPins } from './pinGroups'
 
 // 손으로 움직이는 목업 지도.
 // - 한 손가락(마우스) 끌기: 이동 / 두 손가락: 확대·축소 / 휠·트랙패드: 확대·축소 / 두 번 탭: 확대
@@ -40,7 +40,7 @@ export function MapView({ boards, selectedId, hotIds, onSelect, onMoved, focusOf
   boards: Board[]
   selectedId?: string
   hotIds: Set<string>
-  onSelect: (board?: Board) => void
+  onSelect: (board?: Board, group?: Board[]) => void
   // 지도를 크게 옮겼을 때 (이 지역 다시 찾기)
   onMoved?: (center: Point) => void
   // 아래쪽 시트가 가리는 만큼 선택한 핀을 위로 올려서 보여준다
@@ -193,15 +193,10 @@ export function MapView({ boards, selectedId, hotIds, onSelect, onMoved, focusOf
       <span className="map-radius" style={{ left: ME.x - RADIUS, top: ME.y - RADIUS, width: RADIUS * 2, height: RADIUS * 2 }}/>
     </div>
     <span className="map-me" style={{ transform: `translate(${me.x}px, ${me.y}px)` }} aria-label="내 위치"/>
-    {markers.map(({ board, point }) => {
-      const screen = toScreen(point)
+    {groupPins(markers.map(({ board, point }) => ({ board, point: toScreen(point) }))).map((group) => {
+      const screen = group.point
       if (screen.x < -60 || screen.y < -60 || screen.x > size.width + 60 || screen.y > size.height + 60) return null
-      const Icon = categoryIcon[board.category]
-      const selected = board.id === selectedId
-      return <button key={board.id} className={`map-marker ${selected ? 'selected' : ''} ${hotIds.has(board.id) ? 'hot' : ''} ${board.distance > RADIUS ? 'far' : ''}`} data-category={board.category} style={{ transform: `translate(${screen.x}px, ${screen.y}px)` }} onClick={() => { if (!dragged.current) onSelect(board) }} aria-label={`${board.title}, ${board.distance}m`}>
-        <span className="marker-dot"><Icon size={15} strokeWidth={2.2}/></span>
-        {selected && <span className="marker-label">{board.title}</span>}
-      </button>
+      return <PinMarker key={group.key} group={group} selectedId={selectedId} hotIds={hotIds} style={{ transform: `translate(${screen.x}px, ${screen.y}px)` }} onSelect={(board, boards) => { if (!dragged.current) onSelect(board, boards) }}/>
     })}
     {!hideControls && <div className="map-controls">
       <div className="map-zoom"><button onClick={() => zoomBy(1.5)} aria-label="지도 확대"><Plus size={18}/></button><button onClick={() => zoomBy(1 / 1.5)} aria-label="지도 축소"><Minus size={18}/></button></div>

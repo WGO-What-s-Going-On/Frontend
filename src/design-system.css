@@ -2163,3 +2163,13 @@ button.title-progress-card:active { background: #f7f8fa; }
 .ux-board-card-corner { position: absolute; z-index: 1; top: 8px; right: 8px; display: flex; gap: 2px; }
 .board-corner-button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; color: var(--c-mute); border: 0; border-radius: 50%; background: transparent; }
 .board-corner-button:active { color: var(--c-ink); background: var(--c-surface); }
+
+/* 겹친 핀 묶음: 핀 오른쪽 위 개수 */
+.marker-count { position: absolute; top: -7px; right: -8px; display: grid; place-items: center; min-width: 18px; height: 18px; padding: 0 4px; color: #fff; border: 2px solid #fff; border-radius: 9px; background: var(--c-ink); font-size: 10px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+:root[data-theme="dark"] .marker-count { color: var(--c-page); border-color: var(--c-page); background: var(--c-ink); }
+/* 요약 시트: 같은 자리 글 넘기기 ‹ 1 / 2 › (X와 같은 줄 왼쪽). 그 줄만큼 내용을 내린다 */
+.sheet-pager { position: absolute; z-index: 2; top: 6px; left: 10px; display: flex; align-items: center; gap: 2px; height: 32px; color: var(--c-body); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sheet-pager button { display: grid; place-items: center; width: 28px; height: 28px; padding: 0; color: var(--c-ink); border: 0; border-radius: 50%; background: transparent; }
+.sheet-pager button:active { background: var(--c-surface); }
+.map-bottom-sheet.has-pager > .sheet-handle { margin-bottom: 19px; }
+.map-bottom-sheet.has-pager .board-image-placeholder.sheet-image { margin-top: 4px; }
