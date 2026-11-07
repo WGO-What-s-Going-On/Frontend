@@ -6,7 +6,6 @@ import type { RefObject } from 'react'
 // 어두운 배경 · 사진 보기가 뜨면 그 아래 화면 맨 위가 어두워지는데 상태바만 흰 띠로 남아서,
 // 떠 있는 배경들의 색을 화면 바탕 위에 겹친 색을 계산해 상태바 자리에 칠한다 (겹쳐 뜨면 위에 뜬 것까지 겹친다)
 const layers: HTMLElement[] = []
-let defaultThemeColor: string | null = null
 
 type Rgb = [number, number, number]
 const parse = (color: string): [number, number, number, number] => {
@@ -18,10 +17,10 @@ const hex = (rgb: Rgb) => `#${rgb.map((value) => Math.round(value).toString(16).
 function apply() {
   const root = document.documentElement
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
-  if (meta && defaultThemeColor === null) defaultThemeColor = meta.content
   root.style.removeProperty('--status-tint')
   if (!layers.length) {
-    if (meta && defaultThemeColor !== null) meta.content = defaultThemeColor
+    // 시작 화면이 떠 있는 동안은 시작 화면 색 그대로 (닫힐 때 main.tsx가 평소 색으로 되돌린다)
+    if (meta?.dataset.default && !root.classList.contains('launching')) meta.content = meta.dataset.default
     return
   }
   // 화면 바탕(로그인 첫 화면이면 연한 파랑) 위에 떠 있는 배경들을 차례로 겹친다
@@ -32,6 +31,13 @@ function apply() {
   }, [r, g, b])
   root.style.setProperty('--status-tint', hex(tint))
   if (meta) meta.content = hex(tint)
+}
+
+// 평소 상태바 색 (화면 모드: 라이트 흰색 · 다크 진회색)
+export function setBaseStatusColor(color: string) {
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+  if (meta) meta.dataset.default = color
+  apply()
 }
 
 // 어두운 배경 요소에 붙인다. 화면에 그려지기 전에 칠해서 배경과 상태바가 같이 바뀐다

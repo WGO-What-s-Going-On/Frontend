@@ -4,14 +4,53 @@
     <meta charset="UTF-8" />
     <!-- viewport-fit=cover: 노치·홈 바 영역까지 화면을 쓰고, 안전 영역은 CSS(safe-area.css)에서 비운다 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#ffffff" />
+    <!-- data-default: 평소 상태바 색 (시작 화면 · 어두운 배경이 잠깐 바꿨다가 되돌린다) -->
+    <meta name="theme-color" content="#ffffff" data-default="#ffffff" />
     <!-- 홈 화면에 추가(PWA): 주소창 없이 앱처럼 열리고, iOS는 이 상태에서만 웹 푸시를 받는다 -->
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="WGO" />
+    <!-- 홈 화면 앱을 열 때 iOS가 페이지보다 먼저 띄우는 시작 그림 (#launch-splash와 같은 모양, 아이폰 화면 크기별) -->
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1320x2868.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1206x2622.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1260x2736.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1290x2796.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1179x2556.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1170x2532.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1284x2778.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1125x2436.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/splash/1242x2688.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/828x1792.png" />
+    <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/splash/750x1334.png" />
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
     <title>What's Going On?</title>
+    <!-- 시작 화면: 앱을 열면 코드가 뜨기 전부터 바로 보이고, 첫 화면이 준비되면 사라진다 (main.tsx hideLaunchSplash).
+         홈 화면 앱은 iOS가 페이지를 불러오기 전에도 같은 그림(public/splash, apple-touch-startup-image)을 띄워 이어 보인다.
+         휴대폰 크기에서만 (컴퓨터 미리보기 · 카카오 로그인 복귀 중에는 띄우지 않는다) -->
+    <style>
+      #launch-splash { display: none; }
+      html.launching, html.launching body { background: #2550d8 !important; }
+      html.launching #launch-splash {
+        position: fixed; z-index: 1000; inset: 0;
+        display: grid; place-items: center;
+        padding-top: var(--launch-top, 0px);
+        color: #fff; text-align: center;
+        background: linear-gradient(180deg, #2550d8 0%, #3466e8 55%, #4a7af0 100%);
+        font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+        transition: opacity .28s ease-out;
+      }
+      #launch-splash.leaving { opacity: 0; }
+      #launch-splash h1 { margin: 0; font-size: 34px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.2; color: rgba(255, 255, 255, .7); }
+      #launch-splash h1 b { font-weight: 800; color: #fff; }
+      #launch-splash p { margin: 14px 0 0; font-size: 15px; font-weight: 500; line-height: 1.55; color: rgba(255, 255, 255, .86); }
+    </style>
+    <script>
+      if (window.matchMedia('(max-width: 450px)').matches && location.pathname.indexOf('/auth/') !== 0) {
+        document.documentElement.classList.add('launching')
+        document.querySelector('meta[name="theme-color"]').content = '#2550d8'
+      }
+    </script>
     <script>
       // 첫 화면이 그려지기 전에 화면 모드를 적용한다. 기본은 라이트, 마이 > 설정에서 다크를 고른 경우만 다크
       try {
@@ -21,6 +60,12 @@
     </script>
   </head>
   <body>
+    <div id="launch-splash" aria-hidden="true">
+      <div>
+        <h1><b>W</b>hat's <b>G</b>oing <b>O</b>n</h1>
+        <p>내 주변에서 일어나는 일을<br />실시간으로 확인해보세요</p>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

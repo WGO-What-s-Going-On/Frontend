@@ -26,3 +26,20 @@ document.documentElement.dataset.shell = Capacitor.isNativePlatform() ? 'app' : 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode><BrowserRouter><AppProvider><App /></AppProvider></BrowserRouter></React.StrictMode>,
 )
+
+// 시작 화면(index.html #launch-splash) 닫기: 첫 화면이 그려진 뒤, 앱을 연 지 최소 1초는 보여 주고 서서히 사라진다
+function hideLaunchSplash() {
+  const root = document.documentElement
+  const splash = document.getElementById('launch-splash')
+  if (!splash || !root.classList.contains('launching')) return
+  window.setTimeout(() => {
+    splash.classList.add('leaving')
+    window.setTimeout(() => {
+      root.classList.remove('launching')
+      splash.remove()
+      const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+      if (meta?.dataset.default) meta.content = meta.dataset.default
+    }, 280)
+  }, Math.max(0, 1000 - performance.now()))
+}
+requestAnimationFrame(() => requestAnimationFrame(hideLaunchSplash))

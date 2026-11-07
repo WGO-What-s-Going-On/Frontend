@@ -16,6 +16,7 @@ import { consentTerms, getMe, getTerms, requestWithdrawal, updateMe } from '../a
 import type { MeResponse } from '../api/users'
 import { useServerSync, type RankingView } from './useServerSync'
 import type { LevelStats } from '../features/level/levels'
+import { setBaseStatusColor } from '../components/ui/statusTint'
 import { myCommentReactions, myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, ImageFocus, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
 
@@ -203,7 +204,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // 그리기 전에 반영해야 아래 toggleTheme의 겹쳐 전환이 바뀐 색을 찍는다
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = themeMode
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeMode === 'dark' ? '#2a2d34' : '#ffffff')
+    setBaseStatusColor(themeMode === 'dark' ? '#2a2d34' : '#ffffff')
   }, [themeMode])
 
   useEffect(() => {
