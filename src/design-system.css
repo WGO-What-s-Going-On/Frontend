@@ -1105,7 +1105,7 @@ html { -webkit-tap-highlight-color: transparent; }
 .map-screen ~ .map-bottom-sheet .incident-preview,
 .map-bottom-sheet .incident-preview { display: none; }
 /* 닫기(X)는 사진보다 위 줄에: 사진과 겹치지 않게 X를 올리고 사진을 그만큼 내린다 */
-.map-bottom-sheet .sheet-close { top: 6px; right: 8px; width: 32px; height: 32px; background: transparent; }
+.map-bottom-sheet .sheet-close { top: 6px; right: 14px; width: 32px; height: 32px; background: transparent; }
 .map-bottom-sheet .board-image-placeholder.sheet-image { margin-top: 16px; }
 
 /* ======================================================================
@@ -2140,3 +2140,12 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 알림 설정: 이 기기 푸시 알림은 위에 따로 */
 .device-push { margin-bottom: 14px; }
+
+/* 글쓰기 게시 중: 버튼을 회색(누를 수 없음)으로 죽이지 않고 파란색 그대로 돌아가는 표시 + 단계 문구 */
+.quick-submit[aria-busy="true"] { color: #fff !important; border-color: var(--c-accent) !important; background: var(--c-accent) !important; opacity: 1 !important; cursor: progress; }
+:root[data-theme="dark"] .quick-submit[aria-busy="true"] { border-color: var(--c-accent-fill) !important; background: var(--c-accent-fill) !important; }
+.quick-submit-progress { display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+.spinner { width: 16px; height: 16px; flex: none; border: 2px solid rgba(255, 255, 255, .35); border-top-color: #fff; border-radius: 50%; animation: spinner-turn .7s linear infinite; }
+@keyframes spinner-turn { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 1.6s; } }
+.quick-submit-note { margin: 8px 0 0; color: var(--c-mute); font-size: 12px; text-align: center; }

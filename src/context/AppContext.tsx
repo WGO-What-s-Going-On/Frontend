@@ -19,7 +19,8 @@ import type { LevelStats } from '../features/level/levels'
 import { myCommentReactions, myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
 
-interface BoardInput { category: Category; title: string; body: string; imageName?: string; imageFile?: File; anonymous?: boolean; reach?: Reach }
+// onStage: 서버에 올리는 단계(사진 올리기 → 게시)를 글쓰기 버튼에 알린다
+interface BoardInput { category: Category; title: string; body: string; imageName?: string; imageFile?: File; anonymous?: boolean; reach?: Reach; onStage?: (stage: 'upload' | 'post') => void }
 export type LocationPermission = 'unknown' | 'granted' | 'denied'
 // 화면 모드: 라이트(기본) · 다크
 export type ThemeMode = 'light' | 'dark'

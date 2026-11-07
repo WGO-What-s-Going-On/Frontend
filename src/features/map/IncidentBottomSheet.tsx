@@ -5,7 +5,7 @@ import { IconButton } from '../../components/ui/IconButton'
 import { categoryLabel } from '../../domain/labels'
 import type { Board } from '../../types/domain'
 import { BoardImage } from '../board/BoardImage'
-import { PhotoViewer, useLongPress } from '../../components/ui/PhotoViewer'
+import { PhotoViewer, ZoomBadge } from '../../components/ui/PhotoViewer'
 
 interface IncidentBottomSheetProps {
   board: Board
@@ -14,10 +14,9 @@ interface IncidentBottomSheetProps {
 }
 
 export function IncidentBottomSheet({ board, onClose, onOpen }: IncidentBottomSheetProps) {
-  // 시트 사진: 누르면 지도 시트 탭과 헷갈리지 않게 꾹 눌러야 크게 본다
+  // 시트 사진: 사진을 누르면 바로 크게 본다 (사진 밖을 눌러서는 열리지 않게 사진에만 붙인다)
   const [photoOpen, setPhotoOpen] = useState(false)
   const photoOrigin = useRef<HTMLDivElement>(null)
-  const photoPress = useLongPress(() => setPhotoOpen(true))
   return <aside className="map-bottom-sheet" aria-label={`${board.title} 요약`}>
     <button className="sheet-handle" onClick={onClose} aria-label="사건 정보 닫기"><span/></button>
     <IconButton className="sheet-close" label="닫기" onClick={onClose}><X size={20}/></IconButton>
@@ -27,7 +26,7 @@ export function IncidentBottomSheet({ board, onClose, onOpen }: IncidentBottomSh
       <span className="preview-road"/>
       <span className="preview-marker"><MapPin size={20}/></span>
     </div>
-    {board.imageUrl ? <div ref={photoOrigin} className="detail-photo-press" {...photoPress}><BoardImage board={board} variant="sheet-image" block/></div> : <BoardImage board={board} variant="sheet-image" block/>}
+    {board.imageUrl ? <div ref={photoOrigin} className="detail-photo-press zoomable" role="button" tabIndex={0} aria-label="사진 크게 보기" onClick={(event) => { event.stopPropagation(); setPhotoOpen(true) }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setPhotoOpen(true) } }} onContextMenu={(event) => event.preventDefault()}><BoardImage board={board} variant="sheet-image" block/><ZoomBadge/></div> : <BoardImage board={board} variant="sheet-image" block/>}
     {photoOpen && board.imageUrl && <PhotoViewer src={board.imageUrl} alt="현장 사진" origin={photoOrigin} onClose={() => setPhotoOpen(false)}/>}
     <span className="sheet-category" data-category={board.category}>{categoryLabel[board.category]}</span>
     <h2>{board.title}</h2>
