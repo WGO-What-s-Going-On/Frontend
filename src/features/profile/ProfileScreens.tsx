@@ -10,6 +10,7 @@ import { FilterChips } from '../../components/ui/FilterChips'
 import { IconButton } from '../../components/ui/IconButton'
 import { Camera, Loader2, Moon, Sun } from 'lucide-react'
 import { useApp, type NotificationSettings } from '../../context/AppContext'
+import { disableWebPush, enableWebPush, webPushState, type WebPushState } from '../../api/webPush'
 import { nicknameError, nicknameFormatError } from '../../domain/nickname'
 import { apiEnabled } from '../../api/config'
 import { checkNickname as checkNicknameApi } from '../../api/users'
@@ -132,9 +133,42 @@ const notificationOptions: { key: keyof NotificationSettings; title: string; des
   { key: 'lifecycle', title: '게시판 종료', description: '참여한 게시판이 곧 종료되거나 종료되면 알려드려요' },
 ]
 
+// 이 기기 푸시 알림(웹 · 홈 화면 앱). 앱(iOS · 안드로이드)은 앱 푸시가 따로 있어 보이지 않는다
+const pushHelp: Record<WebPushState, string> = {
+  on: '이 기기로 알림을 보내드려요',
+  off: '켜면 앱을 닫아도 이 기기로 알림이 와요',
+  denied: '브라우저 설정에서 이 사이트 알림을 허용해 주세요',
+  'needs-install': '아이폰은 Safari 공유 버튼 → 홈 화면에 추가로 연 앱에서 켤 수 있어요',
+  unsupported: '',
+}
+
+function DevicePushSetting() {
+  const { showToast, live } = useApp()
+  const [state, setState] = useState<WebPushState>(webPushState)
+  const [busy, setBusy] = useState(false)
+  if (state === 'unsupported' || !live) return null
+  const toggle = async (on: boolean) => {
+    setBusy(true)
+    try {
+      if (on) {
+        const next = await enableWebPush()
+        setState(next)
+        if (next === 'on') showToast('이 기기 푸시 알림을 켰어요.')
+      } else { await disableWebPush(); setState('off') }
+    } catch { showToast('푸시 알림을 켜지 못했어요. 다시 시도해 주세요.'); setState(webPushState()) } finally { setBusy(false) }
+  }
+  return <div className="menu-group setting-list device-push">
+    <label className="setting-toggle">
+      <span><strong>이 기기 푸시 알림</strong><small>{pushHelp[state]}</small></span>
+      <input type="checkbox" role="switch" checked={state === 'on'} disabled={busy || state === 'denied' || state === 'needs-install'} onChange={(event) => toggle(event.target.checked)}/>
+    </label>
+  </div>
+}
+
 export function NotificationSettingsScreen() {
   const { notificationSettings, updateNotificationSettings, go } = useApp()
   return <AppShell><BackHeader title="알림 설정" onBack={() => go('my')}/>
+    <DevicePushSetting/>
     <div className="menu-group setting-list">{notificationOptions.map((option) => <label key={option.key} className="setting-toggle">
       <span><strong>{option.title}</strong><small>{option.description}</small></span>
       <input type="checkbox" role="switch" checked={notificationSettings[option.key]} onChange={(event) => updateNotificationSettings({ ...notificationSettings, [option.key]: event.target.checked })}/>

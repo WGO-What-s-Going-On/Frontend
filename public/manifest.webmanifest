@@ -1,0 +1,11 @@
+{
+  "name": "What's Going On?",
+  "short_name": "WGO",
+  "description": "내 주변 150m에서 지금 일어나는 일",
+  "lang": "ko",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}

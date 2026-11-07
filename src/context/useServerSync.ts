@@ -199,15 +199,18 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   }
   const loadNotices = async () => {
     const result = await notifications.getNotifications()
-    const ids = [...new Set(result.items.flatMap((item) => item.targetId ? [item.targetId] : []))]
+    // 게시물 알림만 게시물로 연다 (칭호 · 뱃지 알림의 targetId는 사용자 ID)
+    const postIdOf = (item: notifications.NotificationResponse) => item.targetId && (item.targetType ?? 'post') === 'post' ? item.targetId : undefined
+    const ids = [...new Set(result.items.flatMap((item) => postIdOf(item) ?? []))]
     const titles = new Map(await Promise.all(ids.map(async (id) => [id, await titleOf(id)] as const)))
     setNotices(result.items.map((item) => {
-      const post = item.targetId ? titles.get(item.targetId) : undefined
+      const postId = postIdOf(item)
+      const post = postId ? titles.get(postId) : undefined
       return {
         id: item.notificationId, text: item.body ? `${item.title} ${item.body}` : item.title, createdAt: timeAgo(item.createdAt), read: item.isRead,
         type: /COMMENT|REPLY/.test(item.type) ? 'reply' : /REACTION/.test(item.type) ? 'reaction' : /CLOSE|EXPIRE|STALE/.test(item.type) ? 'lifecycle' : 'nearby',
         // 알림의 targetId는 댓글 알림이어도 게시글 ID다 (Notification 서비스 기준)
-        boardId: item.targetId ?? undefined,
+        boardId: postId,
         title: item.title, body: item.body, postTitle: post?.title, gone: post?.gone,
       }
     }))

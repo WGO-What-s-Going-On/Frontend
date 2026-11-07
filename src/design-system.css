@@ -2142,3 +2142,6 @@ button.title-progress-card:active { background: #f7f8fa; }
 .quick-photo-change { display: block; width: 100%; height: 150px; padding: 0; overflow: hidden; border: 0; border-radius: 13px; background: var(--c-surface); }
 .quick-photo-change img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .quick-photo-remove { position: absolute; top: 8px; right: 8px; display: grid; place-items: center; width: 30px; height: 30px; padding: 0; color: #fff; border: 0; border-radius: 50%; background: rgba(17, 18, 22, .6); }
+
+/* 알림 설정: 이 기기 푸시 알림은 위에 따로 */
+.device-push { margin-bottom: 14px; }

@@ -14,6 +14,13 @@ interface ImportMetaEnv {
   readonly VITE_DEV_LATLNG?: string
   // 개발 서버 전용 테스트 계정 토큰 (.env.local에만, 커밋 금지)
   readonly VITE_DEV_ACCESS_TOKEN?: string
+  // 웹 푸시(PWA): Firebase 웹 앱 설정 · VAPID 공개키 (모두 공개 값). 비워 두면 웹 푸시 없음
+  readonly VITE_FIREBASE_API_KEY?: string
+  readonly VITE_FIREBASE_AUTH_DOMAIN?: string
+  readonly VITE_FIREBASE_PROJECT_ID?: string
+  readonly VITE_FIREBASE_MESSAGING_SENDER_ID?: string
+  readonly VITE_FIREBASE_APP_ID?: string
+  readonly VITE_FIREBASE_VAPID_KEY?: string
 }
 
 interface ImportMeta {

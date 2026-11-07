@@ -10,6 +10,7 @@ import { ApiError, SESSION_EXPIRED_EVENT } from '../api/client'
 import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/auth'
 import { clearSession, readSession } from '../api/session'
 import { startPush, stopPush } from '../api/push'
+import { startWebPush, unregisterWebPush } from '../api/webPush'
 import { getMyProfileImage, removeProfileImage as removeProfileImageApi, shrinkImage, uploadProfileImage } from '../api/profileImage'
 import { consentTerms, getMe, getTerms, requestWithdrawal, updateMe } from '../api/users'
 import type { MeResponse } from '../api/users'
@@ -299,6 +300,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       try { await requestWithdrawal() } catch { showToast('탈퇴를 처리하지 못했어요. 다시 시도해 주세요.'); return }
       server.stopRealtime()
       await stopPush()
+      await unregisterWebPush()
       pushStarted.current = false
       clearSession()
     }
@@ -309,6 +311,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     server.stopRealtime()
     await stopPush()
+    await unregisterWebPush()
     pushStarted.current = false
     await logoutApi()
     setUser((value) => ({ ...value, serverId: undefined }))
@@ -539,9 +542,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!server.live || pushStarted.current || (screen !== 'home' && screen !== 'board')) return
     pushStarted.current = true
+    const refreshAlerts = () => { latestServer.current.loadUnread().catch(() => undefined); latestServer.current.loadNotices().catch(() => undefined) }
     startPush({
-      onReceive: () => { latestServer.current.loadUnread().catch(() => undefined); latestServer.current.loadNotices().catch(() => undefined) },
+      onReceive: refreshAlerts,
       onOpen: ({ postId, toAlerts }) => navigate(toAlerts || !postId ? pathForScreen('alerts') : pathForScreen('detail', postId)),
+    })
+    // 웹(PWA): 알림 설정에서 켜 둔 기기면 토큰을 다시 맞춘다. 앱을 보고 있을 때 온 알림은 토스트로
+    startWebPush({
+      onReceive: (title) => { refreshAlerts(); if (title) showToast(title) },
+      onOpen: (url) => navigate(url),
     })
   }, [server.live, screen])
   // 서버 연동 배포본: 로그인 없이 /map 같은 주소로 바로 들어오면 목업 데이터가 보이지 않게 로그인 화면으로 보낸다
