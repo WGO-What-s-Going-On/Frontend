@@ -8,13 +8,14 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { IconButton } from '../../components/ui/IconButton'
-import { Camera, Loader2, Moon, Sun } from 'lucide-react'
+import { Archive, Camera, Loader2, Moon, Sun, Trash2 } from 'lucide-react'
 import { useApp, type NotificationSettings } from '../../context/AppContext'
 import { disableWebPush, enableWebPush, webPushState, type WebPushState } from '../../api/webPush'
 import { nicknameError, nicknameFormatError } from '../../domain/nickname'
 import { apiEnabled } from '../../api/config'
 import { checkNickname as checkNicknameApi } from '../../api/users'
 import { commentCountOf, myReactions } from '../../types/domain'
+import type { Board } from '../../types/domain'
 import { TitleProgressCard } from './TitleProgressCard'
 import { levelStats } from '../level/levels'
 
@@ -44,7 +45,16 @@ export function ProfileScreen() {
 }
 
 export function ActivityScreen() {
-  const { boards, comments, user, recentBoardIds, openBoard, go, reopenBoard, live, loadActivity } = useApp()
+  const { boards, comments, user, recentBoardIds, openBoard, go, finishBoard, deleteBoard, live, loadActivity } = useApp()
+  // 내가 쓴 글: 오른쪽 위 보관(종료) · 삭제. 지우거나 보관해도 이 화면에 그대로 있는다
+  const [confirm, setConfirm] = useState<{ kind: 'archive' | 'delete'; board: Board } | null>(null)
+  const confirmDialog = confirm && (confirm.kind === 'delete'
+    ? <ConfirmDialog title="게시글을 삭제할까요?" description="삭제한 글은 되돌릴 수 없어요." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => { deleteBoard(confirm.board.id); setConfirm(null) }}/>
+    : <ConfirmDialog title="게시글을 보관할까요?" description="보관하면 게시판이 종료돼 새 댓글을 받지 않고 지도에서 사라져요. 글은 최근 활동에 남아요." confirmLabel="보관" onClose={() => setConfirm(null)} onConfirm={() => { finishBoard(confirm.board.id); setConfirm(null) }}/>)
+  const myActions = (board: Board) => board.authorId === user.id ? <>
+    {board.status === '실시간' && <IconButton className="board-corner-button" label={`${board.title} 보관`} onClick={() => setConfirm({ kind: 'archive', board })}><Archive size={17}/></IconButton>}
+    <IconButton className="board-corner-button" label={`${board.title} 삭제`} onClick={() => setConfirm({ kind: 'delete', board })}><Trash2 size={17}/></IconButton>
+  </> : undefined
   const [filter, setFilter] = useState<'최근 본' | '댓글 단' | '공감한' | '내가 작성한' | '종료된'>('최근 본')
   // 서버 연동 중에는 서버 활동 기록으로 (주변 목록에 없는 글 · 종료된 글도 포함)
   const [serverActivity, setServerActivity] = useState<{ written: string[]; commented: string[]; reacted: string[] } | null>(null)
@@ -64,9 +74,9 @@ export function ActivityScreen() {
   const filtered = allLists[filter]
   const emptyText = { '최근 본': '최근에 본 게시판이 없어요.', '댓글 단': '댓글을 단 게시판이 없어요.', '공감한': '반응을 남긴 게시판이 없어요.', '내가 작성한': '작성한 게시판이 없어요.', '종료된': '종료된 게시판이 없어요.' }
   // 게시판 목록과 같은 여백·칩·카드를 써서 같은 화면처럼 보이게 한다
-  return <AppShell contentClassName="ux-board-screen activity-screen"><BackHeader title="최근 활동" onBack={() => go('my')}/>
+  return <AppShell contentClassName="ux-board-screen activity-screen" bottomContent={confirmDialog}><BackHeader title="최근 활동" onBack={() => go('my')}/>
     <div className="ux-filter-row"><FilterChips className="ux-category-filters activity-chips" options={filters.map((item) => ({ value: item.label, count: item.count }))} selected={filter} onSelect={setFilter}/></div>
-    <div className="ux-board-list">{filtered.length ? filtered.map((board) => <BoardCard key={board.id} board={board} commentCount={commentCountOf(board, comments)} onOpen={() => openBoard(board.id)} action={board.authorId === user.id && board.status === '종료됨' ? <button className="board-reopen" onClick={() => reopenBoard(board.id)}>종료 해제</button> : undefined}/>) : <EmptyState title={emptyText[filter]}/>}</div>
+    <div className="ux-board-list">{filtered.length ? filtered.map((board) => <BoardCard key={board.id} board={board} commentCount={commentCountOf(board, comments)} onOpen={() => openBoard(board.id)} corner={myActions(board)}/>) : <EmptyState title={emptyText[filter]}/>}</div>
   </AppShell>
 }
 

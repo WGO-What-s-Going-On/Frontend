@@ -371,7 +371,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }))
     showToast('게시글을 수정했습니다.')
   }
-  const deleteBoard = (id: string) => { setBoards((items) => items.filter((board) => board.id !== id)); showToast('게시글을 삭제했습니다.'); go('board') }
+  // 삭제한 글을 보고 있었으면 게시판으로, 목록(최근 활동 등)에서 지웠으면 그 화면에 그대로
+  const leaveDeleted = (id: string) => { if ((view.current.screen === 'detail' || view.current.screen === 'outside') && view.current.currentBoardId === id) go('board') }
+  const deleteBoard = (id: string) => { setBoards((items) => items.filter((board) => board.id !== id)); showToast('게시글을 삭제했습니다.'); leaveDeleted(id) }
   const reopenBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '실시간' } : board)); showToast('게시판을 다시 열었어요.') }
   const finishBoard = (id: string) => { setBoards((items) => items.map((board) => board.id === id ? { ...board, status: '종료됨' } : board)); showToast('게시판을 종료했습니다.') }
   const reactToBoard = (id: string, reaction: PostReaction) => setBoards((items) => items.map((board) => {
@@ -485,7 +487,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }).catch((error) => { showToast(mediaMessage(error) ?? '글을 올리지 못했어요. 다시 시도해 주세요.'); throw error }),
     // 서버는 제목 · 본문만 수정할 수 있다 (카테고리 · 작성자 표시 · 사진은 그대로)
     updateBoard: (id, input) => { server.editPost(id, input.title, input.body).then(() => showToast('게시글을 수정했습니다.')).catch(fail('게시글을 수정하지 못했어요.')) },
-    deleteBoard: (id) => { server.deletePost(id).then(() => { showToast('게시글을 삭제했습니다.'); go('board') }).catch(fail('게시글을 삭제하지 못했어요.')) },
+    deleteBoard: (id) => { server.deletePost(id).then(() => { showToast('게시글을 삭제했습니다.'); leaveDeleted(id) }).catch(fail('게시글을 삭제하지 못했어요.')) },
     finishBoard: (id) => { server.setClosed(id, true).then(() => showToast('게시판을 종료했습니다.')).catch(fail('게시판을 종료하지 못했어요.')) },
     reopenBoard: (id) => { server.setClosed(id, false).then(() => showToast('게시판을 다시 열었어요.')).catch(fail('게시판을 다시 열지 못했어요.')) },
     reactToBoard: (id, reaction) => { const board = boards.find((item) => item.id === id); server.reactToPost(id, reaction, board ? myReactions(board)[0] : undefined).catch(fail('반응을 남기지 못했어요.')) },
