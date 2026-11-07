@@ -48,13 +48,14 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
     const content = body.trim()
     if (!content || busy) return
     setBusy(true)
-    setStage('check')
+    // 사진이 있으면 처음부터 '사진 올리는 중' (비슷한 글 확인은 따로 보여 주지 않는다)
+    setStage(imageFile ? 'upload' : 'check')
     const title = content.split(/\n|[.!?。！？]/)[0].trim().slice(0, 50) || `${category} 상황 공유`
     const found = live ? await findSimilar({ category, title, body: content, reach }).catch(() => []) : findSimilarBoards(boards, { category, body: content })
     if (found.length) { setSimilar(found); setBusy(false); setStage(null); return }
     publishNow()
   }
-  // 올리는 동안 시트는 그대로 두고 버튼에서 진행을 보여 준다 (비슷한 글 확인 · 게시는 '게시하는 중', 사진이 있으면 그 사이에 '사진 올리는 중').
+  // 올리는 동안 시트는 그대로 두고 버튼에서 진행을 보여 준다 (사진이 있으면 '사진 올리는 중' → '게시하는 중', 없으면 '게시하는 중').
   // 끝나면 상세로 넘어가고, 실패하면 쓴 내용 그대로 다시 누를 수 있다
   const publishNow = () => {
     const content = body.trim()
