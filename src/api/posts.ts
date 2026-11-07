@@ -1,4 +1,5 @@
 import { api } from './client'
+import { stableMediaUrl } from './mediaUrls'
 import type { Board, Category, Comment, CommentReaction, ImageFocus, PostReaction, Reach } from '../types/domain'
 import { timeAgo } from '../domain/time'
 
@@ -51,7 +52,7 @@ export interface CommentResponse {
   parentCommentId: string | null
   // 작성 당시 150m 안에서 쓴 댓글
   verified: boolean
-  media: { mediaId: string; url: string }[]
+  media: { mediaId: string; url: string; expiresAt?: string }[]
   createdAt: string
   // 수정한 적이 있으면 시각 (없으면 null)
   updatedAt?: string | null
@@ -127,7 +128,7 @@ export function toBoard(post: PostResponse): Board {
     myReactions: post.myReaction ? [postReactionFromCode(post.myReaction)] : [],
     // 투표 상태는 상세에서 GET /vote로 받는다. 그 전에는 목업 규칙(작성 시각 · 댓글 수)으로 추측하지 않게 '없음'
     voteStatus: 'NONE',
-    imageUrl: post.media?.find((media) => media.type === 'IMAGE')?.url, imageFocus: post.coverFocus ?? undefined, reach: ([150, 250, 350] as const).find((value) => value === post.radiusM),
+    imageUrl: stableMediaUrl(post.media?.find((media) => media.type === 'IMAGE')), imageFocus: post.coverFocus ?? undefined, reach: ([150, 250, 350] as const).find((value) => value === post.radiusM),
   }
 }
 
@@ -135,7 +136,7 @@ export function toComment(comment: CommentResponse): Comment {
   const counts = comment.reactionCounts ?? { HELPFUL: 0, AGREE: 0, DIFFERENT: 0 }
   return {
     id: comment.commentId, boardId: comment.postId, authorId: String(comment.authorId), authorName: comment.authorNickname ?? '알 수 없음', body: comment.content,
-    imageUrl: comment.media[0]?.url, createdAt: timeAgo(comment.createdAt), verified: comment.verified, parentId: comment.parentCommentId ?? undefined,
+    imageUrl: stableMediaUrl(comment.media[0]), createdAt: timeAgo(comment.createdAt), verified: comment.verified, parentId: comment.parentCommentId ?? undefined,
     reactions: { '도움돼요': counts.HELPFUL, '맞아요': counts.AGREE, '정보가 달라요': counts.DIFFERENT },
     myReactions: comment.myReaction ? [commentReactionFromCode(comment.myReaction)] : [],
     edited: Boolean(comment.updatedAt),
