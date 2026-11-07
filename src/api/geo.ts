@@ -9,11 +9,12 @@ const devCoords = (() => {
 })()
 
 // 지금 위치 (휴대폰 GPS · 브라우저 위치 권한). 실패하면 개발용 위치, 그것도 없으면 오류
-export function currentCoords(): Promise<Coords> {
+// accuracy: 오차 반경(m). 브라우저가 잠깐 부정확한 위치(와이파이 · 기지국 추정)를 줄 때 걸러내는 데 쓴다
+export function currentCoords(): Promise<Coords & { accuracy?: number }> {
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) { if (devCoords) resolve(devCoords); else reject(new Error('위치를 사용할 수 없어요')); return }
     navigator.geolocation.getCurrentPosition(
-      ({ coords }) => resolve({ latitude: coords.latitude, longitude: coords.longitude }),
+      ({ coords }) => resolve({ latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy }),
       (error) => { if (devCoords) resolve(devCoords); else reject(error) },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 },
     )

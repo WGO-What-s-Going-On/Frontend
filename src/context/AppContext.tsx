@@ -72,6 +72,8 @@ interface AppContextValue {
   notices: Notice[]
   reports: Report[]
   currentBoard?: Board
+  // 지금 주소의 게시물이 삭제돼 서버에 없음 (상세에서 빈 화면 대신 안내)
+  currentBoardMissing: boolean
   inRange: boolean
   blockedUsers: string[]
   alertBoardIds: string[]
@@ -178,6 +180,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [locationPermission, setLocationPermissionState] = useState<LocationPermission>(persisted.locationPermission ?? 'unknown')
   const [themeMode, setThemeMode] = useState<ThemeMode>(persisted.themeMode === 'dark' ? 'dark' : 'light')
   const [toast, setToast] = useState('')
+  // 서버에서 찾을 수 없는(삭제된) 게시물
+  const [missingBoardIds, setMissingBoardIds] = useState<Set<string>>(new Set())
   // 실시간 콜백에서 지금 보고 있는 화면을 읽는다 (콜백은 연결 때 한 번 만들어진다)
   const view = useRef({ screen, currentBoardId })
   view.current = { screen, currentBoardId }
@@ -560,7 +564,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   // 게시글 상세는 목록에서 열든 주소로 바로 들어오든(새로고침 포함) 상세 · 댓글 · 투표를 새로 받는다
   useEffect(() => {
     if (!server.live || (screen !== 'detail' && screen !== 'outside') || !currentBoardId) return
-    server.loadBoard(currentBoardId).catch(fail('게시글을 불러오지 못했어요.'))
+    server.loadBoard(currentBoardId).catch((error) => {
+      // 삭제된 게시물: 목록에서도 빼고 상세는 '삭제된 게시물' 안내로
+      if (error instanceof ApiError && error.status === 404) { setMissingBoardIds((ids) => new Set(ids).add(currentBoardId)); setBoards((items) => items.filter((board) => board.id !== currentBoardId)); return }
+      showToast('게시글을 불러오지 못했어요.')
+    })
     // 이 게시판 알림을 다른 기기에서 껐을 수도 있어 상세를 열 때 맞춘다
     server.getBoardAlert(currentBoardId).then((enabled) => setMutedBoardIds((items) => enabled ? items.filter((id) => id !== currentBoardId) : [...new Set([...items, currentBoardId])])).catch(() => undefined)
   }, [screen, currentBoardId, server.live])
@@ -570,7 +578,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return server.watchBoard(currentBoardId)
   }, [screen, currentBoardId, server.live])
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), inRange,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), currentBoardMissing: missingBoardIds.has(currentBoardId), inRange,
     blockedUsers: server.live ? serverBlocked : blockedUsers,
     alertBoardIds: server.live ? boards.filter((board) => !mutedBoardIds.includes(board.id)).map((board) => board.id) : alertBoardIds,
     recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
@@ -581,7 +589,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
     live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,
-  }), [screen, user, boards, comments, notices, reports, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])
+  }), [screen, user, boards, comments, notices, reports, missingBoardIds, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

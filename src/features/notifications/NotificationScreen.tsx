@@ -10,9 +10,20 @@ import type { Notice } from '../../types/domain'
 const ACTIONS_WIDTH = 150 // 알림 카드와 틈 6 + 읽음 72 + 삭제 72
 const OPEN_THRESHOLD = 56
 
+// 서버 알림 내용 줄: 앞에 게시물 제목을 붙인다
+// "게시물이 종료되었습니다." → "‘제목’ 게시물이 종료되었습니다." / "댓글이 …" → "‘제목’ 글의 댓글이 …"
+function noticeBody({ body = '', postTitle, gone }: Notice) {
+  if (gone) return `${body} · 삭제된 게시물`
+  if (!postTitle) return body
+  const title = `‘${postTitle}’`
+  if (body.startsWith('게시물')) return `${title} ${body}`
+  if (body.startsWith('댓글') || body.startsWith('답글')) return `${title} 글의 ${body}`
+  return `${title} · ${body}`
+}
+
 // 알림 한 줄. 왼쪽으로 밀면 오른쪽에 읽음·삭제 버튼이 드러난다.
 function NoticeRow({ notice, open, onOpenChange }: { notice: Notice; open: boolean; onOpenChange: (open: boolean) => void }) {
-  const { markNoticeRead, deleteNotice, openBoard } = useApp()
+  const { markNoticeRead, deleteNotice, openBoard, showToast } = useApp()
   const [dragX, setDragX] = useState<number | null>(null)
   const start = useRef<{ x: number; y: number; base: number; axis: 'x' | 'y' | null } | null>(null)
   const moved = useRef(false)
@@ -54,9 +65,14 @@ function NoticeRow({ notice, open, onOpenChange }: { notice: Notice; open: boole
         if (moved.current) return
         if (open) { onOpenChange(false); return }
         markNoticeRead(notice.id)
+        // 삭제된 게시물은 열면 빈 화면이라 알려만 준다
+        if (notice.gone) { showToast('삭제된 게시물이라 열 수 없어요.'); return }
         if (notice.boardId) openBoard(notice.boardId)
       }}
-    ><span><strong>{notice.text}</strong><small>{notice.createdAt}</small></span>{!notice.read && <i/>}</button>
+    >{notice.title
+      // 서버 알림: 제목 한 줄 + "'게시물 제목' 내용" 한 줄
+      ? <span><strong>{notice.title}</strong><span className="alert-body">{noticeBody(notice)}</span><small>{notice.createdAt}</small></span>
+      : <span><strong>{notice.text}</strong><small>{notice.createdAt}</small></span>}{!notice.read && <i/>}</button>
   </div>
 }
 

@@ -8,6 +8,7 @@ import * as notifications from '../api/notifications'
 import { createRealtime, type Realtime, type RealtimeEvent } from '../api/realtime'
 import { blockUser as blockUserApi, getBlocks, getMyBadges } from '../api/users'
 import { uploadImage } from '../api/media'
+import { ApiError } from '../api/client'
 import { timeAgo } from '../domain/time'
 import type { LevelStats } from '../features/level/levels'
 import type { Board, Category, Comment, CommentReaction, Notice, PostReaction, Reach } from '../types/domain'
@@ -60,21 +61,31 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const upsertBoard = (board: Board) => setBoards((items) => items.some((item) => item.id === board.id) ? items.map((item) => item.id === board.id ? { ...item, ...board } : item) : [board, ...items])
 
   // 위치를 잡고 서버에 알린다 (게시판 참여 · 글쓰기 위치 인가는 서버가 최근 위치로 판단)
+  // 방금(2분 안) 정확한 위치가 있는데 새 위치가 훨씬 부정확하면(오차 200m 넘고 이전의 3배 이상) 이전 위치를 쓴다.
+  // 안 그러면 순간적으로 몇 km 떨어진 곳으로 잡혀 주변 글이 0개가 됐다가 다시 생긴다
+  const lastFix = useRef<{ accuracy: number; at: number } | null>(null)
   const locate = async () => {
-    const next = await currentCoords()
+    const { accuracy, ...next } = await currentCoords()
+    const previous = lastFix.current
+    if (coords.current && previous && accuracy !== undefined && accuracy > 200 && accuracy > previous.accuracy * 3 && Date.now() - previous.at < 120_000) return coords.current
     coords.current = next
+    if (accuracy !== undefined) lastFix.current = { accuracy, at: Date.now() }
     posts.updateLocation(next).catch(() => undefined)
     return next
   }
   const ensureCoords = async () => coords.current ?? locate()
 
   // 주변 글 (지도 핀 · 게시판). 150m 밖 글도 읽기 전용으로 보이도록 가장 넓은 350m로 가져온다
+  // 지도 · 게시판을 오가며 여러 번 겹쳐 불러와도 마지막에 시작한 요청 결과만 쓴다 (늦게 온 예전 결과가 목록을 덮지 않게)
+  const nearbyRequest = useRef(0)
   const loadNearby = async () => {
+    const request = ++nearbyRequest.current
     setBoardsLoading(true)
     setBoardsError(false)
     try {
       const here = await locate()
       const result = await posts.getNearbyPosts({ ...here, radiusM: 350, sort: 'distance', limit: 100 })
+      if (request !== nearbyRequest.current) return
       const fresh = result.posts.map(placeBoard)
       const freshIds = new Set(fresh.map((board) => board.id))
       // 목록 응답에는 투표 정보가 없어서, 상세에서 받아 둔 투표 상태는 그대로 이어 붙인다
@@ -82,7 +93,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
         ...fresh.map((board) => keepVote(items, board)),
         ...items.filter((item) => !freshIds.has(item.id) && opened.current.has(item.id)),
       ])
-    } catch { setBoardsError(true) } finally { setBoardsLoading(false) }
+    } catch { if (request === nearbyRequest.current) setBoardsError(true) } finally { if (request === nearbyRequest.current) setBoardsLoading(false) }
   }
 
   // 지도를 옮긴 곳 주변 글 (이 지역에서 다시 찾기). 서버 거리는 지도 가운데 기준이라 내 위치 기준으로 다시 잰다 (150m 참여 판단용)
@@ -177,14 +188,29 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const block = (userId: string) => blockUserApi(userId)
 
   // 알림 목록 · 설정
+  // 알림 내용 앞에 붙일 게시물 제목 (알림에는 제목이 없어서 게시물을 따로 읽는다). 삭제된 게시물은 gone
+  const postTitles = useRef(new Map<string, { title?: string; gone: boolean }>())
+  const titleOf = async (postId: string): Promise<{ title?: string; gone: boolean }> => {
+    const cached = postTitles.current.get(postId)
+    if (cached) return cached
+    const found = await posts.getPost(postId).then((post) => ({ title: post.title, gone: false }), (error) => ({ gone: error instanceof ApiError && error.status === 404 }))
+    postTitles.current.set(postId, found)
+    return found
+  }
   const loadNotices = async () => {
     const result = await notifications.getNotifications()
-    setNotices(result.items.map((item) => ({
-      id: item.notificationId, text: item.body ? `${item.title} ${item.body}` : item.title, createdAt: timeAgo(item.createdAt), read: item.isRead,
-      type: /COMMENT|REPLY/.test(item.type) ? 'reply' : /REACTION/.test(item.type) ? 'reaction' : /CLOSE|EXPIRE/.test(item.type) ? 'lifecycle' : 'nearby',
-      // 알림의 targetId는 댓글 알림이어도 게시글 ID다 (Notification 서비스 기준)
-      boardId: item.targetId ?? undefined,
-    })))
+    const ids = [...new Set(result.items.flatMap((item) => item.targetId ? [item.targetId] : []))]
+    const titles = new Map(await Promise.all(ids.map(async (id) => [id, await titleOf(id)] as const)))
+    setNotices(result.items.map((item) => {
+      const post = item.targetId ? titles.get(item.targetId) : undefined
+      return {
+        id: item.notificationId, text: item.body ? `${item.title} ${item.body}` : item.title, createdAt: timeAgo(item.createdAt), read: item.isRead,
+        type: /COMMENT|REPLY/.test(item.type) ? 'reply' : /REACTION/.test(item.type) ? 'reaction' : /CLOSE|EXPIRE|STALE/.test(item.type) ? 'lifecycle' : 'nearby',
+        // 알림의 targetId는 댓글 알림이어도 게시글 ID다 (Notification 서비스 기준)
+        boardId: item.targetId ?? undefined,
+        title: item.title, body: item.body, postTitle: post?.title, gone: post?.gone,
+      }
+    }))
   }
   const loadUnread = async () => { setUnreadCount((await notifications.getUnreadCount()).count) }
   const loadSettings = async () => { setNotificationSettings(await notifications.getNotificationSettings()) }

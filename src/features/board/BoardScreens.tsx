@@ -7,7 +7,7 @@ import { Button } from '../../components/ui/Button'
 import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { ErrorState } from '../../components/ui/ErrorState'
-import { BoardCardSkeleton } from '../../components/ui/Skeleton'
+import { BoardCardSkeleton, Skeleton } from '../../components/ui/Skeleton'
 import { IconButton } from '../../components/ui/IconButton'
 import { NoticeBell } from '../../components/ui/NoticeBell'
 import { PostReactions } from '../../components/ui/PostReactions'
@@ -24,7 +24,7 @@ import { FeedItem } from './FeedItem'
 import { AlbumTile } from './AlbumTile'
 import { CommentVoteSection } from './CommentVoteSection'
 import { BoardImage } from './BoardImage'
-import { PhotoViewer, useLongPress } from '../../components/ui/PhotoViewer'
+import { PhotoViewer, ZoomBadge } from '../../components/ui/PhotoViewer'
 import { imageProblem } from '../../api/media'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
@@ -216,7 +216,7 @@ function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, 
 
   return <article ref={articleRef} className={`comment comment-clickable ${isReply ? 'reply-comment' : ''} ${menu || picker !== null ? 'comment-menu-open' : ''} ${replyTargetId === comment.id ? 'reply-target' : ''}`} tabIndex={0} aria-label={`${comment.authorName} 댓글에 댓글 작성`} onClick={(event) => { const target = event.target as HTMLElement; if (target.closest('.comment') !== event.currentTarget || target.closest('button, a, input, textarea, select, .context-menu') || window.getSelection()?.toString()) return; event.stopPropagation(); onReply(comment) }} onKeyDown={(event) => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onReply(comment) } }}>
     <div className="comment-head"><div className="comment-identity"><div><strong>{comment.authorName}</strong>{shownReactions.length > 0 && <span className="comment-reactions">{shownReactions.map((reaction) => { const Icon = commentReactionIcon[reaction]; const pressed = mine.includes(reaction); return <button key={reaction} className={`comment-reaction-chip ${pressed ? 'mine' : ''}`} onClick={() => reactToComment(comment.id, reaction)} disabled={readOnly} aria-pressed={pressed} aria-label={`${reaction} ${comment.reactions[reaction]}`}><Icon size={12} strokeWidth={2.4}/>{comment.reactions[reaction]}</button> })}</span>}</div></div><div ref={toolsRef} className="comment-tools">{!readOnly && <><IconButton className="comment-react-button" label="공감 남기기" onClick={() => { setMenu(null); const tools = toolsRef.current?.getBoundingClientRect(); const article = articleRef.current?.getBoundingClientRect(); setPicker(picker !== null || !tools || !article ? null : tools.bottom - article.top + 6) }} expanded={picker !== null}><SmilePlus size={13}/></IconButton><i aria-hidden="true"/></>}<IconButton className="comment-icon-button" label="댓글 메뉴" onClick={() => { setPicker(null); setMenu(menu ? null : 'actions') }} expanded={Boolean(menu)}><MoreHorizontal size={14}/></IconButton></div></div>
-    {comment.body && <p>{comment.body}</p>}{comment.imagePlaceholder && <div className="comment-image-placeholder">[이미지]</div>}{comment.imageUrl && <button ref={commentPhotoRef} className="comment-photo" onClick={() => setPhotoOpen(true)} aria-label="댓글 사진 크게 보기"><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/></button>}
+    {comment.body && <p>{comment.body}</p>}{comment.imagePlaceholder && <div className="comment-image-placeholder">[이미지]</div>}{comment.imageUrl && <button ref={commentPhotoRef} className="comment-photo zoomable" onClick={() => setPhotoOpen(true)} aria-label="댓글 사진 크게 보기"><img src={comment.imageUrl} alt="댓글에 첨부된 현장 사진"/><ZoomBadge/></button>}
     <div className="comment-actions"><small className="comment-time">{comment.createdAt}{comment.edited && <span className="comment-edited">수정됨</span>}</small>{!readOnly && <button className="comment-reply-button" onClick={() => onReply(comment)}>답글 달기</button>}</div>
     {!isReply && replies.length > 0 && <div className="comment-replies">{replies.map((reply) => <CommentItem key={reply.id} comment={reply} onReply={onReply} onEdit={onEdit} isReply replyTargetId={replyTargetId} readOnly={readOnly}/>)}</div>}
     {picker !== null && <div ref={pickerRef} className="context-menu comment-reaction-picker" style={{ top: picker }} role="menu" aria-label="공감 고르기">{commentReactionList.map((reaction) => { const Icon = commentReactionIcon[reaction]; return <button key={reaction} role="menuitemradio" aria-checked={mine.includes(reaction)} className={mine.includes(reaction) ? 'selected' : ''} onClick={() => { reactToComment(comment.id, reaction); setPicker(null) }}><Icon size={16} strokeWidth={2}/><span>{reaction}</span></button> })}</div>}
@@ -228,12 +228,11 @@ function CommentItem({ comment, replies = [], onReply, onEdit, isReply = false, 
 export function BoardDetailScreen() {
   // 다른 화면에서 게시글을 열고 들어왔을 때만 들어오는 애니메이션을 쓴다
   const entering = Boolean((useLocation().state as { enter?: boolean } | null)?.enter)
-  const { screen, currentBoard: board, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers, relocate, refreshBoard, showToast } = useApp()
+  const { screen, currentBoard: board, currentBoardMissing, back, comments, user, go, inRange, locationPermission, reactToBoard, addComment, updateComment, deleteBoard, finishBoard, reportTarget, blockUser, blockedUsers, relocate, refreshBoard, showToast } = useApp()
   const [body, setBody] = useState('')
   const [commentImageUrl, setCommentImageUrl] = useState('')
   const [commentFile, setCommentFile] = useState<File>()
   const [boardPhotoOpen, setBoardPhotoOpen] = useState(false)
-  const photoPress = useLongPress(() => setBoardPhotoOpen(true))
   const photoOrigin = useRef<HTMLDivElement>(null)
   // 서버에 보내는 중에는 다시 누르지 못하게 (사진 업로드가 길어도 같은 댓글이 두 번 올라가지 않게)
   const [sending, setSending] = useState(false)
@@ -255,7 +254,13 @@ export function BoardDetailScreen() {
   // 오른쪽 새로고침 버튼: 당기기와 같은 위치 다시 잡기 (잠깐 돌다가 결과)
   const [checking, setChecking] = useState(false)
   const checkLocation = () => { if (checking || !board) return; setChecking(true); window.setTimeout(() => { setChecking(false); relocate(board.id) }, 800) }
-  if (!board) return null
+  // 게시물이 없을 때: 삭제됐으면 안내, 아직 불러오는 중이면 자리 표시 (빈 화면 대신)
+  if (!board) return <AppShell nav={false} contentClassName="board-detail-screen">
+    <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('board')}><ArrowLeft size={22}/></IconButton></header>
+    {currentBoardMissing
+      ? <EmptyState title="삭제된 게시물이에요." action="게시판으로" onAction={() => go('board')}/>
+      : <div className="detail-loading"><Skeleton width="70%" height={24}/><Skeleton width="40%"/><Skeleton height={80} radius={14}/></div>}
+  </AppShell>
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))
   const submit = () => {
     if ((!body.trim() && !commentImageUrl) || sending) return
@@ -300,8 +305,8 @@ export function BoardDetailScreen() {
       <div className="detail-title-row"><h1 title={board.title}>{board.title}</h1><span className="detail-title-menu-wrap"><IconButton className="detail-title-menu" label="게시글 메뉴" onClick={() => setMenu(!menu)} expanded={menu}><MoreHorizontal size={18}/></IconButton>{menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => { setEditOpen(true); setMenu(false) }}>수정</button><button onClick={() => { setConfirm('finish'); setMenu(false) }}>종료</button><button onClick={() => { setConfirm('delete'); setMenu(false) }}>삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>차단</button></>}</div>}</span></div>
       <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span>{board.edited && <span className="detail-edited">수정됨</span>}<span><MapPin size={12}/>{board.distance}m</span><span>조회 {board.views}</span></div>
       <p className="detail-body">{board.body}</p>
-      {/* 사진을 꾹 누르면 잘리지 않은 전체 사진 */}
-      {board.imageUrl ? <div ref={photoOrigin} className="detail-photo-press" {...photoPress}><BoardImage board={board} variant="detail-image" block/></div> : <BoardImage board={board} variant="detail-image" block/>}
+      {/* 사진을 누르면 잘리지 않은 전체 사진 (오른쪽 아래 돋보기 표시) */}
+      {board.imageUrl ? <div ref={photoOrigin} className="detail-photo-press zoomable" role="button" tabIndex={0} aria-label="사진 크게 보기" onClick={() => setBoardPhotoOpen(true)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setBoardPhotoOpen(true) } }} onContextMenu={(event) => event.preventDefault()}><BoardImage board={board} variant="detail-image" block/><ZoomBadge/></div> : <BoardImage board={board} variant="detail-image" block/>}
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={canParticipate} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
     </article>
     {boardPhotoOpen && board.imageUrl && <PhotoViewer src={board.imageUrl} alt="현장 사진" origin={photoOrigin} onClose={() => setBoardPhotoOpen(false)}/>}

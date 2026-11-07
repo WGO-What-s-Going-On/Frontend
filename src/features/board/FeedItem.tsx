@@ -35,6 +35,7 @@ export function FeedItem({ board, comments }: { board: Board; comments: Comment[
     return () => document.removeEventListener('pointerdown', close)
   }, [picker])
   const mine = myReactions(board)[0]
+  const MineIcon = (mine && reactionOptions.find((option) => option.label === mine)?.icon) || SmilePlus
   const reactionTotal = Object.values(board.reactions).reduce((sum, count) => sum + count, 0)
   return <article className="feed-item">
     {/* 게시판 카드와 같은 알림 켜기/끄기 (기본 꺼짐, 켜면 파랑) */}
@@ -45,9 +46,9 @@ export function FeedItem({ board, comments }: { board: Board; comments: Comment[
       <span className="feed-body">{board.body}</span>
       <BoardImage board={board} variant="feed-image"/>
     </button>
-    {/* 반응 버튼(무엇을 눌렀든 이모티콘 그대로, 내가 반응했으면 파랗게) + 반응 합계, 댓글 수. 버튼을 누르면 반응 판 */}
+    {/* 반응 버튼(내가 고른 반응이 있으면 그 아이콘으로 바뀌고 파랗게, 없으면 이모티콘) + 반응 합계, 댓글 수. 버튼을 누르면 반응 판 */}
     <div ref={actionsRef} className="feed-actions">
-      <button className={mine ? 'selected' : ''} onClick={() => setPicker(!picker)} aria-expanded={picker} aria-label={`반응 ${reactionTotal}개, 반응 남기기`}><SmilePlus size={21} strokeWidth={1.8}/><span>{reactionTotal}</span></button>
+      <button className={mine ? 'selected' : ''} onClick={() => setPicker(!picker)} aria-expanded={picker} aria-label={mine ? `내 반응 ${reactionLabel[mine].full}, 반응 ${reactionTotal}개, 반응 바꾸기` : `반응 ${reactionTotal}개, 반응 남기기`}><MineIcon size={21} strokeWidth={1.8}/><span>{reactionTotal}</span></button>
       <button onClick={open} aria-label={`댓글 ${commentCount}개`}><MessageCircle size={21} strokeWidth={1.8}/><span>{commentCount}</span></button>
       {/* 오른쪽 끝: 게시판 카드처럼 작성 시간 (투표 중이면 그 앞에) */}
       <span className="feed-side">{voting && <em>댓글 투표 중</em>}<small>{board.createdAt}</small></span>

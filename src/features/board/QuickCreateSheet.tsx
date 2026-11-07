@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Camera, Info, MapPin, X } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { IconButton } from '../../components/ui/IconButton'
@@ -20,6 +20,10 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   const [body, setBody] = useState('')
   const [imageName, setImageName] = useState<string>()
   const [imageFile, setImageFile] = useState<File>()
+  // 고른 사진 미리보기 (이 기기에서만 쓰는 임시 주소, 바꾸거나 닫으면 지운다)
+  const previewUrl = useMemo(() => imageFile ? URL.createObjectURL(imageFile) : undefined, [imageFile])
+  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl) }, [previewUrl])
+  const removePhoto = () => { setImageFile(undefined); setImageName(undefined); if (fileRef.current) fileRef.current.value = '' }
   const [anonymous, setAnonymous] = useState(false)
   const [reach, setReach] = useState<Reach>(150)
   const [reachTip, setReachTip] = useState(false)
@@ -69,7 +73,10 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
       {!inRange ? <div className="quick-compose-blocked"><strong>현재 위치에서는 글을 작성할 수 없어요</strong><p>150m 참여 범위 안에서 다시 시도해 주세요.</p><button onClick={() => { onClose(); go('home') }}>지도로 돌아가기</button></div> : <>
         <div className="quick-category-grid">{categories.map((item) => <button key={item} className={category === item ? 'selected' : ''} data-category={item} onClick={() => setCategory(item)}><CategoryIcon category={item}/>{categoryLabel[item]}</button>)}</div>
         <label className="quick-field quick-detail-field"><span>상세 내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder="무슨 일이 있었는지 자세히 알려주세요" maxLength={500}/></label>
-        <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>
+        {/* 사진을 고르면 미리보기로 바뀐다. 미리보기를 누르면 다른 사진으로 바꾸고, 오른쪽 위 X로 뺀다 */}
+        {previewUrl
+          ? <div className="quick-photo-preview"><button className="quick-photo-change" onClick={() => fileRef.current?.click()} aria-label="다른 사진으로 바꾸기"><img src={previewUrl} alt="올릴 사진 미리보기"/></button><button className="quick-photo-remove" onClick={removePhoto} aria-label="사진 빼기"><X size={16} strokeWidth={2.4}/></button></div>
+          : <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>}
         <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; const problem = file && imageProblem(file); if (problem) { showToast(problem); event.target.value = ''; return } setImageFile(file); setImageName(file?.name) }}/>
         {/* 공개 범위: 작성자 표시와 같은 모양의 한 줄. i를 누르면 짧은 안내 */}
         <div className="write-author-row reach-row"><span ref={reachTipRef} className="reach-label">공개 범위<button className="reach-info" aria-label="공개 범위 안내" aria-expanded={reachTip} onClick={() => setReachTip(!reachTip)}><Info size={14}/></button>{reachTip && <span className="reach-tip" role="tooltip">작게 설정할수록 현장성 증가돼요</span>}</span><div className="author-toggle" role="radiogroup" aria-label="공개 범위">{reachOptions.map((option) => <button key={option} role="radio" aria-checked={reach === option} className={reach === option ? 'selected' : ''} onClick={() => setReach(option)}>{option}m</button>)}</div></div>

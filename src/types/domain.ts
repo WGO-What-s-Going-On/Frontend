@@ -107,6 +107,12 @@ export interface Notice {
   createdAt: string
   read: boolean
   boardId?: string
+  // 서버 알림: 제목 한 줄 + 내용 한 줄 (내용 앞에 게시물 제목). 목업 알림은 text 한 줄
+  title?: string
+  body?: string
+  postTitle?: string
+  // 게시물이 삭제돼 열 수 없는 알림
+  gone?: boolean
 }
 
 export interface Report {
