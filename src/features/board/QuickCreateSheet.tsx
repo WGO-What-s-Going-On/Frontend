@@ -21,8 +21,9 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   const [body, setBody] = useState('')
   const [imageName, setImageName] = useState<string>()
   const [imageFile, setImageFile] = useState<File>()
-  // 잘린 칸에 보일 사진 위치 (위치 변경으로 고른다, 새 사진을 고르면 가운데로)
+  // 잘린 칸에 보일 사진 위치 (위치 조정으로 고른다, 새 사진을 고르면 가운데로)
   const [imageFocus, setImageFocus] = useState<ImageFocus>(CENTER)
+  const removePhoto = () => { setImageFile(undefined); setImageName(undefined); setImageFocus(CENTER); if (fileRef.current) fileRef.current.value = '' }
   // 게시 진행 단계 (null이면 아직 안 누름)
   const [stage, setStage] = useState<'check' | 'upload' | 'post' | null>(null)
   // 고른 사진 미리보기 (이 기기에서만 쓰는 임시 주소, 바꾸거나 닫으면 지운다)
@@ -81,7 +82,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         <label className="quick-field quick-detail-field"><span>상세 내용</span><textarea value={body} onChange={(event) => setBody(event.target.value)} placeholder="무슨 일이 있었는지 자세히 알려주세요" maxLength={500}/></label>
         {/* 사진을 고르면 미리보기로 바뀐다. 미리보기를 누르면 다른 사진으로 바꾸고, 오른쪽 위 X로 뺀다 */}
         {previewUrl
-          ? <PhotoRepositionPreview src={previewUrl} focus={imageFocus} onFocusChange={setImageFocus} onChangePhoto={() => fileRef.current?.click()}/>
+          ? <PhotoRepositionPreview src={previewUrl} focus={imageFocus} onFocusChange={setImageFocus} onChangePhoto={() => fileRef.current?.click()} onRemove={removePhoto}/>
           : <button className="quick-photo-button" onClick={() => fileRef.current?.click()}><Camera size={19}/>{imageName || '사진 추가'}</button>}
         <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => { const file = event.target.files?.[0]; const problem = file && imageProblem(file); if (problem) { showToast(problem); event.target.value = ''; return } setImageFile(file); setImageFocus(CENTER); setImageName(file?.name) }}/>
         {/* 공개 범위: 작성자 표시와 같은 모양의 한 줄. i를 누르면 짧은 안내 */}
