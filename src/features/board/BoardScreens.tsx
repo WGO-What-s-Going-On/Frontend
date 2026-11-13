@@ -308,6 +308,8 @@ export function BoardDetailScreen() {
       <p className="detail-body">{board.body}</p>
       {/* 사진을 누르면 잘리지 않은 전체 사진 (오른쪽 아래 돋보기 표시) */}
       {board.imageUrl ? <div ref={photoOrigin} className="detail-photo-press zoomable" role="button" tabIndex={0} aria-label="사진 크게 보기" onClick={() => setBoardPhotoOpen(true)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setBoardPhotoOpen(true) } }} onContextMenu={(event) => event.preventDefault()}><BoardImage board={board} variant="detail-image" block/><ZoomBadge/></div> : <BoardImage board={board} variant="detail-image" block/>}
+      {/* 댓글 · 댓글 투표처럼 제목을 달아 반응 영역임을 바로 알게 */}
+      <div className="detail-reactions-head"><h3>반응</h3></div>
       <div className="detail-inline-reactions"><PostReactions board={board} interactive={canParticipate} fullLabels onReact={(reaction) => reactToBoard(board.id, reaction)}/></div>
     </article>
     {boardPhotoOpen && board.imageUrl && <PhotoViewer src={board.imageUrl} alt="현장 사진" origin={photoOrigin} onClose={() => setBoardPhotoOpen(false)}/>}
