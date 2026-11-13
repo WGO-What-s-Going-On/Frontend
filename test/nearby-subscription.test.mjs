@@ -89,3 +89,25 @@ test('ending a logged-in session prevents pending GPS from uploading for a new a
   await enabling
   assert.deepEqual(f.calls, [])
 })
+test('renewal GPS completing after the old TTL cannot reactivate expired consent', async () => {
+  const f = fixture({ enabled: true }), gps = deferred()
+  f.deps.locate = () => gps.promise
+  await f.session.start(); f.time(899_000)
+  const renewing = f.session.tick()
+  f.time(2_000)
+  gps.resolve({ latitude: 0, longitude: 0, capturedAt: '2026-11-13T00:15:01Z' })
+  await renewing
+  assert.deepEqual(f.calls, [])
+  assert.equal(f.state().subscription.enabled, false)
+})
+test('a GET arriving after its expiration does not show active consent', async () => {
+  const f = fixture(), loading = deferred()
+  f.deps.get = () => loading.promise
+  const starting = f.session.start()
+  f.time(900_001)
+  loading.resolve({ featureEnabled: true, enabled: true, locationConsent: true, expiresAt: '2026-11-13T00:15:00Z', radiusM: 150 })
+  await starting
+  assert.equal(f.state().subscription.enabled, false)
+  await f.session.tick()
+  assert.deepEqual(f.calls, [])
+})

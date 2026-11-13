@@ -34,8 +34,9 @@ export class NearbySubscriptionSession {
     try {
       const subscription = await this.deps.get()
       if (this.disposed || epoch !== this.epoch) return
-      this.wanted = subscription.featureEnabled && subscription.enabled && subscription.locationConsent && Date.parse(subscription.expiresAt ?? '') > this.deps.now()
-      this.publish({ subscription, error: false })
+      const current = subscription.enabled && subscription.locationConsent && Date.parse(subscription.expiresAt ?? '') > this.deps.now()
+      this.wanted = subscription.featureEnabled && current
+      this.publish({ subscription: subscription.enabled && !current ? { ...subscription, enabled: false, locationConsent: false, expiresAt: null } : subscription, error: false })
     } catch { this.publish({ error: true }) }
   }
   async enable(locationConsent: boolean) {
@@ -52,16 +53,23 @@ export class NearbySubscriptionSession {
       this.publish({ subscription: { ...subscription, enabled: false, locationConsent: false, expiresAt: null } })
       return
     }
-    if (remaining <= 300_000) await this.saveLocation(this.epoch)
+    if (remaining <= 300_000) await this.saveLocation(this.epoch, Date.parse(subscription.expiresAt!))
   }
-  private async saveLocation(epoch: number) {
+  private canSave(epoch: number, deadline: number) {
+    if (this.disposed || !this.wanted || epoch !== this.epoch) return false
+    if (this.deps.now() < deadline) return true
+    this.wanted = false
+    if (this.state.subscription) this.publish({ subscription: { ...this.state.subscription, enabled: false, locationConsent: false, expiresAt: null } })
+    return false
+  }
+  private async saveLocation(epoch: number, deadline = Infinity) {
     this.publish({ busy: true, error: false })
     try {
       const location = await this.deps.locate()
-      if (this.disposed || !this.wanted || epoch !== this.epoch) return
+      if (!this.canSave(epoch, deadline)) return
       // Serializing save and revoke ensures a late PUT cannot resurrect withdrawn consent.
       const task = this.pending.catch(() => undefined).then(() => {
-        if (this.disposed || !this.wanted || epoch !== this.epoch) return null
+        if (!this.canSave(epoch, deadline)) return null
         return this.deps.save(location)
       })
       this.pending = task
