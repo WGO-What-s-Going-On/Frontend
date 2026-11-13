@@ -2267,3 +2267,16 @@ button.title-progress-card:active { background: #f7f8fa; }
 
 /* 댓글 제목과 '아직 댓글이 없습니다' 점선 상자 사이를 조금 띄운다 (제목 위치는 그대로) */
 .board-detail-screen .comments-heading + .comments-empty { margin-top: 8px; }
+
+/* 댓글 읽기 크기: 닉네임 · 본문 · 공감 · 오른쪽 아이콘이 작아 답답해 보여 한 단계씩 키운다 (원댓글 · 답글 같은 비율) */
+.board-detail-screen .comments-section .comment-identity strong { font-size: 13.5px; }
+.board-detail-screen .comments-section .comment > p { font-size: 14.5px; line-height: 1.5; }
+.board-detail-screen .comments-section .comment-time,
+.board-detail-screen .comments-section .comment-reply-button { font-size: 12.5px; }
+.board-detail-screen .comments-section .comment-reaction-chip { gap: 3px; font-size: 13px; }
+.board-detail-screen .comments-section .comment-reaction-chip svg { width: 14px; height: 14px; }
+.board-detail-screen .comments-section .comment-react-button,
+.board-detail-screen .comments-section .comment-icon-button { width: 28px; height: 26px; }
+.board-detail-screen .comments-section .comment-react-button svg { width: 16px; height: 16px; }
+.board-detail-screen .comments-section .comment-icon-button svg { width: 18px; height: 18px; }
+.board-detail-screen .comments-section .comment-tools > i { height: 11px; }
