@@ -11,7 +11,7 @@ export const reactionOptions = [
   { label: '이제 끝났어요', icon: CircleCheck },
 ] satisfies { label: PostReaction; icon: typeof CircleHelp }[]
 
-// 상세 화면(fullLabels)은 반응마다 따로 누르는 버튼 4칸: 아이콘 · 이름 · 숫자를 세로로 (뉴스 기사 아래 반응 버튼처럼).
+// 상세 화면(fullLabels)은 반응마다 따로 누르는 버튼 4칸: 윗줄 아이콘 + 이름, 아랫줄 숫자.
 // 칸마다 바탕을 깔아 누를 수 있는 영역이 바로 보이게 하고, 고른 반응은 파란 칠
 export function PostReactions({ board, interactive = false, fullLabels = false, onReact }: { board: Board; interactive?: boolean; fullLabels?: boolean; onReact?: (reaction: PostReaction) => void }) {
   return <div className={`post-reactions ${interactive ? 'interactive' : ''} ${fullLabels ? 'full-labels tiles' : ''}`}>{reactionOptions.map(({ label, icon: Icon }) => { const { full: fullLabel, short: shortLabel } = reactionLabel[label]; return interactive
