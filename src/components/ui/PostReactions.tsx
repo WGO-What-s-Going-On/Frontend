@@ -6,7 +6,7 @@ import { myReactions } from '../../types/domain'
 import type { Board, PostReaction } from '../../types/domain'
 
 // 물음표만 (lucide에는 동그라미 테두리가 있는 물음표뿐이라 직접 그린다). 글자 폭이 좁아 옆 아이콘보다 가늘어 보여서 선을 1.2배로
-const QuestionMark = forwardRef<SVGSVGElement, LucideProps>(({ size = 24, strokeWidth = 2, color = 'currentColor', ...rest }, ref) => <svg ref={ref} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={Number(strokeWidth) * 1.2} strokeLinecap="round" strokeLinejoin="round" {...rest}><path d="M7.2 7.6a4.9 4.9 0 0 1 9.6 1.5c0 3.2-4.8 4-4.8 6.6"/><path d="M12 20.6h.01"/></svg>) as unknown as LucideIcon
+const QuestionMark = forwardRef<SVGSVGElement, LucideProps>(({ size = 24, strokeWidth = 2, color = 'currentColor', ...rest }, ref) => <svg ref={ref} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={Number(strokeWidth) * 1.2} strokeLinecap="round" strokeLinejoin="round" {...rest}><path d="M8.6 9a3.5 3.5 0 0 1 6.8 1.1c0 2.3-3.4 2.9-3.4 4.7"/><path d="M12 18.6h.01"/></svg>) as unknown as LucideIcon
 QuestionMark.displayName = 'QuestionMark'
 
 export const reactionLabels: PostReaction[] = ['저도 궁금해요', '지금도 그래요', '도움 됐어요', '이제 끝났어요']
