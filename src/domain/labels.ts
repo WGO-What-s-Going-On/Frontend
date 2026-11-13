@@ -11,10 +11,10 @@ export const categoryLabel: Record<Category, string> = {
   '일상 불편': '기타',
 }
 
-// 게시글 반응: full은 상세 화면, short는 좁은 곳에서 쓰는 이름
+// 게시글 반응: full은 상세 화면 · 피드 반응 판, short는 좁은 곳에서 쓰는 이름 (상세 버튼 폭에 맞춰 짧게)
 export const reactionLabel: Record<PostReaction, { full: string; short: string }> = {
-  '저도 궁금해요': { full: '저도 궁금해요', short: '궁금' },
-  '지금도 그래요': { full: '아직 진행 중이에요', short: '진행 중' },
+  '저도 궁금해요': { full: '궁금해요', short: '궁금' },
+  '지금도 그래요': { full: '진행 중', short: '진행 중' },
   '도움 됐어요': { full: '유익해요', short: '유익함' },
   '이제 끝났어요': { full: '끝났어요', short: '끝남' },
 }

@@ -2207,3 +2207,40 @@ button.title-progress-card:active { background: #f7f8fa; }
 .moving-status { display: block; margin: 8px 0 18px; color: var(--c-mute); font-size: 12px; }
 .moving-dialog .dialog-actions button:disabled { opacity: .45; }
 @media (prefers-reduced-motion: reduce) { .moving-progress i { animation: none; } }
+
+/* 게시글 상세 반응: 4칸 버튼 (한 상자 안 글자 나열 → 칸마다 바탕을 깐 버튼). 아이콘 · 이름 · 숫자 세로, 고른 반응은 파란 칠 */
+.board-detail-screen .detail-inline-reactions { margin-top: 16px; padding: 0; border: 0; border-radius: 0; background: transparent; }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button,
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > span {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+  min-height: 0;
+  padding: 11px 2px 9px;
+  border: 0;
+  border-radius: 12px;
+  background: #f2f4f7;
+  color: var(--c-body);
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color .15s ease, transform .1s ease;
+}
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button:active { transform: scale(.96); }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles svg { width: 20px; height: 20px; margin-bottom: 2px; color: var(--c-body); }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles b { overflow: hidden; max-width: 100%; color: var(--c-body); font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button.selected b::after { content: none; }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button span,
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > span small { color: var(--c-ink); font-size: 13px; font-weight: 700; }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button.selected { background: var(--c-accent-soft); }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button.selected :is(svg, b, span) { color: var(--c-accent); }
+/* 범위 밖(읽기 전용): 누를 수 없어서 바탕 · 글자를 한 톤 옅게 */
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > span { cursor: default; background: #f7f8fa; }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > span :is(svg, b, small) { color: var(--c-mute); }
+:root[data-theme="dark"] .board-detail-screen .detail-inline-reactions .post-reactions.tiles > :is(button, span) { background: var(--c-raised); }
+:root[data-theme="dark"] .board-detail-screen .detail-inline-reactions .post-reactions.tiles > button.selected { background: var(--c-accent-soft); }

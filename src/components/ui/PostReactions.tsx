@@ -11,8 +11,10 @@ export const reactionOptions = [
   { label: '이제 끝났어요', icon: CircleCheck },
 ] satisfies { label: PostReaction; icon: typeof CircleHelp }[]
 
+// 상세 화면(fullLabels)은 반응마다 따로 누르는 버튼 4칸: 아이콘 · 이름 · 숫자를 세로로 (뉴스 기사 아래 반응 버튼처럼).
+// 칸마다 바탕을 깔아 누를 수 있는 영역이 바로 보이게 하고, 고른 반응은 파란 칠
 export function PostReactions({ board, interactive = false, fullLabels = false, onReact }: { board: Board; interactive?: boolean; fullLabels?: boolean; onReact?: (reaction: PostReaction) => void }) {
-  return <div className={`post-reactions ${interactive ? 'interactive' : ''} ${fullLabels ? 'full-labels' : ''}`}>{reactionOptions.map(({ label, icon: Icon }) => { const { full: fullLabel, short: shortLabel } = reactionLabel[label]; return interactive
+  return <div className={`post-reactions ${interactive ? 'interactive' : ''} ${fullLabels ? 'full-labels tiles' : ''}`}>{reactionOptions.map(({ label, icon: Icon }) => { const { full: fullLabel, short: shortLabel } = reactionLabel[label]; return interactive
     ? <button key={label} className={myReactions(board).includes(label) ? 'selected' : ''} aria-pressed={myReactions(board).includes(label)} onClick={() => onReact?.(label)} aria-label={`${fullLabel} ${board.reactions[label]}`} title={fullLabel}><Icon size={15}/><b>{fullLabels ? fullLabel : shortLabel}</b><span>{board.reactions[label]}</span></button>
     : <span key={label} title={fullLabel}><Icon size={15}/><b>{fullLabels ? fullLabel : shortLabel}</b><small>{board.reactions[label]}</small></span>
   })}</div>
