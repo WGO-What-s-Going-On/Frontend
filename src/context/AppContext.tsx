@@ -7,6 +7,7 @@ import { RADIUS, mapSeedBoards, type Point } from '../features/map/mapWorld'
 import { pickCandidates } from '../features/board/commentVote'
 import { apiEnabled, kakaoEnabled } from '../api/config'
 import { ApiError, SESSION_EXPIRED_EVENT } from '../api/client'
+import { isMovingError } from '../api/posts'
 import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/auth'
 import { clearSession, readSession } from '../api/session'
 import { startPush, stopPush } from '../api/push'
@@ -106,6 +107,8 @@ interface AppContextValue {
   refreshNotices: () => Promise<void>
   // 서버 연동 중에는 올리기가 끝날 때까지 기다릴 수 있게 Promise를 돌려준다 (실패하면 reject)
   createBoard: (input: BoardInput) => void | Promise<void>
+  // 화면이 떠 있는 동안 위치를 주기적으로 서버에 보낸다 (이동 중 글쓰기 제한 해제 확인용). 멈추는 함수를 돌려준다. 목업에서는 아무것도 안 함
+  keepLocationFresh: (intervalMs: number) => () => void
   updateBoard: (id: string, input: Pick<BoardInput, 'title' | 'body' | 'category' | 'anonymous' | 'imageName'>) => void
   deleteBoard: (id: string) => void
   finishBoard: (id: string) => void
@@ -485,7 +488,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCurrentBoardId(id)
       navigate(pathForScreen('detail', id), { state: { enter: true } })
       showToast('게시판이 생성되었습니다.')
-    }).catch((error) => { showToast(mediaMessage(error) ?? '글을 올리지 못했어요. 다시 시도해 주세요.'); throw error }),
+    }).catch((error) => {
+      // 이동 중 차단은 글쓰기 시트가 안내 창으로 보여 준다
+      if (!isMovingError(error)) showToast(mediaMessage(error) ?? '글을 올리지 못했어요. 다시 시도해 주세요.')
+      throw error
+    }),
     // 서버는 제목 · 본문만 수정할 수 있다 (카테고리 · 작성자 표시 · 사진은 그대로)
     updateBoard: (id, input) => { server.editPost(id, input.title, input.body).then(() => showToast('게시글을 수정했습니다.')).catch(fail('게시글을 수정하지 못했어요.')) },
     deleteBoard: (id) => { server.deletePost(id).then(() => { showToast('게시글을 삭제했습니다.'); leaveDeleted(id) }).catch(fail('게시글을 삭제하지 못했어요.')) },
@@ -598,7 +605,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate,
     refreshBoard: (boardId) => server.live ? server.loadBoard(boardId).then(() => undefined) : Promise.resolve(),
     refreshNotices: () => server.live ? Promise.all([server.loadNotices(), server.loadUnread()]).then(() => undefined) : Promise.resolve(),
-    createBoard, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
+    createBoard, keepLocationFresh: server.keepLocationFresh, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
     live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,

@@ -34,9 +34,10 @@ export function consumeKakaoState(state: string | null) {
   return Boolean(state && saved && state === saved)
 }
 
-// 인가 코드로 로그인(또는 가입). 토큰을 저장하고 온보딩이 필요한지 돌려준다
+// 인가 코드로 로그인(또는 가입). 토큰을 저장하고 온보딩이 필요한지 돌려준다.
+// redirectUri: 인가 때 쓴 돌아올 주소. 서버가 허용 목록(로컬 · 배포 · 앱)과 맞춰 보고 같은 주소로 카카오 토큰을 받는다
 export async function loginWithKakao(authorizationCode: string) {
-  const result = await api<KakaoLoginResponse>('POST', '/api/v1/auth/kakao', { body: { authorizationCode }, auth: false })
+  const result = await api<KakaoLoginResponse>('POST', '/api/v1/auth/kakao', { body: { authorizationCode, redirectUri: KAKAO_REDIRECT_URI }, auth: false })
   saveSession(sessionFromTokens(result, result.userId))
   return result
 }

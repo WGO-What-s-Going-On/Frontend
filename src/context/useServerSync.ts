@@ -5,7 +5,7 @@ import { currentCoords, distanceMeters, fromWorldPoint, toWorldPoint, type Coord
 import type { Point } from '../features/map/mapWorld'
 import * as posts from '../api/posts'
 import * as notifications from '../api/notifications'
-import { createRealtime, type Realtime, type RealtimeEvent } from '../api/realtime'
+import { createRealtime, requestRealtimeTicket, type Realtime, type RealtimeEvent } from '../api/realtime'
 import { blockUser as blockUserApi, getBlocks, getMyBadges } from '../api/users'
 import { uploadImage } from '../api/media'
 import { ApiError } from '../api/client'
@@ -64,14 +64,35 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   // 방금(2분 안) 정확한 위치가 있는데 새 위치가 훨씬 부정확하면(오차 200m 넘고 이전의 3배 이상) 이전 위치를 쓴다.
   // 안 그러면 순간적으로 몇 km 떨어진 곳으로 잡혀 주변 글이 0개가 됐다가 다시 생긴다
   const lastFix = useRef<{ accuracy: number; at: number } | null>(null)
+  // 서버는 위치를 받은 시각과 직전 위치로 이동 속도를 잰다 (시속 20km 이상이면 글쓰기 차단, 10m 안 10초 정지로 해제).
+  // - 서버 계약대로 5초 이상 간격으로만 보낸다 (몇 초 사이 GPS가 튀면 달리는 것으로 잡힌다)
+  // - 직전에 보낸 자리에서 GPS 오차 안(최대 25m)만 움직였으면 같은 자리로 보낸다: 가만히 있는데 오차로 '이동 중'이 되거나
+  //   정지 확인(10m)이 계속 다시 시작되는 것을 막는다. 5초에 25m는 시속 18km라 실제 차량 이동(20km 이상)은 가리지 않는다
+  const lastSent = useRef<Coords & { at: number } | null>(null)
+  const reportLocation = (next: Coords, accuracy?: number) => {
+    const sent = lastSent.current
+    const now = Date.now()
+    if (sent && now - sent.at < 5000) return
+    const still = sent && distanceMeters(sent, next) <= Math.min(25, Math.max(10, accuracy ?? 10))
+    const position = still ? { latitude: sent.latitude, longitude: sent.longitude } : next
+    lastSent.current = { ...position, at: now }
+    posts.updateLocation(position).catch(() => undefined)
+  }
   const locate = async () => {
     const { accuracy, ...next } = await currentCoords()
     const previous = lastFix.current
     if (coords.current && previous && accuracy !== undefined && accuracy > 200 && accuracy > previous.accuracy * 3 && Date.now() - previous.at < 120_000) return coords.current
     coords.current = next
     if (accuracy !== undefined) lastFix.current = { accuracy, at: Date.now() }
-    posts.updateLocation(next).catch(() => undefined)
+    reportLocation(next, accuracy)
     return next
+  }
+  // 글쓰기 시트 · 이동 중 안내가 떠 있는 동안 위치를 주기적으로 보낸다 (서버가 멈춘 것을 확인해야 글쓰기가 풀린다). 멈추는 함수를 돌려준다
+  const keepLocationFresh = (intervalMs: number) => {
+    if (!live) return () => undefined
+    locate().catch(() => undefined)
+    const timer = window.setInterval(() => { locate().catch(() => undefined) }, intervalMs)
+    return () => window.clearInterval(timer)
   }
   const ensureCoords = async () => coords.current ?? locate()
 
@@ -120,13 +141,24 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     return board
   }
 
+  // 같은 사진으로 다시 게시할 때(이동 중 차단 뒤 다시 올리기 등) 사진을 또 올리지 않는다
+  const uploadedImages = useRef(new WeakMap<File, string>())
   const createPost = async (input: { category: Category; title: string; body: string; anonymous?: boolean; reach?: Reach; imageFile?: File; imageFocus?: ImageFocus; onStage?: (stage: 'upload' | 'post') => void }) => {
     // 사진을 먼저 올려 mediaId를 받는다 (실패하면 글도 올리지 않는다)
-    if (input.imageFile) input.onStage?.('upload')
-    const mediaIds = input.imageFile ? [await uploadImage(input.imageFile)] : undefined
+    let mediaIds: string[] | undefined
+    if (input.imageFile) {
+      let mediaId = uploadedImages.current.get(input.imageFile)
+      if (!mediaId) {
+        input.onStage?.('upload')
+        mediaId = await uploadImage(input.imageFile)
+        uploadedImages.current.set(input.imageFile, mediaId)
+      }
+      mediaIds = [mediaId]
+    }
     input.onStage?.('post')
     const here = await locate()
-    const post = await posts.createPost({ title: input.title, content: input.body, category: input.category, latitude: here.latitude, longitude: here.longitude, radiusM: input.reach ?? 150, anonymous: input.anonymous, mediaIds, ...(mediaIds && input.imageFocus && serverFeatures.coverFocus ? { coverFocus: input.imageFocus } : {}) })
+    // coverFocus: 사진 보일 위치(가로 · 세로 0~100 정수). 사진이 있을 때만 보낸다
+    const post = await posts.createPost({ title: input.title, content: input.body, category: input.category, latitude: here.latitude, longitude: here.longitude, radiusM: input.reach ?? 150, anonymous: input.anonymous, mediaIds, ...(mediaIds && input.imageFocus ? { coverFocus: { x: Math.round(input.imageFocus.x), y: Math.round(input.imageFocus.y) } } : {}) })
     // 생성 응답에는 작성자 닉네임 · 반응 수 · 사진이 없어 상세를 다시 받아 채운다
     const board = await loadBoard(post.postId)
     return board.id
@@ -282,7 +314,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   // 실시간이 안 붙으면(Safari는 다른 사이트 쿠키를 막아 WebSocket 인증이 안 됨 · 범위 밖 · 끊김) 화면이 보이는 동안 5초마다 HTTP로 새로 읽는다
   const watchBoard = (postId: string) => {
     if (!live) return () => undefined
-    const client = WS_URL ? (realtime.current ??= createRealtime({ url: WS_URL, onEvent: (event) => onRealtimeEvent(event), onRejoin: scheduleReload })) : null
+    const client = WS_URL ? (realtime.current ??= createRealtime({ url: WS_URL, ticket: requestRealtimeTicket, onEvent: (event) => onRealtimeEvent(event), onRejoin: scheduleReload })) : null
     let active = true
     if (client) locate().catch(() => undefined).then(() => { if (active) return client.join(postId) }).catch(() => undefined)
     const poll = window.setInterval(() => {
@@ -294,7 +326,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
 
   return {
     live, boardsLoading, boardsError, level, badges, unreadCount, loadUnread,
-    locate, loadNearby, searchArea, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
+    locate, keepLocationFresh, loadNearby, searchArea, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
     editPost, setClosed, deletePost, report, editComment, loadBlocks, getBoardAlert, block, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
     loadLevel, loadBadges, loadActivity, loadRanking, watchBoard, stopRealtime,
   }

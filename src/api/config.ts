@@ -19,6 +19,4 @@ export const serverFeatures = {
   users: apiEnabled,
   // 게시글 · 댓글 · 공감 · 투표 · 위치 · 알림 · 활동: .env.local의 VITE_SERVER_POSTS=true로 켠다 (실제 로그인 확인 전에는 꺼 둠)
   posts: apiEnabled && import.meta.env.VITE_SERVER_POSTS === 'true',
-  // 사진 보일 위치(coverFocus) 저장: 백엔드가 글 작성 body · 응답에 coverFocus를 받기 전에는 보내면 400이라 꺼 둔다
-  coverFocus: import.meta.env.VITE_SERVER_COVER_FOCUS === 'true',
 }

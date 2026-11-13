@@ -11,13 +11,15 @@ import { CategoryIcon } from '../../domain/categoryIcons'
 import { AuthorToggle } from './AuthorToggle'
 import { CENTER, PhotoRepositionPreview } from './PhotoRepositionPreview'
 import { SimilarBoardsSheet } from './SimilarBoardsSheet'
+import { MovingDialog } from './MovingDialog'
+import { isMovingError } from '../../api/posts'
 import { findSimilarBoards } from './similarBoards'
 import { imageProblem } from '../../api/media'
 
 const categories: Category[] = ['긴급 사고', '도움 요청', '동네 소식', '일상 불편']
 
 export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
-  const { boards, createBoard, go, inRange, live, findSimilar, showToast } = useApp()
+  const { boards, createBoard, go, inRange, live, findSimilar, showToast, keepLocationFresh } = useApp()
   const [category, setCategory] = useState<Category>('긴급 사고')
   const [body, setBody] = useState('')
   const [imageName, setImageName] = useState<string>()
@@ -36,6 +38,10 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
   const reachTipRef = useRef<HTMLSpanElement>(null)
   // 게시하기를 눌렀을 때 찾은 비슷한 글 (있으면 올리기 전에 먼저 보여준다)
   const [similar, setSimilar] = useState<Board[] | null>(null)
+  // 이동 중이라 글쓰기가 막혔을 때 안내 창
+  const [moving, setMoving] = useState(false)
+  // 쓰는 동안 위치를 7초마다 보낸다: 버스에서 내린 뒤처럼 이동 기록이 남아 있어도, 쓰는 사이 서버가 정지를 확인해 게시할 때 막히지 않게
+  useEffect(() => keepLocationFresh(7000), [])
   // 비슷한 글 확인 · 사진 업로드 · 서버 저장 중 (버튼만 막고 시트는 그대로)
   const [busy, setBusy] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -57,7 +63,9 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
     // 사진이 있으면 처음부터 '사진 올리는 중' (비슷한 글 확인은 따로 보여 주지 않는다)
     setStage(imageFile ? 'upload' : 'check')
     const title = content.split(/\n|[.!?。！？]/)[0].trim().slice(0, 50) || `${category} 상황 공유`
-    const found = live ? await findSimilar({ category, title, body: content, reach }).catch(() => []) : findSimilarBoards(boards, { category, body: content })
+    // 이동 중이면 비슷한 글 확인부터 막힌다: 사진을 올리기 전에 바로 안내한다 (그 밖의 확인 실패는 그냥 올린다)
+    const found = live ? await findSimilar({ category, title, body: content, reach }).catch((error) => isMovingError(error) ? 'moving' as const : []) : findSimilarBoards(boards, { category, body: content })
+    if (found === 'moving') { setBusy(false); setStage(null); setMoving(true); return }
     if (found.length) { setSimilar(found); setBusy(false); setStage(null); return }
     publishNow()
   }
@@ -70,7 +78,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
     setStage(imageFile ? 'upload' : 'post')
     const title = content.split(/\n|[.!?。！？]/)[0].trim().slice(0, 50) || `${category} 상황 공유`
     Promise.resolve(createBoard({ category, title, body: content, imageName, imageFile, imageFocus: imageFile ? imageFocus : undefined, anonymous, reach, onStage: setStage }))
-      .catch(() => { setBusy(false); setStage(null) })
+      .catch((error) => { setBusy(false); setStage(null); if (isMovingError(error)) setMoving(true) })
   }
   // 올리는 중에는 닫지 않는다 (닫아도 올리기는 계속돼 나중에 갑자기 상세로 넘어가게 된다)
   const close = () => { if (!stage) onClose() }
@@ -96,6 +104,7 @@ export function QuickCreateSheet({ onClose }: { onClose: () => void }) {
         </div>
       </>}
     </section>
+    {moving && <MovingDialog onClose={() => setMoving(false)} onRetry={() => { setMoving(false); publishNow() }}/>}
     {similar && <SimilarBoardsSheet boards={similar} onClose={() => setSimilar(null)} onCancelWrite={() => setSimilar(null)} onPublish={publishNow}/>}
   </div>
 }

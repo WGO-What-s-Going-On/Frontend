@@ -10,8 +10,6 @@ interface ImportMetaEnv {
   readonly VITE_KAKAO_JS_KEY?: string
   // 게시글 · 댓글 · 알림 · 활동 화면을 실제 서버로 ('true'일 때). 로그인 확인 전에는 꺼 둔다
   readonly VITE_SERVER_POSTS?: string
-  // 사진 보일 위치 저장 (백엔드 coverFocus 지원 후 'true')
-  readonly VITE_SERVER_COVER_FOCUS?: string
   // 브라우저 위치를 못 받을 때 쓰는 개발용 위치 "위도,경도"
   readonly VITE_DEV_LATLNG?: string
   // 개발 서버 전용 테스트 계정 토큰 (.env.local에만, 커밋 금지)

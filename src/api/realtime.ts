@@ -1,5 +1,9 @@
+import { api } from './client'
+
 // 게시판 실시간 연결 (WebSocket). HTTP와 규칙이 달라 따로 둔다 (Backend gateways/ws-gateway/README.md)
-// - 주소는 HTTP와 다른 호스트(VITE_WS_URL). 브라우저는 헤더를 못 붙여서 로그인 응답이 심은 wgo_access_token 쿠키로 인증한다
+// - 주소는 HTTP와 다른 호스트(VITE_WS_URL). 브라우저는 WebSocket에 헤더를 못 붙인다
+// - 인증: 접속 직전 HTTP로 일회용 티켓(45초, 한 번만)을 받아 ?ticket=으로 붙인다. 다른 도메인 쿠키를 막는 Safari · 앱에서도 된다.
+//   티켓을 못 받으면(구버전 서버 등) 예전처럼 로그인 쿠키로 접속한다. 재연결마다 새 티켓
 // - 서버가 connection.ready를 보낸 뒤에만 명령을 보낸다. 명령은 {version:1, type, requestId, payload}
 // - 같은 eventId는 한 번만 반영한다. 끊기면 지수 backoff로 다시 붙고, 다시 참여한 게시판은 HTTP로 새로 읽어 누락분을 채운다
 
@@ -18,8 +22,13 @@ export class RealtimeError extends Error {
   }
 }
 
+// 일회용 티켓 발급 (Authorization 헤더 필요, 응답은 저장 · 기록하지 않는다)
+export const requestRealtimeTicket = () => api<{ ticket: string; expiresAt: string }>('POST', '/api/v1/realtime/tickets').then((result) => result.ticket)
+
 interface Options {
   url: string
+  // 접속 직전 티켓 받기. 없거나 실패하면 쿠키 인증으로 접속
+  ticket?: () => Promise<string>
   // 테스트(Node)에서 Authorization 헤더를 붙일 때만 바꾼다. 브라우저는 기본값(쿠키 인증)
   open?: (url: string) => WebSocket
   onEvent: (event: RealtimeEvent) => void
@@ -33,8 +42,10 @@ const MAX_DELAY = 30_000
 const MAX_FAILED_OPENS = 3
 const SEEN_LIMIT = 500
 
-export function createRealtime({ url, open = (address) => new WebSocket(address), onEvent, onRejoin }: Options) {
+export function createRealtime({ url, ticket, open = (address) => new WebSocket(address), onEvent, onRejoin }: Options) {
   let socket: WebSocket | null = null
+  // 티켓을 받는 중 (그 사이 접속을 겹쳐 시작하지 않게)
+  let connecting = false
   let ready = false
   let attempt = 0
   let failedOpens = 0
@@ -100,9 +111,22 @@ export function createRealtime({ url, open = (address) => new WebSocket(address)
 
   const connect = () => {
     window.clearTimeout(retryTimer)
-    if (socket || !boards.size) return
+    if (socket || connecting || !boards.size) return
+    if (!ticket) { openSocket(url); return }
+    connecting = true
+    ticket()
+      .then((value) => `${url}${url.includes('?') ? '&' : '?'}ticket=${encodeURIComponent(value)}`)
+      .catch(() => url)
+      .then((address) => {
+        connecting = false
+        // 티켓을 받는 동안 모든 게시판에서 나갔으면 접속하지 않는다
+        if (!socket && boards.size) openSocket(address)
+      })
+  }
+
+  const openSocket = (address: string) => {
     let opened = false
-    const ws = open(url)
+    const ws = open(address)
     socket = ws
     ws.onmessage = (event) => {
       try { handle(JSON.parse(String(event.data))) } catch { /* 형식이 다른 메시지는 무시 */ }
@@ -117,7 +141,7 @@ export function createRealtime({ url, open = (address) => new WebSocket(address)
       pending.clear()
       if (!boards.size) return
       if (!opened && ++failedOpens >= MAX_FAILED_OPENS) {
-        console.warn('[WS] 실시간 연결 실패: 인증 쿠키 · 허용 origin 확인 필요 (다음 게시판 참여 때 다시 시도)')
+        console.warn('[WS] 실시간 연결 실패: 티켓 · 허용 origin 확인 필요 (다음 게시판 참여 때 다시 시도)')
         return
       }
       // 1012(서버 재시작 · 구독 끊김) 포함 모든 끊김은 다시 붙는다. 한꺼번에 몰리지 않게 지연을 흩뜨린다
@@ -128,7 +152,7 @@ export function createRealtime({ url, open = (address) => new WebSocket(address)
 
   // 화면이 다시 보이거나 네트워크가 돌아오면 기다리지 않고 바로 붙는다
   const wake = () => {
-    if (document.visibilityState !== 'visible' || socket || !boards.size) return
+    if (document.visibilityState !== 'visible' || socket || connecting || !boards.size) return
     attempt = 0
     failedOpens = 0
     connect()

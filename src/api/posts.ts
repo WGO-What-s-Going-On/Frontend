@@ -1,4 +1,4 @@
-import { api } from './client'
+import { api, ApiError } from './client'
 import { stableMediaUrl } from './mediaUrls'
 import type { Board, Category, Comment, CommentReaction, ImageFocus, PostReaction, Reach } from '../types/domain'
 import { timeAgo } from '../domain/time'
@@ -117,6 +117,11 @@ export const getRanking = (regionCode: string) => api<{ regionCode: string; item
 export const categoryFromCode = (code: string): Category => (Object.entries(categoryCode).find(([, value]) => value === code)?.[0] as Category | undefined) ?? '일상 불편'
 const postReactionFromCode = (code: PostReactionCode) => (Object.entries(postReactionCode).find(([, value]) => value === code)?.[0]) as PostReaction
 const commentReactionFromCode = (code: CommentReactionCode) => (Object.entries(commentReactionCode).find(([, value]) => value === code)?.[0]) as CommentReaction
+
+// 이동 중 글쓰기 제한 (서버 #123): 시속 20km 이상 이동이 감지되면 글 작성이 403으로 막히고,
+// 같은 자리(10m 안)에서 10초 멈춘 것이 위치 갱신으로 확인되면 풀린다. 댓글 · 반응 등 참여는 막지 않는다
+const MOVING_REASONS = ['USER_MOVING', 'MOVEMENT_UNCONFIRMED']
+export const isMovingError = (error: unknown) => error instanceof ApiError && error.status === 403 && (MOVING_REASONS.includes(error.message) || MOVING_REASONS.includes(error.code))
 
 export function toBoard(post: PostResponse): Board {
   const counts = post.reactionCounts ?? { CURIOUS: 0, STILL_HAPPENING: 0, HELPFUL: 0, ENDED: 0 }
