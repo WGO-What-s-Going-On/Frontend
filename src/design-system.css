@@ -2208,14 +2208,15 @@ button.title-progress-card:active { background: #f7f8fa; }
 .moving-dialog .dialog-actions button:disabled { opacity: .45; }
 @media (prefers-reduced-motion: reduce) { .moving-progress i { animation: none; } }
 
-/* 게시글 상세 반응: 4칸 버튼 (한 상자 안 글자 나열 → 칸마다 바탕을 깐 버튼). 윗줄 아이콘 + 이름, 아랫줄 숫자, 고른 반응은 파란 칠 */
+/* 게시글 상세 반응: 4칸 버튼 (칸마다 바탕을 깐 버튼). 윗줄 아이콘 + 이름, 아랫줄 숫자.
+   고른 반응은 파란 칠 + 오른쪽 위 체크 표시 */
 .board-detail-screen .detail-reactions-head { margin: 22px 0 10px; }
 .board-detail-screen .detail-reactions-head h3 { margin: 0; color: var(--c-ink); font-size: 19px; }
 .board-detail-screen .detail-inline-reactions { margin-top: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
 .board-detail-screen .detail-inline-reactions .post-reactions.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 0; }
 .board-detail-screen .detail-inline-reactions .post-reactions.tiles > button,
 .board-detail-screen .detail-inline-reactions .post-reactions.tiles > span {
-  /* 윗줄: 아이콘 + 이름, 아랫줄: 숫자 */
+  position: relative;
   display: grid;
   grid-template-columns: auto auto;
   align-items: center;
@@ -2235,15 +2236,34 @@ button.title-progress-card:active { background: #f7f8fa; }
   transition: background-color .15s ease, transform .1s ease;
 }
 .board-detail-screen .detail-inline-reactions .post-reactions.tiles > button:active { transform: scale(.96); }
-.board-detail-screen .detail-inline-reactions .post-reactions.tiles svg { width: 15px; height: 15px; margin: 0; color: var(--c-body); }
-.board-detail-screen .detail-inline-reactions .post-reactions.tiles b { overflow: hidden; max-width: 100%; color: var(--c-body); font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles svg { flex: none; width: 15px; height: 15px; margin: 0; color: var(--c-body); }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles b { overflow: hidden; min-width: 0; color: var(--c-body); font-size: 12px; font-weight: 600; text-overflow: ellipsis; }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles small { grid-column: 1 / -1; justify-self: center; color: var(--c-ink); font-size: 13px; font-weight: 700; }
 .board-detail-screen .detail-inline-reactions .post-reactions.tiles > button.selected b::after { content: none; }
-.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button span,
-.board-detail-screen .detail-inline-reactions .post-reactions.tiles > span small { grid-column: 1 / -1; justify-self: center; color: var(--c-ink); font-size: 13px; font-weight: 700; }
-.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button.selected { background: var(--c-accent-soft); }
-.board-detail-screen .detail-inline-reactions .post-reactions.tiles > button.selected :is(svg, b, span) { color: var(--c-accent); }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > .selected { background: var(--c-accent-soft); }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > .selected > :is(svg, b, small) { color: var(--c-accent); }
+/* 고른 칸 오른쪽 위 체크 */
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles .reaction-check {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--c-page);
+  border-radius: 50%;
+  background: var(--c-accent);
+  animation: reaction-check-in .18s ease-out;
+}
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles .reaction-check svg { width: 10px; height: 10px; color: #fff; }
+@keyframes reaction-check-in { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 /* 범위 밖(읽기 전용): 누를 수 없어서 바탕 · 글자를 한 톤 옅게 */
 .board-detail-screen .detail-inline-reactions .post-reactions.tiles > span { cursor: default; background: #f7f8fa; }
-.board-detail-screen .detail-inline-reactions .post-reactions.tiles > span :is(svg, b, small) { color: var(--c-mute); }
+.board-detail-screen .detail-inline-reactions .post-reactions.tiles > span:not(.selected) :is(svg, b, small) { color: var(--c-mute); }
 :root[data-theme="dark"] .board-detail-screen .detail-inline-reactions .post-reactions.tiles > :is(button, span) { background: var(--c-raised); }
-:root[data-theme="dark"] .board-detail-screen .detail-inline-reactions .post-reactions.tiles > button.selected { background: var(--c-accent-soft); }
+:root[data-theme="dark"] .board-detail-screen .detail-inline-reactions .post-reactions.tiles > .selected { background: var(--c-accent-soft); }
+@media (prefers-reduced-motion: reduce) { .board-detail-screen .detail-inline-reactions .post-reactions.tiles .reaction-check { animation: none; } }
+
+/* 댓글 제목과 '아직 댓글이 없습니다' 점선 상자 사이를 조금 띄운다 (제목 위치는 그대로) */
+.board-detail-screen .comments-heading + .comments-empty { margin-top: 8px; }
