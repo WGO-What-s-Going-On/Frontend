@@ -12,7 +12,6 @@ import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/a
 import { clearSession, readSession } from '../api/session'
 import { startPush, stopPush } from '../api/push'
 import { startWebPush, unregisterWebPush } from '../api/webPush'
-import { useNearbyNotifications } from '../features/notifications/useNearbyNotifications'
 import { getMyProfileImage, removeProfileImage as removeProfileImageApi, shrinkImage, uploadProfileImage } from '../api/profileImage'
 import { consentTerms, getMe, getTerms, requestWithdrawal, updateMe } from '../api/users'
 import type { MeResponse } from '../api/users'
@@ -84,7 +83,6 @@ interface AppContextValue {
   alertBoardIds: string[]
   recentBoardIds: string[]
   notificationSettings: NotificationSettings
-  nearbyNotifications: ReturnType<typeof useNearbyNotifications>
   themeMode: ThemeMode
   setThemeMode: (mode: ThemeMode) => void
   toggleTheme: () => void
@@ -201,7 +199,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       navigate(pathForScreen('board', boardId), { replace: true })
     },
   })
-  const nearbyNotifications = useNearbyNotifications(server.live ? readSession()?.userId ?? null : null, notificationSettings.nearby)
   // 서버 데이터는 목업 저장소에 섞지 않는다: 서버 연동 중에는 마지막 목업 글 · 댓글 · 알림을 그대로 저장해 둔다
   const mockData = useRef({ boards, comments, notices })
   if (!server.live) mockData.current = { boards, comments, notices }
@@ -317,7 +314,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     go('login')
   }
   const logout = async () => {
-    if (nearbyNotifications.subscription?.enabled) await nearbyNotifications.revoke()?.catch(() => undefined)
     server.stopRealtime()
     await stopPush()
     await unregisterWebPush()
@@ -527,11 +523,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setMutedBoardIds((items) => muted ? items.filter((id) => id !== boardId) : [...items, boardId])
       server.setBoardAlert(boardId, muted).catch(() => { setMutedBoardIds((items) => muted ? [...items, boardId] : items.filter((id) => id !== boardId)); showToast('알림 설정을 바꾸지 못했어요.') })
     },
-    updateNotificationSettings: (settings) => {
-      updateNotificationSettings(settings)
-      const revoke = !settings.nearby ? nearbyNotifications.revoke() : undefined
-      Promise.resolve(revoke).then(() => server.saveSettings(settings)).catch(fail('알림 설정을 저장하지 못했어요.'))
-    },
+    updateNotificationSettings: (settings) => { updateNotificationSettings(settings); server.saveSettings(settings).catch(fail('알림 설정을 저장하지 못했어요.')) },
   }
   // 서버 연동이 켜지면(로그인 직후 · 로그인 상태로 앱 실행) 목업 데이터를 비우고 서버 데이터로 채운다
   useEffect(() => {
@@ -609,7 +601,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), currentBoardMissing: missingBoardIds.has(currentBoardId), inRange,
     blockedUsers: server.live ? serverBlocked : blockedUsers,
     alertBoardIds: server.live ? boards.filter((board) => !mutedBoardIds.includes(board.id)).map((board) => board.id) : alertBoardIds,
-    recentBoardIds, notificationSettings, nearbyNotifications, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
+    recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate,
     refreshBoard: (boardId) => server.live ? server.loadBoard(boardId).then(() => undefined) : Promise.resolve(),
     refreshNotices: () => server.live ? Promise.all([server.loadNotices(), server.loadUnread()]).then(() => undefined) : Promise.resolve(),
@@ -617,7 +609,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
     live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,
-  }), [screen, user, boards, comments, notices, reports, missingBoardIds, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, nearbyNotifications, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])
+  }), [screen, user, boards, comments, notices, reports, missingBoardIds, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
