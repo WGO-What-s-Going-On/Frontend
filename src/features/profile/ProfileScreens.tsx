@@ -18,6 +18,7 @@ import { commentCountOf, myReactions } from '../../types/domain'
 import type { Board } from '../../types/domain'
 import { TitleProgressCard } from './TitleProgressCard'
 import { levelStats } from '../level/levels'
+import { NearbyLocationSetting } from '../notifications/NearbyLocationSetting'
 
 // 화면 모드 토글: 왼쪽 해(라이트) · 오른쪽 달(다크). 손잡이가 먼저 미끄러진 뒤 화면 색이 겹쳐 바뀐다
 function ThemeSwitch({ dark, onToggle }: { dark: boolean; onToggle: () => void }) {
@@ -180,6 +181,7 @@ export function NotificationSettingsScreen() {
       <span><strong>{option.title}</strong><small>{option.description}</small></span>
       <input type="checkbox" role="switch" checked={notificationSettings[option.key]} onChange={(event) => updateNotificationSettings({ ...notificationSettings, [option.key]: event.target.checked })}/>
     </label>)}</div>
+    <NearbyLocationSetting/>
   </AppShell>
 }
 

@@ -1,4 +1,5 @@
 import { api } from './client'
+import type { NearbySubscription, NearbyLocation } from '../features/notifications/nearbySubscription'
 
 export interface NotificationResponse {
   notificationId: string
@@ -30,3 +31,7 @@ export const getNotificationSettings = () => api<NotificationSettingsResponse>('
 export const updateNotificationSettings = (settings: Partial<NotificationSettingsResponse>) => api<NotificationSettingsResponse>('PATCH', '/api/v1/notifications/settings', { body: settings })
 export const getBoardNotification = (postId: string) => api<{ postId: string; enabled: boolean }>('GET', `/api/v1/notifications/boards/${encodeURIComponent(postId)}`)
 export const setBoardNotification = (postId: string, enabled: boolean) => api<{ postId: string; enabled: boolean }>('PUT', `/api/v1/notifications/boards/${encodeURIComponent(postId)}`, { body: { enabled } })
+
+export const getNearbySubscription = () => api<NearbySubscription>('GET', '/api/v1/notifications/nearby-subscription')
+export const saveNearbySubscription = (location: NearbyLocation) => api<NearbySubscription>('PUT', '/api/v1/notifications/nearby-subscription', { body: { enabled: true, locationConsent: true, ...location, expiresInSeconds: 900 } })
+export const removeNearbySubscription = () => api<void>('DELETE', '/api/v1/notifications/nearby-subscription')
