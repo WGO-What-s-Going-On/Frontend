@@ -41,7 +41,7 @@ export function ProfileScreen() {
   const { user, boards, comments, go, themeMode, toggleTheme, logout, withdraw, live, serverLevel, profileImageUrl } = useApp()
   const [withdrawOpen, setWithdrawOpen] = useState(false)
   const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="30일 안에 다시 로그인하면 탈퇴가 취소돼요. 이후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { setWithdrawOpen(false); withdraw() }}/>
-  return <AppShell bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} photo={profileImageUrl ?? undefined} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
+  return <AppShell contentClassName="profile-screen" bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} photo={profileImageUrl ?? undefined} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
 
 export function ActivityScreen() {
@@ -77,10 +77,9 @@ export function ActivityScreen() {
   </AppShell>
 }
 
-// 프로필 수정: 실명(비공개)과 닉네임. 닉네임을 바꾸면 중복 확인을 거쳐야 저장할 수 있다.
+// 프로필 수정: 프로필 사진과 닉네임. 닉네임을 바꾸면 중복 확인을 거쳐야 저장할 수 있다.
 export function ProfileEditScreen() {
   const { user, boards, comments, updateUser, go, profileImageUrl, changeProfileImage, removeProfileImage } = useApp()
-  const [realName, setRealName] = useState(user.realName ?? '')
   const photoRef = useRef<HTMLInputElement>(null)
   const [photoBusy, setPhotoBusy] = useState(false)
   const pickPhoto = async (file?: File) => {
@@ -107,7 +106,7 @@ export function ProfileEditScreen() {
   }
   const message = !changed ? '' : formatError || (result ? result.error || '사용할 수 있는 닉네임이에요.' : '중복 확인을 해 주세요.')
   const messageTone = !changed ? '' : formatError || result?.error ? 'error' : result ? 'ok' : 'hint'
-  const canSave = Boolean(realName.trim() && trimmed) && (!changed || (result !== null && !result.error))
+  const canSave = Boolean(trimmed) && (!changed || (result !== null && !result.error))
   return <AppShell contentClassName="profile-edit-screen"><BackHeader title="프로필 수정" onBack={() => go('my')}/>
     {/* 프로필 사진: 사진을 누르면 앨범 · 카메라에서 고른다 */}
     <div className="profile-edit-avatar">
@@ -119,15 +118,11 @@ export function ProfileEditScreen() {
       <input ref={photoRef} className="quick-file-input" type="file" accept="image/jpeg,image/png,image/webp,image/*" onChange={(event) => { pickPhoto(event.target.files?.[0]); event.target.value = '' }}/>
     </div>
     <div className="form-field">
-      <span className="form-label">실명</span>
-      <input className="form-input" value={realName} onChange={(event) => setRealName(event.target.value)} placeholder="실명을 입력해 주세요" maxLength={20} autoComplete="name"/>
-    </div>
-    <div className="form-field">
       <span className="form-label">닉네임</span>
       <div className="input-with-action"><input value={nickname} onChange={(event) => setNickname(event.target.value)} placeholder="닉네임 (2~12자)" maxLength={12} autoComplete="nickname"/><button className="check-button" onClick={checkNickname} disabled={!changed || Boolean(formatError) || !trimmed}>중복 확인</button></div>
       <p className={`field-message ${messageTone}`} aria-live="polite">{message}</p>
     </div>
-    <Button className="primary profile-save" disabled={!canSave} onClick={() => updateUser({ nickname: trimmed, realName: realName.trim() })}>저장</Button>
+    <Button className="primary profile-save" disabled={!canSave} onClick={() => updateUser({ nickname: trimmed })}>저장</Button>
   </AppShell>
 }
 

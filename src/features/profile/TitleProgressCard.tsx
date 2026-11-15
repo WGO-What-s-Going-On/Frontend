@@ -9,7 +9,7 @@ export function TitleProgressCard({ stats, name, photo, onOpen }: { stats: Level
   const progress = levelProgress(stats)
 
   return <button className="title-progress-card" onClick={onOpen} aria-label={`프로필 수정, 현재 칭호 ${current.name}`}>
-    <div className="title-progress-identity"><Avatar src={photo} name={name}/><div><small>{name} · 현재 칭호</small><h3>{current.name}</h3><p>{progress ? `${progress.next.name}까지 ${progress.remaining}${progress.unit} 남았어요` : '최고 칭호를 달성했어요'}</p></div></div>
+    <div className="title-progress-identity"><Avatar src={photo} name={name} size={48}/><div><small>{name} · 현재 칭호</small><h3>{current.name}</h3><p>{progress ? `${progress.next.name}까지 ${progress.remaining}${progress.unit} 남았어요` : '최고 칭호를 달성했어요'}</p></div></div>
     <ChevronRight className="title-progress-arrow" size={20}/>
   </button>
 }
