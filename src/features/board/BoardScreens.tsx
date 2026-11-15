@@ -90,10 +90,10 @@ export function BoardListScreen() {
     {/* 거르기는 한 줄 칩으로: [정렬 ▾] 카테고리 … 오른쪽 끝 검색. 정렬 메뉴는 옆으로 밀리는 칩 줄 밖에 띄워 잘리지 않게 */}
     <div ref={filterRowRef} className="ux-filter-row board-filter-row">
       <div className="ux-category-filters" onScroll={() => setSortMenuLeft(null)}>
-        <button ref={sortChipRef} className="sort-chip" onClick={toggleSortMenu} aria-label={`정렬: ${sortLabel[sort]}`} aria-haspopup="menu" aria-expanded={sortMenuLeft !== null}>{sortLabel[sort]}<ChevronDown size={14}/></button>
+        <button ref={sortChipRef} className="sort-chip" onClick={toggleSortMenu} aria-label={`정렬: ${sortLabel[sort]}`} aria-haspopup="menu" aria-expanded={sortMenuLeft !== null}>{sortLabel[sort]}<ChevronDown size={15}/></button>
         {categoryOptions.map((item) => <button key={item} className={category === item ? 'selected' : ''} data-category={item === '전체' ? undefined : item} onClick={() => updateFilter('category', item)}>{item === '전체' ? '전체' : categoryLabel[item]}</button>)}
       </div>
-      <IconButton className="board-search-chip" label="게시판 검색" onClick={() => go('search')}><Search size={17}/></IconButton>
+      <IconButton className="board-search-chip" label="게시판 검색" onClick={() => go('search')}><Search size={18}/></IconButton>
       {sortMenuLeft !== null && <div className="ux-sort-menu" role="menu" style={{ left: sortMenuLeft }}>{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuLeft(null) }}>{sortLabel[item]}</button>)}</div>}
     </div>
     {/* 서버 연동 중: 처음 불러오는 동안 자리 표시, 실패하면 다시 시도 */}
