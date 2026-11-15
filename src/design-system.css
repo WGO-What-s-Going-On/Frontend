@@ -1308,8 +1308,8 @@ button.title-progress-card:active { background: #f7f8fa; }
    카테고리 칩은 옆으로 밀어서(스와이프) 넘겨 보고, 검색 버튼은 오른쪽 끝에 고정 */
 .ux-filter-row { align-items: center; }
 .board-search-chip {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   display: grid;
   flex: none;
   place-items: center;
