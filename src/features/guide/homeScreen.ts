@@ -43,8 +43,7 @@ export function openedFrom() {
   }
 }
 
-// 홈 화면에 추가를 안내할 때: 브라우저로 연 경우 모두 (앱 · 이미 홈 화면 앱으로 연 경우만 제외)
+// 홈 화면에 추가 안내 시트를 띄울 때: 브라우저 · 홈 화면 앱 모두 (이미 추가했어도 띄운다). 앱(iOS · 안드로이드 설치 앱)만 제외
 export function shouldSuggestHomeScreen() {
-  const from = openedFrom()
-  return !from.native && !from.standalone
+  return !openedFrom().native
 }
