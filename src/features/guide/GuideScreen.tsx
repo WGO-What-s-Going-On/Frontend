@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { CircleCheck } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
 import { Button } from '../../components/ui/Button'
@@ -16,7 +16,6 @@ const faqs = [
   { q: '글이 안 올라가요', a: '150m 밖이거나 이동 중이에요. 멈춘 자리에서 10초 뒤 다시 올려요.' },
   { q: '글이 사라졌어요', a: '종료된 글이에요. 마이 → 최근 활동내역 → 종료된에서 볼 수 있어요.' },
   { q: '내 위치가 다른 사람에게 보이나요?', a: '아니요. 글까지의 대략적인 거리만 보여요.' },
-  { q: '익명으로 올릴 수 있나요?', a: '네. 글을 쓸 때 작성자 표시를 익명으로 바꾸면 돼요.' },
 ]
 
 // 홈 화면에 추가: 이걸 해야 알림을 받는다. 이미 홈 화면 앱이면 짧게 확인만, 앱(Capacitor)에서는 숨긴다
@@ -25,7 +24,7 @@ function HomeScreenCard() {
   const { justInstalled } = useInstallPrompt()
   if (from.native) return null
   if (from.standalone || justInstalled) return <section className="guide-home done">
-    <CircleCheck size={34} strokeWidth={2.2}/><div><h2>홈 화면 추가 완료</h2><p>알림을 받을 수 있어요</p></div>
+    <Check size={30} strokeWidth={3}/><div><h2>홈 화면 추가 완료</h2><p>알림을 받을 수 있어요</p></div>
   </section>
   return <section className="guide-home">
     <header><h2>홈 화면에 추가</h2><em>필수</em></header>
@@ -39,9 +38,9 @@ export function GuideScreen() {
   // 사용법 다시 보기: 둘러보기 → (브라우저로 연 경우) 홈 화면에 추가 안내까지 가입 직후와 똑같이
   const replay = () => { requestTour(); requestHomeScreenHint(); go('home') }
   const bottom = <div className="guide-bottom"><Button className="primary" onClick={replay}>사용법 다시 보기</Button></div>
-  return <AppShell nav={false} contentClassName="guide-screen" bottomContent={bottom}>
+  return <AppShell nav={false} contentClassName="guide-screen" bottomContent={bottom} restoreScroll={false}>
     <BackHeader title="이용 가이드" onBack={() => go('my')}/>
-    <div className="guide-hero"><img src={mascotWave} alt=""/><p>내 주변 150m에서<br/>지금 일어나는 일</p></div>
+    <div className="guide-hero"><img src={mascotWave} alt=""/><p><b>W</b>hat's <b>G</b>oing <b>O</b>n?</p></div>
     <HomeScreenCard/>
     <section className="guide-section">
       <h3>자주 묻는 것</h3>

@@ -20,7 +20,8 @@ function activeTab(screen: Screen) {
   return screen
 }
 
-export function AppShell({ children, nav = true, contentClassName = '', shellClassName = '', bottomContent }: { children: React.ReactNode; nav?: boolean; contentClassName?: string; shellClassName?: string; bottomContent?: React.ReactNode }) {
+// restoreScroll: 다시 들어왔을 때 보던 스크롤 자리로 (기본). 짧은 안내 화면은 끄고 늘 맨 위부터
+export function AppShell({ children, nav = true, contentClassName = '', shellClassName = '', bottomContent, restoreScroll = true }: { children: React.ReactNode; nav?: boolean; contentClassName?: string; shellClassName?: string; bottomContent?: React.ReactNode; restoreScroll?: boolean }) {
   const { screen, go, toast } = useApp()
   const [composerOpen, setComposerOpen] = useState(false)
   const screenRef = useRef<HTMLElement>(null)
@@ -29,7 +30,7 @@ export function AppShell({ children, nav = true, contentClassName = '', shellCla
   useEffect(() => {
     const element = screenRef.current
     const storageKey = `wgo-scroll-${screen}`
-    if (!element) return
+    if (!element || !restoreScroll) return
     element.scrollTop = Number(sessionStorage.getItem(storageKey) || 0)
     return () => sessionStorage.setItem(storageKey, String(element.scrollTop))
   }, [screen])
