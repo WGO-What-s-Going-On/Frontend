@@ -107,19 +107,21 @@
 .home-steps .primary { margin: 14px 0 0; }
 .guide-home.done { display: flex; align-items: center; gap: 12px; border-color: var(--c-line); background: var(--c-canvas); }
 .guide-home.done > svg { flex: none; color: var(--c-news); }
+.guide-home.done h2 { font-size: 16px; }
 .guide-home.done p { margin: 2px 0 0; color: var(--c-mute); font-size: 13px; }
-.guide-home.done h2 { font-size: 15px; }
 
 .guide-section { margin: 0 0 22px; }
 .guide-section h3 { margin: 0 0 8px; font-size: 16px; }
-.guide-faq { display: grid; gap: 8px; }
-.guide-faq details { border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }
-.guide-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px; color: var(--c-ink); font-size: 14.5px; font-weight: 700; list-style: none; cursor: pointer; }
-.guide-faq summary::-webkit-details-marker { display: none; }
-.guide-faq summary svg { flex: none; color: var(--c-mute); transition: transform .2s; }
-.guide-faq details[open] summary svg { transform: rotate(180deg); }
-.guide-faq details p { margin: -4px 16px 14px; color: var(--c-body); font-size: 14px; line-height: 1.6; word-break: keep-all; }
-/* 둘러보기 다시 보기: 엄지 닿는 아래에 고정 */
+/* 자주 묻는 것: Q · A 줄글 (펼치기 없이) */
+.guide-faq { margin: 0; border-top: 1px solid var(--c-line); }
+.guide-faq > div { padding: 14px 2px; border-bottom: 1px solid var(--c-line); }
+.guide-faq dt, .guide-faq dd { display: flex; gap: 8px; margin: 0; line-height: 1.55; word-break: keep-all; }
+.guide-faq dt { color: var(--c-ink); font-size: 14.5px; font-weight: 700; }
+.guide-faq dd { margin-top: 4px; color: var(--c-body); font-size: 14px; }
+.guide-faq dt b, .guide-faq dd b { flex: none; width: 14px; font-weight: 800; }
+.guide-faq dt b { color: var(--c-accent); }
+.guide-faq dd b { color: var(--c-mute); }
+/* 사용법 다시 보기: 엄지 닿는 아래에 고정 */
 .guide-bottom {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
   padding: 14px 20px calc(10px + var(--bottom-inset));
