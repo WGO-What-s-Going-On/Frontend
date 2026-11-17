@@ -77,7 +77,7 @@ export function LocationPermissionScreen() {
     <h1 className="onboarding-title">내 주변 150m 소식을 보려면<br/>위치 권한이 필요해요</h1>
     <ul className="permission-list">
       <li>지금 있는 곳 주변의 게시판을 보여줘요</li>
-      <li>150m 안에 있을 때만 글과 댓글을 쓸 수 있어요</li>
+      <li>댓글은 글에서 150m 안에 있을 때만 쓸 수 있어요</li>
       <li>정확한 위치는 다른 사람에게 공개되지 않아요</li>
     </ul>
     <p className="onboarding-help">허용하지 않으면 게시판은 볼 수 있지만 글쓰기·댓글·사진 올리기가 제한돼요.</p>

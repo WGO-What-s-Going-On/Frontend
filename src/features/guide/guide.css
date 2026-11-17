@@ -152,7 +152,9 @@
 @keyframes home-sheet-up { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
 .home-sheet > img { display: block; height: auto; margin: 0 0 8px; }
 .home-sheet h2 { margin: 0; color: var(--c-ink); font-size: 20px; line-height: 1.35; }
-.home-sheet > p { margin: 6px 0 14px; color: var(--c-body); font-size: 14.5px; line-height: 1.5; word-break: keep-all; }
+.home-sheet-must { color: var(--c-urgent); font-style: normal; font-weight: 800; }
+.home-sheet-why { display: grid; gap: 2px; margin: 8px 0 14px; padding-left: 20px; color: var(--c-body); font-size: 14.5px; line-height: 1.5; word-break: keep-all; }
+.home-sheet-why li::marker { color: var(--c-mute); }
 .home-sheet .home-steps { padding: 14px; border-radius: 14px; background: var(--c-accent-soft); }
 .home-sheet-actions { display: grid; gap: 8px; margin-top: 16px; }
 .home-sheet-actions .primary { margin: 0; }

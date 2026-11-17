@@ -32,7 +32,7 @@ function findPin(phone: HTMLElement) {
 const STEPS: Step[] = [
   { id: 'radius', title: '내 주변 150m', body: '파란 원 안에서 올라온 글이 지도에 핀으로 떠요. 내가 움직이면 원도 같이 움직여요.', shape: 'circle', pad: 0, find: (phone) => phone.querySelector('.map-radius-probe, .map-radius') },
   { id: 'pin', title: '핀을 누르면', body: '무슨 일인지 아래에 바로 요약돼요. 숫자가 붙은 핀은 같은 자리에 글이 여러 개예요.', shape: 'circle', pad: 12, find: findPin },
-  { id: 'compose', title: '지금 보이는 걸 올려요', body: '사진 한 장, 한 줄이면 충분해요.\n지금 있는 자리에 올라가요.', shape: 'circle', pad: 6, find: (phone) => phone.querySelector('.compose-fab') },
+  { id: 'compose', title: '지금 보이는 걸 올려요', body: '사진 한 장, 한 줄이면 충분해요.\n지금 있는 자리에서 즉시 올라가요.', shape: 'circle', pad: 6, find: (phone) => phone.querySelector('.compose-fab') },
   { id: 'bell', title: '새 소식은 여기로', body: '내 글에 댓글이나 반응이 달리면 여기로 알려 드려요.', shape: 'circle', pad: 2, find: (phone) => phone.querySelector('.map-top-overlay .notice-bell') },
 ]
 

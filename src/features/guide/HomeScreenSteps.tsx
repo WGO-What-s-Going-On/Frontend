@@ -43,8 +43,11 @@ export function HomeScreenSheet({ onClose }: { onClose: () => void }) {
   return <div ref={backdrop} className="home-sheet-backdrop" role="presentation">
     <section className="home-sheet" role="dialog" aria-modal="true" aria-labelledby="home-sheet-title">
       <img src={mascotWave} alt="" width={56}/>
-      <h2 id="home-sheet-title">홈 화면에 추가해 주세요</h2>
-      <p>추가한 앱으로 열어야 <mark>새 알림을 실시간</mark>으로 받을 수 있어요.</p>
+      <h2 id="home-sheet-title">홈 화면에 추가해 주세요 <em className="home-sheet-must">(중요)</em></h2>
+      <ul className="home-sheet-why">
+        <li>추가해야 주소창 없이 화면이 꽉 차게 보여요</li>
+        <li>추가해야 <mark>새 알림을 실시간</mark>으로 받을 수 있어요</li>
+      </ul>
       <HomeScreenSteps/>
       <div className="home-sheet-actions">
         <Button className="primary" onClick={onClose}>확인했어요</Button>
