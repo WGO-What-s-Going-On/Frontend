@@ -157,5 +157,6 @@
 :root[data-theme="dark"] .home-sheet .home-steps { background: var(--c-canvas); }
 @media (prefers-reduced-motion: reduce) { .home-sheet { animation: none; } }
 
-/* 마이: 브라우저로 쓰는 중이면 이용 가이드 줄 오른쪽에 파란 글씨 */
-.menu .menu-hint { color: var(--c-accent); font-size: 13.5px; font-weight: 600; }
+/* 안내 시트의 핵심 문장: 형광펜처럼 아래쪽 반만 노랗게 */
+.home-sheet mark { color: var(--c-ink); font-weight: 700; background: linear-gradient(transparent 52%, #ffe066 52%, #ffe066 92%, transparent 92%); }
+:root[data-theme="dark"] .home-sheet mark { background: linear-gradient(transparent 52%, rgba(255, 214, 10, .38) 52%, rgba(255, 214, 10, .38) 92%, transparent 92%); }
