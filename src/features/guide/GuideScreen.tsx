@@ -6,7 +6,7 @@ import { Button } from '../../components/ui/Button'
 import { CrownIcon } from '../../components/ui/CrownIcon'
 import { useApp } from '../../context/AppContext'
 import mascotWave from '../../assets/mascot/wave.webp'
-import { requestTour, type TourVariant } from './tourState'
+import { requestTour } from './tourState'
 
 // 마이 > 이용 가이드: 기능별 짧은 설명 + 자주 묻는 것. 아래 버튼으로 지도 둘러보기를 다시 본다
 const sections: { title: string; icon: LucideIcon; items: React.ReactNode[] }[] = [
@@ -48,15 +48,8 @@ const faqs = [
 
 export function GuideScreen() {
   const { go } = useApp()
-  const replay = (variant: TourVariant) => { requestTour(variant); go('home') }
-  // 비교용: 둘러보기 A(예시 핀 포함) · B(핀 단계 없이). 하나로 정하면 버튼 하나만 남긴다
-  const bottom = <div className="guide-bottom">
-    <div className="guide-bottom-pair">
-      <Button className="primary" onClick={() => replay('a')}>둘러보기 A</Button>
-      <Button className="primary" onClick={() => replay('b')}>둘러보기 B</Button>
-    </div>
-    <small>비교용 · A 예시 핀 포함 5단계, B 핀 단계 없이 4단계</small>
-  </div>
+  const replay = () => { requestTour(); go('home') }
+  const bottom = <div className="guide-bottom"><Button className="primary" onClick={replay}>지도 둘러보기 다시 보기</Button></div>
   return <AppShell nav={false} contentClassName="guide-screen" bottomContent={bottom}>
     <BackHeader title="이용 가이드" onBack={() => go('my')}/>
     <div className="guide-hero">

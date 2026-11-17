@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { categoryIcon } from '../../domain/categoryIcons'
 import mascotHead from '../../assets/mascot/head.webp'
-import type { TourVariant } from './tourState'
 
 // 지도 둘러보기: 화면을 어둡게 하고 실제 버튼 자리만 밝게 뚫어, 마스코트 말풍선으로 하나씩 짚어 준다.
 // 말풍선의 '다음'이나 어두운 곳 아무 데나 누르면 넘어간다. 지도가 늦게 뜨면(위치 권한 창 등) 짚을 곳이 생길 때까지 보이지 않게 기다린다
@@ -42,10 +41,10 @@ const GAP = 14
 const SIDE = 16
 const DemoIcon = categoryIcon['동네 소식']
 
-export function GuideTour({ variant, onDone }: { variant: TourVariant; onDone: () => void }) {
+export function GuideTour({ onDone }: { onDone: () => void }) {
   const ref = useRef<HTMLDivElement>(null)
   const nextRef = useRef<HTMLButtonElement>(null)
-  const steps = variant === 'b' ? STEPS.filter((step) => step.id !== 'pin') : STEPS
+  const steps = STEPS
   const [index, setIndex] = useState(0)
   // 화면(폰 틀) 크기와 짚을 곳. 짚을 곳을 끝내 못 찾으면 null (말풍선만 가운데)
   const [view, setView] = useState<{ w: number; h: number; hole: Rect | null; example?: boolean } | null>(null)
