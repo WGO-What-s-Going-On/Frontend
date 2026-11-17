@@ -12,6 +12,7 @@ import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/a
 import { clearSession, readSession } from '../api/session'
 import { startPush, stopPush } from '../api/push'
 import { startWebPush, unregisterWebPush } from '../api/webPush'
+import { listenNotificationOpen } from '../api/notificationOpen'
 import { getMyProfileImage, removeProfileImage as removeProfileImageApi, shrinkImage, uploadProfileImage } from '../api/profileImage'
 import { consentTerms, getMe, getTerms, requestWithdrawal, updateMe } from '../api/users'
 import type { MeResponse } from '../api/users'
@@ -565,9 +566,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     // 웹(PWA): 알림 설정에서 켜 둔 기기면 토큰을 다시 맞춘다. 앱을 보고 있을 때 온 알림은 토스트로
     startWebPush({
       onReceive: (title) => { refreshAlerts(); if (title) showToast(title) },
-      onOpen: (url) => navigate(url),
     })
   }, [server.live, screen])
+  // 웹 푸시 알림을 눌러 들어왔을 때: 그 알림의 게시글(또는 알림함)로. 로그인한 동안만
+  useEffect(() => { if (server.live) return listenNotificationOpen((url) => navigate(url)) }, [server.live])
   // 서버 연동 배포본: 로그인 없이 /map 같은 주소로 바로 들어오면 목업 데이터가 보이지 않게 로그인 화면으로 보낸다
   useEffect(() => {
     if (apiEnabled && !readSession() && screen !== 'login' && screen !== 'kakao-callback') navigate(pathForScreen('login'), { replace: true })

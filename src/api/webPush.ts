@@ -103,8 +103,9 @@ export async function unregisterWebPush() {
 
 let listening = false
 
-// 로그인한 상태로 앱을 열 때: 이미 켜 둔 기기면 토큰을 새로 맞추고(바뀌었으면 다시 등록) 알림 수신 · 누름을 연결한다. 권한은 묻지 않는다
-export async function startWebPush({ onReceive, onOpen }: { onReceive: (title?: string) => void; onOpen: (url: string) => void }) {
+// 로그인한 상태로 앱을 열 때: 이미 켜 둔 기기면 토큰을 새로 맞추고(바뀌었으면 다시 등록) 앱을 보고 있을 때 온 알림을 연결한다. 권한은 묻지 않는다.
+// 알림을 눌렀을 때 화면 이동은 src/api/notificationOpen.ts
+export async function startWebPush({ onReceive }: { onReceive: (title?: string) => void }) {
   if (webPushState() !== 'on') return
   try {
     await upload(await currentToken())
@@ -112,8 +113,6 @@ export async function startWebPush({ onReceive, onOpen }: { onReceive: (title?: 
     listening = true
     const [{ messaging: instance }, { onMessage }] = await Promise.all([loadMessaging(), import('firebase/messaging')])
     onMessage(instance, (payload) => onReceive(payload.notification?.title))
-    // 서비스 워커가 '알림 누름'을 보내 주면 열려 있는 앱 안에서 그 화면으로
-    navigator.serviceWorker.addEventListener('message', (event) => { if (event.data?.type === 'wgo:open' && typeof event.data.url === 'string') onOpen(event.data.url) })
   } catch (error) {
     console.warn('[Push] 웹 푸시 등록 실패', error)
   }
