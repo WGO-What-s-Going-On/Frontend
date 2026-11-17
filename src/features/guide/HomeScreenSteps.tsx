@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { Ellipsis, EllipsisVertical, Share, SquarePlus } from 'lucide-react'
+import { ChevronDown, Ellipsis, EllipsisVertical, Share, SquarePlus } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { useStatusTint } from '../../components/ui/statusTint'
 import mascotWave from '../../assets/mascot/wave.webp'
@@ -9,8 +9,9 @@ type Os = 'ios' | 'android'
 const steps: Record<Os, React.ReactNode[]> = {
   ios: [
     <>공유 <Share size={15}/> 누르기<small>Safari는 아래 <Ellipsis size={13}/> 안에 있어요</small></>,
+    <>더 보기 <ChevronDown size={15}/> 누르기</>,
     <>홈 화면에 추가 <SquarePlus size={15}/></>,
-    <>오른쪽 위 추가</>,
+    <>다음 화면에서 추가</>,
   ],
   android: [
     <>오른쪽 위 메뉴 <EllipsisVertical size={15}/></>,
