@@ -158,6 +158,15 @@ export function KakaoMapView({ appKey, boards, selectedId, focusId, hotIds, onSe
     setSlots(next)
   }, [map, me, groups])
 
+  // 150m 원의 화면 반지름 (지도 둘러보기가 원 자리를 짚을 때 쓴다)
+  const radiusPx = useMemo(() => {
+    if (!map || !me) return 0
+    const projection = map.map.getProjection()
+    const center = projection.containerPointFromCoords(new map.maps.LatLng(me.latitude, me.longitude))
+    const edge = projection.containerPointFromCoords(new map.maps.LatLng(me.latitude + RADIUS / 111320, me.longitude))
+    return Math.abs(center.y - edge.y)
+  }, [map, me, level])
+
   useEffect(() => {
     groups.forEach((group) => overlays.current.get(group.key)?.overlay.setZIndex(group.boards.some((item) => item.id === selectedId) ? 4 : 3))
   }, [selectedId])
@@ -186,7 +195,7 @@ export function KakaoMapView({ appKey, boards, selectedId, focusId, hotIds, onSe
 
   return <div className="map-canvas kakao-map-canvas">
     <div ref={frameRef} className="kakao-map-frame"/>
-    {slots.get('me') && createPortal(<span className="map-me" aria-label="내 위치"/>, slots.get('me')!)}
+    {slots.get('me') && createPortal(<><span className="map-me" aria-label="내 위치"/>{radiusPx > 0 && <span className="map-radius-probe" style={{ left: -radiusPx, top: -radiusPx, width: radiusPx * 2, height: radiusPx * 2 }} aria-hidden="true"/>}</>, slots.get('me')!)}
     {groups.map((group) => {
       const slot = slots.get(group.key)
       return slot ? createPortal(<PinMarker group={group} selectedId={selectedId} hotIds={hotIds} onSelect={onSelect}/>, slot, group.key) : null

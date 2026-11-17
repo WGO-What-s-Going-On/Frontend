@@ -1,0 +1,118 @@
+/* ---------- 지도 둘러보기 (GuideTour) ---------- */
+.guide-tour {
+  position: absolute;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity .25s ease-out;
+  -webkit-tap-highlight-color: transparent;
+}
+.guide-tour.ready { opacity: 1; pointer-events: auto; }
+/* 밝게 뚫린 자리: 바깥을 큰 그림자로 어둡게 칠한다. 단계가 바뀌면 다음 자리로 미끄러진다 */
+.tour-hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 16px;
+  box-shadow: 0 0 0 200vmax rgba(10, 14, 26, .64);
+  transition: left .38s cubic-bezier(.2, .8, .2, 1), top .38s cubic-bezier(.2, .8, .2, 1), width .38s cubic-bezier(.2, .8, .2, 1), height .38s cubic-bezier(.2, .8, .2, 1), border-radius .38s;
+  pointer-events: none;
+}
+.tour-hole.circle { border-radius: 50%; }
+.tour-hole::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border: 2px solid rgba(255, 255, 255, .9);
+  border-radius: inherit;
+  animation: tour-ring 1.8s ease-out infinite;
+}
+.guide-tour.no-hole .tour-hole::after { display: none; }
+@keyframes tour-ring { 0% { transform: scale(1); opacity: .9; } 70%, 100% { transform: scale(1.08); opacity: 0; } }
+
+/* 예시 핀: 지도 핀과 같은 모양 (주변에 글이 없을 때). 말풍선 제목 옆에 '예시 핀' 표시 */
+.tour-demo-pin { position: absolute; z-index: 0; pointer-events: none; animation: tour-pin-drop .4s cubic-bezier(.2, .8, .2, 1); }
+@keyframes tour-pin-drop { from { transform: translateY(-14px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* 말풍선 */
+.tour-bubble {
+  position: absolute;
+  padding: 14px 16px 12px;
+  color: var(--c-ink);
+  border-radius: 18px;
+  background: var(--c-canvas);
+  box-shadow: 0 10px 30px rgba(10, 14, 26, .28);
+  cursor: default;
+  animation: tour-bubble-in .28s cubic-bezier(.2, .8, .2, 1);
+}
+.tour-bubble.above { animation-name: tour-bubble-in-up; }
+@keyframes tour-bubble-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+@keyframes tour-bubble-in-up { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.tour-arrow {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  margin-left: -7px;
+  border-radius: 3px;
+  background: var(--c-canvas);
+  transform: rotate(45deg);
+}
+.tour-bubble.below .tour-arrow { top: -6px; }
+.tour-bubble.above .tour-arrow { bottom: -6px; }
+.tour-bubble header { display: flex; align-items: center; gap: 8px; margin: 0; }
+.tour-bubble header img { flex: none; width: 30px; height: 30px; }
+.tour-bubble h2 { flex: 1; margin: 0; font-size: 16px; font-weight: 800; line-height: 1.35; }
+.tour-tag { display: inline-block; margin-left: 6px; padding: 2px 6px; color: var(--c-accent); font-size: 11.5px; font-style: normal; font-weight: 700; vertical-align: 2px; border-radius: 6px; background: var(--c-accent-soft); }
+.tour-bubble header small { color: var(--c-mute); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tour-bubble p { margin: 8px 0 12px; color: var(--c-body); font-size: 14px; line-height: 1.55; word-break: keep-all; }
+.tour-bubble footer { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.tour-bubble footer button { height: 36px; border: 0; border-radius: 10px; font-size: 14px; font-weight: 700; }
+.tour-skip { margin-right: auto; padding: 0 6px; color: var(--c-mute); background: none; }
+.tour-next { min-width: 76px; padding: 0 16px; color: #fff; background: var(--c-accent); }
+.tour-next:active { background: var(--c-accent-press); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-hole { transition: none; }
+  .tour-hole::after, .tour-bubble, .tour-demo-pin { animation: none; }
+}
+:root[data-theme="dark"] .tour-bubble, :root[data-theme="dark"] .tour-arrow { background: var(--c-raised); }
+
+/* ---------- 이용 가이드 (마이 > 이용 가이드) ---------- */
+.guide-screen { padding-bottom: calc(96px + var(--bottom-inset)) !important; }
+.guide-hero { display: flex; align-items: center; gap: 14px; margin: 4px 0 22px; padding: 18px 18px 18px 14px; border-radius: 18px; background: var(--c-accent-soft); }
+.guide-hero img { flex: none; width: 76px; height: auto; }
+.guide-hero h1 { margin: 0 0 4px; font-size: 19px; line-height: 1.35; }
+.guide-hero p { margin: 0; color: var(--c-body); font-size: 13.5px; line-height: 1.5; word-break: keep-all; }
+.guide-section { margin: 0 0 18px; }
+.guide-section h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 16px; }
+.guide-section h3 svg { color: var(--c-accent); }
+.guide-section ul { display: grid; gap: 7px; margin: 0; padding: 14px 16px; list-style: none; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }
+.guide-section li { position: relative; padding-left: 12px; color: var(--c-body); font-size: 14px; line-height: 1.55; word-break: keep-all; }
+.guide-section li::before { content: ''; position: absolute; top: .68em; left: 0; width: 4px; height: 4px; border-radius: 50%; background: var(--c-mute); }
+.guide-section li b { color: var(--c-ink); font-weight: 700; }
+.guide-faq { display: grid; gap: 8px; }
+.guide-faq details { border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }
+.guide-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px; color: var(--c-ink); font-size: 14.5px; font-weight: 700; list-style: none; cursor: pointer; }
+.guide-faq summary::-webkit-details-marker { display: none; }
+.guide-faq summary svg { flex: none; color: var(--c-mute); transition: transform .2s; }
+.guide-faq details[open] summary svg { transform: rotate(180deg); }
+.guide-faq details p { margin: -4px 16px 14px; color: var(--c-body); font-size: 14px; line-height: 1.6; word-break: keep-all; }
+/* 둘러보기 다시 보기: 엄지 닿는 아래에 고정 */
+.guide-bottom {
+  position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
+  display: grid; gap: 6px;
+  padding: 14px 20px calc(10px + var(--bottom-inset));
+  background: linear-gradient(to bottom, transparent, var(--c-page) 26%);
+}
+.guide-bottom .primary { margin: 0; }
+.guide-bottom-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.guide-bottom small { color: var(--c-mute); font-size: 12px; text-align: center; }
+:root[data-theme="dark"] .guide-hero { background: var(--c-canvas); }
+
+/* 카카오 지도 150m 원 자리 (보이지 않는 칸, 둘러보기가 위치만 잰다) */
+.map-radius-probe { position: absolute; visibility: hidden; pointer-events: none; }

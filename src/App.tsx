@@ -6,6 +6,7 @@ import { BoardListScreen, SearchScreen, BoardDetailScreen } from './features/boa
 import { NotificationScreen } from './features/notifications/NotificationScreen'
 import { LevelScreen } from './features/level/LevelScreen'
 import { ProfileScreen, ActivityScreen, ProfileEditScreen, NotificationSettingsScreen } from './features/profile/ProfileScreens'
+import { GuideScreen } from './features/guide/GuideScreen'
 import type { Screen } from './types/domain'
 
 const screens: Record<Screen, React.ComponentType> = {
@@ -21,6 +22,7 @@ const screens: Record<Screen, React.ComponentType> = {
   level: LevelScreen,
   'profile-edit': ProfileEditScreen,
   'notification-settings': NotificationSettingsScreen,
+  guide: GuideScreen,
   // 150m 밖 게시판도 같은 상세 화면을 쓰고, 화면 안에서 읽기 전용으로 바뀐다
   outside: BoardDetailScreen,
   terms: TermsScreen,

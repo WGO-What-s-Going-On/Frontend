@@ -3,6 +3,7 @@ export type Screen =
   | 'edit' | 'my' | 'activity' | 'alerts' | 'level'
   | 'profile-edit' | 'notification-settings' | 'outside'
   | 'terms' | 'nickname' | 'location-permission' | 'kakao-callback'
+  | 'guide'
 
 export type Category = '긴급 사고' | '도움 요청' | '동네 소식' | '일상 불편'
 export type BoardStatus = '실시간' | '종료됨' | '숨김'
