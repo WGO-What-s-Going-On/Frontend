@@ -45,7 +45,7 @@ export function HomeScreenSheet({ onClose }: { onClose: () => void }) {
       <img src={mascotWave} alt="" width={56}/>
       <h2 id="home-sheet-title">홈 화면에 추가해 주세요 <em className="home-sheet-must">(중요)</em></h2>
       <ul className="home-sheet-why">
-        <li>추가해야 주소창 없이 화면이 꽉 차게 보여요</li>
+        <li>추가해야 <mark>화면이 전부 채워져서</mark> 보여요</li>
         <li>추가해야 <mark>새 알림을 실시간</mark>으로 받을 수 있어요</li>
       </ul>
       <HomeScreenSteps/>
