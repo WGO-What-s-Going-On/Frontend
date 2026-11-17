@@ -13,6 +13,8 @@ import './design-system.css'
 import './safe-area.css'
 import './dark.css'
 import './features/guide/guide.css'
+// 안드로이드 Chrome 설치 창(beforeinstallprompt)은 앱을 열 때 한 번 오므로 처음부터 받아 둔다
+import './features/guide/homeScreen'
 
 // 개발 서버에서만: 주소 끝에 ?reset 을 붙이면 저장된 목업 데이터(로그인·약관·글·설정)를 지우고 첫 화면부터 다시 본다
 if (import.meta.env.DEV && new URLSearchParams(window.location.search).has('reset')) {

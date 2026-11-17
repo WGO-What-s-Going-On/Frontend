@@ -84,17 +84,40 @@
 
 /* ---------- 이용 가이드 (마이 > 이용 가이드) ---------- */
 .guide-screen { padding-bottom: calc(96px + var(--bottom-inset)) !important; }
-.guide-hero { display: flex; align-items: center; gap: 14px; margin: 4px 0 22px; padding: 18px 18px 18px 14px; border-radius: 18px; background: var(--c-accent-soft); }
-.guide-hero img { flex: none; width: 76px; height: auto; }
-.guide-hero h1 { margin: 0 0 4px; font-size: 19px; line-height: 1.35; }
-.guide-hero p { margin: 0; color: var(--c-body); font-size: 13.5px; line-height: 1.5; word-break: keep-all; }
-.guide-section { margin: 0 0 18px; }
-.guide-section h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; font-size: 16px; }
-.guide-section h3 svg { color: var(--c-accent); }
-.guide-section ul { display: grid; gap: 7px; margin: 0; padding: 14px 16px; list-style: none; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }
-.guide-section li { position: relative; padding-left: 12px; color: var(--c-body); font-size: 14px; line-height: 1.55; word-break: keep-all; }
-.guide-section li::before { content: ''; position: absolute; top: .68em; left: 0; width: 4px; height: 4px; border-radius: 50%; background: var(--c-mute); }
-.guide-section li b { color: var(--c-ink); font-weight: 700; }
+.guide-hero { display: flex; align-items: center; gap: 12px; margin: 0 0 14px; }
+.guide-hero img { flex: none; width: 52px; height: auto; }
+.guide-hero p { margin: 0; color: var(--c-ink); font-size: 17px; font-weight: 800; line-height: 1.4; }
+
+/* 홈 화면에 추가: 가장 먼저, 파란 테두리로 */
+.guide-home { margin: 0 0 22px; padding: 16px; border: 1.5px solid var(--c-accent); border-radius: 16px; background: var(--c-accent-soft); }
+.guide-home header { display: flex; align-items: center; gap: 8px; margin: 0; }
+.guide-home h2 { margin: 0; font-size: 17px; }
+.guide-home header em { padding: 2px 7px; color: #fff; font-size: 11.5px; font-style: normal; font-weight: 700; border-radius: 6px; background: var(--c-accent); }
+.guide-home > p { margin: 4px 0 12px; color: var(--c-body); font-size: 14px; }
+.guide-home .guide-home-warn { padding: 10px 12px; color: var(--c-ink); font-size: 13.5px; line-height: 1.5; word-break: keep-all; border-radius: 10px; background: var(--c-canvas); }
+.guide-os { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin: 0 0 12px; padding: 3px; border-radius: 10px; background: var(--c-canvas); }
+.guide-os button { height: 32px; color: var(--c-mute); font-size: 13.5px; font-weight: 700; border: 0; border-radius: 8px; background: none; }
+.guide-os button.active { color: #fff; background: var(--c-accent); }
+.guide-home ol { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.guide-home li { display: flex; align-items: flex-start; gap: 10px; color: var(--c-ink); font-size: 15px; font-weight: 600; line-height: 24px; }
+.guide-home li > b { flex: none; display: grid; place-items: center; width: 24px; height: 24px; color: var(--c-accent); font-size: 13px; border-radius: 50%; background: var(--c-canvas); }
+.guide-home li svg { display: inline-block; margin: 0 1px; vertical-align: -2px; color: var(--c-accent); }
+.guide-home li small { display: block; color: var(--c-mute); font-size: 12.5px; font-weight: 500; line-height: 1.5; }
+.guide-home li small svg { color: var(--c-mute); vertical-align: -1px; }
+.guide-home .primary { margin: 14px 0 0; }
+.guide-home.done { display: flex; align-items: center; gap: 12px; border-color: var(--c-line); background: var(--c-canvas); }
+.guide-home.done > svg { flex: none; color: var(--c-news); }
+.guide-home.done p { margin: 2px 0 0; color: var(--c-mute); font-size: 13px; }
+.guide-home.done h2 { font-size: 15px; }
+
+.guide-section { margin: 0 0 22px; }
+.guide-section h3 { margin: 0 0 8px; font-size: 16px; }
+.guide-basics { display: grid; margin: 0; padding: 4px 16px; list-style: none; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }
+.guide-basics li { display: flex; align-items: center; gap: 10px; min-height: 46px; font-size: 14px; border-bottom: 1px solid var(--c-line); }
+.guide-basics li:last-child { border-bottom: 0; }
+.guide-basics li svg { flex: none; color: var(--c-accent); }
+.guide-basics li b { flex: none; width: 30px; color: var(--c-ink); font-weight: 700; }
+.guide-basics li span { color: var(--c-body); word-break: keep-all; }
 .guide-faq { display: grid; gap: 8px; }
 .guide-faq details { border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }
 .guide-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px; color: var(--c-ink); font-size: 14.5px; font-weight: 700; list-style: none; cursor: pointer; }
@@ -105,12 +128,12 @@
 /* 둘러보기 다시 보기: 엄지 닿는 아래에 고정 */
 .guide-bottom {
   position: absolute; left: 0; right: 0; bottom: 0; z-index: 6;
-  display: grid; gap: 6px;
   padding: 14px 20px calc(10px + var(--bottom-inset));
   background: linear-gradient(to bottom, transparent, var(--c-page) 26%);
 }
 .guide-bottom .primary { margin: 0; }
-:root[data-theme="dark"] .guide-hero { background: var(--c-canvas); }
+:root[data-theme="dark"] .guide-home:not(.done) { background: var(--c-canvas); }
+:root[data-theme="dark"] :is(.guide-os, .guide-home li > b, .guide-home .guide-home-warn) { background: var(--c-raised); }
 
 /* 카카오 지도 150m 원 자리 (보이지 않는 칸, 둘러보기가 위치만 잰다) */
 .map-radius-probe { position: absolute; visibility: hidden; pointer-events: none; }
