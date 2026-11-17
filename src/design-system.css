@@ -2141,8 +2141,10 @@ button.title-progress-card:active { background: #f7f8fa; }
 .kakao-map-frame { position: absolute; inset: 0; }
 .kakao-overlay-slot { position: relative; width: 0; height: 0; }
 
-/* 서버 알림 내용 줄: 제목 아래, 게시물 제목이 길면 두 줄에서 자른다 */
+/* 서버 알림 내용 줄: 제목 아래 두 줄까지. 그 아래 게시물 제목은 한 줄 (길면 … ), 삭제된 게시물은 회색 */
 .alert .alert-body { display: -webkit-box; overflow: hidden; color: var(--c-body); font-size: 13px; line-height: 1.4; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.alert .alert-post { display: block; overflow: hidden; color: var(--c-ink); font-size: 13px; font-weight: 600; line-height: 1.4; white-space: nowrap; text-overflow: ellipsis; }
+.alert .alert-post.gone { color: var(--c-mute); font-weight: 500; }
 
 /* 게시물 불러오는 중 자리 표시 */
 .detail-loading { display: grid; gap: 12px; margin-top: 24px; }

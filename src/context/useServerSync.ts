@@ -222,7 +222,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const block = (userId: string) => blockUserApi(userId)
 
   // 알림 목록 · 설정
-  // 알림 내용 앞에 붙일 게시물 제목 (알림에는 제목이 없어서 게시물을 따로 읽는다). 삭제된 게시물은 gone
+  // 알림 아래 줄에 보일 게시물 제목 (알림에는 제목이 없어서 게시물을 따로 읽는다). 삭제된 게시물은 gone
   const postTitles = useRef(new Map<string, { title?: string; gone: boolean }>())
   const titleOf = async (postId: string): Promise<{ title?: string; gone: boolean }> => {
     const cached = postTitles.current.get(postId)
