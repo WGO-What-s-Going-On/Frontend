@@ -11,7 +11,6 @@ const steps: Record<Os, React.ReactNode[]> = {
     <>공유 <Share size={15}/> 누르기<small>Safari는 아래 <Ellipsis size={13}/> 안에 있어요</small></>,
     <>더 보기 <ChevronDown size={15}/> 누르기</>,
     <>홈 화면에 추가 <SquarePlus size={15}/></>,
-    <>다음 화면에서 추가</>,
   ],
   android: [
     <>오른쪽 위 메뉴 <EllipsisVertical size={15}/></>,
