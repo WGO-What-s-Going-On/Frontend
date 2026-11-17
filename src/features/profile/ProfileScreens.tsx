@@ -8,7 +8,7 @@ import { ConfirmDialog } from '../../components/ui/ConfirmDialog'
 import { EmptyState } from '../../components/ui/EmptyState'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { IconButton } from '../../components/ui/IconButton'
-import { Camera, ChevronRight, Loader2, Moon, Smartphone, Sun, Trash2 } from 'lucide-react'
+import { Camera, Loader2, Moon, Sun, Trash2 } from 'lucide-react'
 import { useApp, type NotificationSettings } from '../../context/AppContext'
 import { disableWebPush, enableWebPush, webPushState, type WebPushState } from '../../api/webPush'
 import { nicknameError, nicknameFormatError } from '../../domain/nickname'
@@ -41,10 +41,10 @@ function ThemeSwitch({ dark, onToggle }: { dark: boolean; onToggle: () => void }
 export function ProfileScreen() {
   const { user, boards, comments, go, themeMode, toggleTheme, logout, withdraw, live, serverLevel, profileImageUrl } = useApp()
   const [withdrawOpen, setWithdrawOpen] = useState(false)
-  // 브라우저로 쓰는 중이면 홈 화면에 추가 안내 (추가해야 알림을 받는다)
+  // 브라우저로 쓰는 중이면 이용 가이드 줄 오른쪽에 '홈 화면 추가하기' (추가해야 알림을 받는다)
   const suggestHome = useMemo(shouldSuggestHomeScreen, [])
   const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="30일 안에 다시 로그인하면 탈퇴가 취소돼요. 이후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { setWithdrawOpen(false); withdraw() }}/>
-  return <AppShell contentClassName="profile-screen" bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} photo={profileImageUrl ?? undefined} onOpen={() => go('profile-edit')}/>{suggestHome && <button className="my-home-hint" onClick={() => go('guide')}><Smartphone size={20}/><span><b>홈 화면에 추가해야 알림을 받아요</b><small>추가하는 방법 보기</small></span><ChevronRight size={18}/></button>}<h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>도움말</h4><button className="menu" onClick={() => go('guide')}>이용 가이드</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
+  return <AppShell contentClassName="profile-screen" bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} photo={profileImageUrl ?? undefined} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>도움말</h4><button className="menu" onClick={() => go('guide')}>이용 가이드{suggestHome && <span className="menu-hint">홈 화면 추가하기</span>}</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
 
 export function ActivityScreen() {

@@ -157,14 +157,5 @@
 :root[data-theme="dark"] .home-sheet .home-steps { background: var(--c-canvas); }
 @media (prefers-reduced-motion: reduce) { .home-sheet { animation: none; } }
 
-/* 마이: 휴대폰 브라우저로 쓰는 중이면 홈 화면에 추가 안내 */
-.my-home-hint {
-  display: flex; align-items: center; gap: 12px; width: 100%; margin: 12px 0 0; padding: 14px 14px 14px 16px;
-  color: var(--c-ink); text-align: left; border: 1.5px solid var(--c-accent); border-radius: 16px; background: var(--c-accent-soft);
-}
-.my-home-hint > svg:first-child { flex: none; color: var(--c-accent); }
-.my-home-hint span { display: grid; flex: 1; gap: 2px; }
-.my-home-hint b { font-size: 14.5px; }
-.my-home-hint small { color: var(--c-accent); font-size: 13px; font-weight: 600; }
-.my-home-hint > svg:last-child { flex: none; color: var(--c-mute); }
-:root[data-theme="dark"] .my-home-hint { background: var(--c-canvas); }
+/* 마이: 브라우저로 쓰는 중이면 이용 가이드 줄 오른쪽에 파란 글씨 */
+.menu .menu-hint { color: var(--c-accent); font-size: 13.5px; font-weight: 600; }
