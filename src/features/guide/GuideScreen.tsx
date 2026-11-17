@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { Bell, ChevronDown, CircleCheck, Ellipsis, EllipsisVertical, Map, MessageCircle, Plus, Share, SquarePlus } from 'lucide-react'
+import { useMemo } from 'react'
+import { Bell, ChevronDown, CircleCheck, Map, MessageCircle, Plus } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { BackHeader } from '../../components/ui/BackHeader'
@@ -9,6 +9,7 @@ import { useApp } from '../../context/AppContext'
 import mascotWave from '../../assets/mascot/wave.webp'
 import { requestTour } from './tourState'
 import { openedFrom, useInstallPrompt } from './homeScreen'
+import { HomeScreenSteps } from './HomeScreenSteps'
 
 // 마이 > 이용 가이드: 홈 화면에 추가(가장 먼저) · 핵심 사용법 한 줄씩 · 자주 묻는 것. 아래 버튼으로 지도 둘러보기를 다시 본다
 const basics: { icon: LucideIcon; title: string; text: string }[] = [
@@ -25,25 +26,10 @@ const faqs = [
   { q: '알림이 안 와요', a: '홈 화면에 추가한 앱에서 마이 → 알림 설정 → 이 기기 푸시 알림을 켜요.' },
 ]
 
-type Os = 'ios' | 'android'
-const steps: Record<Os, React.ReactNode[]> = {
-  ios: [
-    <>공유 <Share size={15}/> 누르기<small>Safari는 아래 <Ellipsis size={13}/> 안에 있어요</small></>,
-    <>홈 화면에 추가 <SquarePlus size={15}/></>,
-    <>오른쪽 위 추가</>,
-  ],
-  android: [
-    <>오른쪽 위 메뉴 <EllipsisVertical size={15}/></>,
-    <>홈 화면에 추가 (또는 앱 설치)</>,
-    <>설치</>,
-  ],
-}
-
-// 홈 화면에 추가: 이걸 해야 알림을 받는다. 지금 기기에 맞는 방법을 먼저 보여 주고, 이미 홈 화면 앱이면 짧게 확인만
+// 홈 화면에 추가: 이걸 해야 알림을 받는다. 이미 홈 화면 앱이면 짧게 확인만, 앱(Capacitor)에서는 숨긴다
 function HomeScreenCard() {
   const from = useMemo(openedFrom, [])
-  const { canInstall, install, justInstalled } = useInstallPrompt()
-  const [os, setOs] = useState<Os>(from.android ? 'android' : 'ios')
+  const { justInstalled } = useInstallPrompt()
   if (from.native) return null
   if (from.standalone || justInstalled) return <section className="guide-home done">
     <CircleCheck size={22}/><div><h2>홈 화면 앱으로 쓰는 중</h2><p>알림을 받을 수 있어요</p></div>
@@ -51,12 +37,7 @@ function HomeScreenCard() {
   return <section className="guide-home">
     <header><h2>홈 화면에 추가</h2><em>필수</em></header>
     <p>추가한 앱으로 열어야 알림을 받아요.</p>
-    {from.inApp && <p className="guide-home-warn">카카오톡 같은 앱 안에서는 추가할 수 없어요. 먼저 메뉴에서 <b>다른 브라우저로 열기</b>를 눌러요.</p>}
-    <div className="guide-os" role="tablist" aria-label="휴대폰 종류">
-      {(['ios', 'android'] as const).map((value) => <button key={value} role="tab" aria-selected={os === value} className={os === value ? 'active' : ''} onClick={() => setOs(value)}>{value === 'ios' ? 'iPhone' : 'Android'}</button>)}
-    </div>
-    <ol>{steps[os].map((step, index) => <li key={index}><b>{index + 1}</b><span>{step}</span></li>)}</ol>
-    {os === 'android' && canInstall && <Button className="primary" onClick={install}>지금 추가하기</Button>}
+    <HomeScreenSteps/>
   </section>
 }
 

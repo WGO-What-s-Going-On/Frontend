@@ -18,7 +18,7 @@ import type { MeResponse } from '../api/users'
 import { useServerSync, type RankingView } from './useServerSync'
 import type { LevelStats } from '../features/level/levels'
 import { setBaseStatusColor } from '../components/ui/statusTint'
-import { requestTour } from '../features/guide/tourState'
+import { requestHomeScreenHint, requestTour } from '../features/guide/tourState'
 import { myCommentReactions, myReactions } from '../types/domain'
 import type { Board, Category, Comment, CommentReaction, ImageFocus, Notice, PostReaction, Reach, Report, Screen, User } from '../types/domain'
 
@@ -298,8 +298,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       }
     }
     setUser((value) => ({ ...value, nickname, onboarded: true }))
-    // 가입을 막 마친 사람에게만 지도 둘러보기를 띄운다 (기존 사용자는 마이 > 이용 가이드에서)
+    // 가입을 막 마친 사람에게만 지도 둘러보기 → 홈 화면에 추가 안내를 띄운다 (기존 사용자는 마이 > 이용 가이드에서)
     requestTour()
+    requestHomeScreenHint()
     go('location-permission')
   }
   // 회원 탈퇴: 서버는 30일 복구 기간을 두고 refresh 세션만 지운다(이미 받은 access 토큰은 만료 전까지 유효) → 기기의 세션도 바로 지운다

@@ -13,3 +13,16 @@ export function pendingTour() {
 export function clearTour() {
   try { localStorage.removeItem(KEY) } catch { /* 없음 */ }
 }
+
+// 가입 직후 한 번: 홈 화면에 추가 안내 (둘러보기가 끝난 뒤 지도에서)
+const HOME_KEY = 'wgo-home-screen-hint'
+export function requestHomeScreenHint() {
+  try { localStorage.setItem(HOME_KEY, '1') } catch { /* 저장 못 하면 이번엔 건너뛴다 */ }
+}
+export function takeHomeScreenHint() {
+  try {
+    const pending = localStorage.getItem(HOME_KEY) !== null
+    localStorage.removeItem(HOME_KEY)
+    return pending
+  } catch { return false }
+}

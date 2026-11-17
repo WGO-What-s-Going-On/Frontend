@@ -42,3 +42,9 @@ export function openedFrom() {
     inApp: /KAKAOTALK|Instagram|FBAN|FBAV|NAVER\(inapp|Line\//i.test(ua),
   }
 }
+
+// 홈 화면에 추가를 안내할 기기: 휴대폰 브라우저로 연 경우만 (앱 · 이미 홈 화면 앱 · 컴퓨터는 제외)
+export function shouldSuggestHomeScreen() {
+  const from = openedFrom()
+  return !from.native && !from.standalone && (from.ios || from.android)
+}

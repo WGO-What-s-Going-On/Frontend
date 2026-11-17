@@ -13,7 +13,9 @@ import { KakaoMapView } from './KakaoMapView'
 import { KAKAO_MAP_KEY } from '../../api/config'
 import { ME, boardPosition, type Point } from './mapWorld'
 import { GuideTour } from '../guide/GuideTour'
-import { clearTour, pendingTour } from '../guide/tourState'
+import { clearTour, pendingTour, takeHomeScreenHint } from '../guide/tourState'
+import { HomeScreenSheet } from '../guide/HomeScreenSteps'
+import { shouldSuggestHomeScreen } from '../guide/homeScreen'
 
 // 지도 필터: 게시판과 같은 카테고리 순서 + HOT. 칸이 넘치면 옆으로 밀어 넘긴다
 type MapFilter = '전체' | Category | 'HOT'
@@ -72,15 +74,20 @@ export function MapScreen() {
     announce(nearby.filter((board) => { const point = boardPosition(board); return Math.hypot(point.x - viewCenter.x, point.y - viewCenter.y) <= 400 }).length)
   }
   // 지도 둘러보기: 가입 직후 · 이용 가이드에서 다시 보기를 눌렀을 때. 지도가 자리 잡을 틈을 두고 띄운다
+  // 가입 직후에는 둘러보기가 끝나면 홈 화면에 추가 안내 (휴대폰 브라우저로 연 경우만). 둘러보기 도중 나갔으면 다음에 지도에 올 때
   const [tour, setTour] = useState(false)
+  const [homeHint, setHomeHint] = useState(false)
+  const showHomeHint = () => { if (takeHomeScreenHint() && shouldSuggestHomeScreen()) setHomeHint(true) }
   useEffect(() => {
-    if (!pendingTour()) return
     // 띄우는 순간 기록을 지운다 (도중에 앱을 닫아도 다음에 또 뜨지 않게, 다시 보려면 이용 가이드에서)
-    const timer = window.setTimeout(() => { clearTour(); setSelection(undefined); setTour(true) }, 700)
+    const timer = window.setTimeout(() => {
+      if (pendingTour()) { clearTour(); setSelection(undefined); setTour(true) }
+      else showHomeHint()
+    }, 700)
     return () => window.clearTimeout(timer)
   }, [])
-  const endTour = () => setTour(false)
-  return <AppShell shellClassName="map-shell" contentClassName="map-screen" bottomContent={tour && <GuideTour onDone={endTour}/>}>
+  const endTour = () => { setTour(false); showHomeHint() }
+  return <AppShell shellClassName="map-shell" contentClassName="map-screen" bottomContent={<>{tour && <GuideTour onDone={endTour}/>}{homeHint && <HomeScreenSheet onClose={() => setHomeHint(false)}/>}</>}>
     {realMap
       ? <KakaoMapView appKey={KAKAO_MAP_KEY} boards={nearby} selectedId={selectedBoard?.id} focusId={selection?.ids[0]} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} onFail={() => { kakaoMapFailed = true; setRealMap(false) }} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>
       : <MapView boards={nearby} selectedId={selectedBoard?.id} focusId={selection?.ids[0]} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>}
