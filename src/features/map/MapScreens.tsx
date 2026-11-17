@@ -74,7 +74,7 @@ export function MapScreen() {
     announce(nearby.filter((board) => { const point = boardPosition(board); return Math.hypot(point.x - viewCenter.x, point.y - viewCenter.y) <= 400 }).length)
   }
   // 지도 둘러보기: 가입 직후 · 이용 가이드에서 다시 보기를 눌렀을 때. 지도가 자리 잡을 틈을 두고 띄운다
-  // 가입 직후에는 둘러보기가 끝나면 홈 화면에 추가 안내 (휴대폰 브라우저로 연 경우만). 둘러보기 도중 나갔으면 다음에 지도에 올 때
+  // 가입 직후에는 둘러보기가 끝나면 홈 화면에 추가 안내 (브라우저로 연 경우). 둘러보기 도중 나갔으면 다음에 지도에 올 때
   const [tour, setTour] = useState(false)
   const [homeHint, setHomeHint] = useState(false)
   const showHomeHint = () => { if (takeHomeScreenHint() && shouldSuggestHomeScreen()) setHomeHint(true) }

@@ -43,8 +43,8 @@ export function openedFrom() {
   }
 }
 
-// 홈 화면에 추가를 안내할 기기: 휴대폰 브라우저로 연 경우만 (앱 · 이미 홈 화면 앱 · 컴퓨터는 제외)
+// 홈 화면에 추가를 안내할 때: 브라우저로 연 경우 모두 (앱 · 이미 홈 화면 앱으로 연 경우만 제외)
 export function shouldSuggestHomeScreen() {
   const from = openedFrom()
-  return !from.native && !from.standalone && (from.ios || from.android)
+  return !from.native && !from.standalone
 }

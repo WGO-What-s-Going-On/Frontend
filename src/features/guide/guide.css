@@ -112,12 +112,6 @@
 
 .guide-section { margin: 0 0 22px; }
 .guide-section h3 { margin: 0 0 8px; font-size: 16px; }
-.guide-basics { display: grid; margin: 0; padding: 4px 16px; list-style: none; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }
-.guide-basics li { display: flex; align-items: center; gap: 10px; min-height: 46px; font-size: 14px; border-bottom: 1px solid var(--c-line); }
-.guide-basics li:last-child { border-bottom: 0; }
-.guide-basics li svg { flex: none; color: var(--c-accent); }
-.guide-basics li b { flex: none; width: 30px; color: var(--c-ink); font-weight: 700; }
-.guide-basics li span { color: var(--c-body); word-break: keep-all; }
 .guide-faq { display: grid; gap: 8px; }
 .guide-faq details { border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }
 .guide-faq summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px; color: var(--c-ink); font-size: 14.5px; font-weight: 700; list-style: none; cursor: pointer; }
