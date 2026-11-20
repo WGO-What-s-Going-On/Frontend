@@ -43,14 +43,8 @@ export function IncidentBottomSheet({ board, position, onClose, onOpen }: Incide
   const sheet = useRef<HTMLElement>(null)
   const before = useRef<number | null>(null)
 
-  // 크기 바꾸기: 바뀌기 전 높이를 재 두고, 바뀐 뒤 위 가장자리만 부드럽게 움직인다 (아래 '자세히 보기'는 제자리)
-  // 펼친 시트는 지금 글 높이에 맞추되 접혀 있던 높이보다 작아지지 않는다 (묶음이면 접힌 높이가 가장 긴 글 기준이라)
-  const [floor, setFloor] = useState<number | null>(null)
-  const resize = (next: boolean) => {
-    before.current = sheet.current?.offsetHeight ?? null
-    if (next) setFloor(before.current)
-    setExpanded(next)
-  }
+  // 크기 바꾸기: 바뀌기 전 높이를 재 두고, 바뀐 높이까지 위 가장자리가 부드럽게 오르내린다 (아래 '자세히 보기'는 제자리)
+  const resize = (next: boolean) => { before.current = sheet.current?.offsetHeight ?? null; setExpanded(next) }
   useLayoutEffect(() => {
     const el = body.current
     setScrolls(Boolean(expanded && el && el.scrollHeight > el.clientHeight + 1))
@@ -58,10 +52,11 @@ export function IncidentBottomSheet({ board, position, onClose, onOpen }: Incide
     before.current = null
     const box = sheet.current
     if (from === null || !box || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const delta = box.offsetHeight - from
-    const radius = 'round 26px 26px 18px 18px'
-    if (delta > 0) box.animate([{ clipPath: `inset(${delta}px 0 0 0 ${radius})` }, { clipPath: `inset(0 0 0 0 ${radius})` }], { duration: 280, easing: 'cubic-bezier(.2, .8, .2, 1)' })
-    else if (delta < 0) box.animate([{ transform: `translateY(${-Math.min(-delta, 40) / 2}px)`, opacity: 0.9 }, { transform: 'none', opacity: 1 }], { duration: 220, easing: 'ease-out' })
+    const to = box.offsetHeight
+    if (from === to) return
+    box.style.overflow = 'hidden'
+    box.animate([{ height: `${from}px` }, { height: `${to}px` }], { duration: 300, easing: 'cubic-bezier(.2, .8, .2, 1)' })
+      .finished.catch(() => undefined).then(() => { box.style.overflow = '' })
   }, [expanded, board.id])
 
   const turnTo = (step: 1 | -1, offset = 0) => {
@@ -109,15 +104,15 @@ export function IncidentBottomSheet({ board, position, onClose, onOpen }: Incide
     else if (!expanded && d.dy > CLOSE) { setClosing(true); window.setTimeout(onClose, window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 240) }
   }
 
-  // 세로로 끄는 동안 시트가 손가락을 따라온다 (위로는 살짝만, 아래로는 그대로)
-  const lift = drag?.axis === 'y' ? (drag.dy < 0 ? Math.max(drag.dy * 0.35, -60) : drag.dy) : 0
+  // 세로로 끄는 동안 시트가 손가락을 따라온다 (위로는 절반쯤, 아래로는 그대로)
+  const lift = drag?.axis === 'y' ? (drag.dy < 0 ? Math.max(drag.dy * 0.5, -140) : drag.dy) : 0
   const slideX = drag?.axis === 'x' ? drag.dx : 0
   const toggle = () => resize(!expanded)
 
   // 닫힐 때는 아래로 빠져나간 뒤 닫는다
   const shift = closing ? 'translateY(calc(100% + 140px))' : lift ? `translateY(${lift}px)` : undefined
   return <aside ref={sheet} className={`map-bottom-sheet ${position ? 'has-pager' : ''} ${expanded ? 'expanded' : ''} ${drag ? 'dragging' : ''} ${turn ? 'turning' : ''}`} aria-label={`${board.title} 요약`}
-    style={{ transform: shift, minHeight: expanded && floor ? floor : undefined }}
+    style={shift ? { transform: shift } : undefined}
     onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
     onClickCapture={(event) => { if (moved.current) { moved.current = false; event.stopPropagation(); event.preventDefault() } }}>
     <button className="sheet-handle" onClick={toggle} aria-label={expanded ? '요약 작게 보기' : '요약 크게 보기'} aria-expanded={expanded}><span/></button>

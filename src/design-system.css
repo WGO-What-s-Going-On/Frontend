@@ -2233,13 +2233,13 @@ button.title-progress-card:active { background: #f7f8fa; }
 @keyframes sheet-leave-prev { from { transform: translateX(var(--from, 0px)); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
 @keyframes sheet-enter-next { from { transform: translateX(calc(var(--from, 0px) + 100%)); opacity: .4; } to { transform: none; opacity: 1; } }
 @keyframes sheet-enter-prev { from { transform: translateX(calc(var(--from, 0px) - 100%)); opacity: .4; } to { transform: none; opacity: 1; } }
-/* 펼친 시트: 지도 위 제목 줄 아래까지 커지고, 본문을 전부 보여 준다. 넘치면 글 부분만 스크롤 */
-.map-bottom-sheet.expanded { max-height: calc(100% - 108px - var(--nav-shift) - var(--top-inset) - 64px); }
+/* 펼친 시트: 글 길이와 상관없이 화면 위쪽(상태바 바로 아래)까지 올라온다. 본문이 넘치면 글 부분만 스크롤, '자세히 보기'는 아래 그대로 */
+.map-bottom-sheet.expanded { height: calc(100% - 108px - var(--nav-shift) - var(--top-inset) - 8px); }
 .map-bottom-sheet.expanded .sheet-body { flex: 1 1 auto; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
 .map-bottom-sheet.expanded .sheet-body.scrolls { touch-action: pan-y; }
 .map-bottom-sheet.expanded p { display: block; overflow: visible; -webkit-line-clamp: unset; white-space: pre-wrap; word-break: keep-all; font-size: 14px; line-height: 1.6; }
 .map-bottom-sheet .board-image-placeholder.sheet-image { transition: height .28s cubic-bezier(.2, .8, .2, 1); }
-.map-bottom-sheet.expanded .board-image-placeholder.sheet-image { height: 200px; }
+.map-bottom-sheet.expanded .board-image-placeholder.sheet-image { height: 240px; }
 .map-bottom-sheet.expanded > .sheet-detail { margin-top: 12px; }
 /* 펼치면 묶음의 다른 글 높이에 맞추지 않고 지금 글만큼만 (넘기는 동안 나가는 글은 겹쳐서 잠깐 보인다) */
 .map-bottom-sheet.expanded .sheet-slide:not([data-active="true"]):not([data-leave]) { display: none; }
