@@ -141,7 +141,7 @@ export function toComment(comment: CommentResponse): Comment {
   const counts = comment.reactionCounts ?? { HELPFUL: 0, AGREE: 0, DIFFERENT: 0 }
   return {
     id: comment.commentId, boardId: comment.postId, authorId: String(comment.authorId), authorName: comment.authorNickname ?? '알 수 없음', body: comment.content,
-    imageUrl: stableMediaUrl(comment.media[0]), createdAt: timeAgo(comment.createdAt), verified: comment.verified, parentId: comment.parentCommentId ?? undefined,
+    imageUrl: stableMediaUrl(comment.media[0]), createdAt: timeAgo(comment.createdAt), createdAtMs: Date.parse(comment.createdAt) || undefined, verified: comment.verified, parentId: comment.parentCommentId ?? undefined,
     reactions: { '도움돼요': counts.HELPFUL, '맞아요': counts.AGREE, '정보가 달라요': counts.DIFFERENT },
     myReactions: comment.myReaction ? [commentReactionFromCode(comment.myReaction)] : [],
     edited: Boolean(comment.updatedAt),

@@ -287,6 +287,8 @@ export function BoardDetailScreen() {
   const startEdit = (comment: Comment) => { setReplyTo(null); setEditing(comment); setBody(comment.body); requestAnimationFrame(() => commentInputRef.current?.focus()) }
   const cancelCompose = () => { setReplyTo(null); if (editing) { setEditing(null); setBody('') } }
   const rootComments = boardComments.filter((comment) => !comment.parentId)
+  // 답글은 오래된 것부터 아래로 쌓는다 (답글에 단 답글도 같은 줄의 맨 아래로)
+  const repliesOf = (id: string) => boardComments.filter((reply) => reply.parentId === id).sort((a, b) => (a.createdAtMs ?? 0) - (b.createdAtMs ?? 0))
   const shownComments = rootComments.slice(0, visibleComments)
   const remainingComments = rootComments.length - shownComments.length
   // 150m 밖이면 같은 상세 화면을 읽기 전용으로 보여준다 (MAP-F05)
@@ -314,7 +316,7 @@ export function BoardDetailScreen() {
     </article>
     {boardPhotoOpen && board.imageUrl && <PhotoViewer src={board.imageUrl} alt="현장 사진" origin={photoOrigin} onClose={() => setBoardPhotoOpen(false)}/>}
     <CommentVoteSection board={board} canChoose={canParticipate}/>
-    <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={boardComments.filter((reply) => reply.parentId === comment.id)} onReply={canParticipate ? startComment : () => undefined} onEdit={startEdit} replyTargetId={replyTo?.id} readOnly={!canParticipate}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong>{canParticipate && <p>가장 먼저 상황을 알려주세요</p>}</div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>접기 <ChevronUp size={17}/></button>}</section>
+    <section className="comments-section"><div className="comments-heading"><h3>댓글</h3><span>{boardComments.length}</span></div>{rootComments.length ? shownComments.map((comment) => <CommentItem key={comment.id} comment={comment} replies={repliesOf(comment.id)} onReply={canParticipate ? startComment : () => undefined} onEdit={startEdit} replyTargetId={replyTo?.id} readOnly={!canParticipate}/>) : <div className="comments-empty"><strong>아직 댓글이 없습니다</strong>{canParticipate && <p>가장 먼저 상황을 알려주세요</p>}</div>}{remainingComments > 0 && <button className="comments-more" onClick={() => setVisibleComments((count) => count + 3)}>댓글 {remainingComments}개 더 보기 <ChevronDown size={17}/></button>}{rootComments.length > 3 && remainingComments === 0 && <button className="comments-more" onClick={() => setVisibleComments(3)}>접기 <ChevronUp size={17}/></button>}</section>
   </AppShell>
 }
 

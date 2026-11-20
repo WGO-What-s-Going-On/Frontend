@@ -41,7 +41,7 @@ export function ProfileScreen() {
   const { user, boards, comments, go, themeMode, toggleTheme, logout, withdraw, live, serverLevel, profileImageUrl } = useApp()
   const [withdrawOpen, setWithdrawOpen] = useState(false)
   const withdrawDialog = withdrawOpen && <ConfirmDialog title="정말 탈퇴할까요?" description="30일 안에 다시 로그인하면 탈퇴가 취소돼요. 이후에는 계정을 복구할 수 없어요." confirmLabel="탈퇴" danger onClose={() => setWithdrawOpen(false)} onConfirm={() => { setWithdrawOpen(false); withdraw() }}/>
-  return <AppShell contentClassName="profile-screen" bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} photo={profileImageUrl ?? undefined} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>도움말</h4><button className="menu" onClick={() => go('guide')}>이용 가이드</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
+  return <AppShell contentClassName="profile-screen" bottomContent={withdrawDialog}><header><h1>마이페이지</h1><ThemeSwitch dark={themeMode === 'dark'} onToggle={toggleTheme}/></header><TitleProgressCard stats={live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)} name={user.nickname} photo={profileImageUrl ?? undefined} onOpen={() => go('profile-edit')}/><h4>나의 활동</h4><button className="menu" onClick={() => go('activity')}>최근 활동내역 보기</button><h4>도움말</h4><button className="menu" onClick={() => go('guide')}>이용 가이드</button><h4>설정</h4><div className="menu-group account-actions"><button onClick={() => go('notification-settings')}>알림 설정</button><button onClick={() => go('blocked')}>차단한 사용자</button><button onClick={logout}>로그아웃</button><button className="account-withdraw" onClick={() => setWithdrawOpen(true)}>회원 탈퇴</button></div></AppShell>
 }
 
 export function ActivityScreen() {
@@ -148,21 +148,24 @@ function DevicePushSetting() {
   const { showToast, live } = useApp()
   const [state, setState] = useState<WebPushState>(webPushState)
   const [busy, setBusy] = useState(false)
+  // 누르자마자 스위치가 움직이게: 권한 확인 · 기기 등록이 끝날 때까지 누른 쪽으로 보여 두고, 실패하면 되돌린다
+  const [pending, setPending] = useState<boolean | null>(null)
   if (state === 'unsupported' || !live) return null
   const toggle = async (on: boolean) => {
     setBusy(true)
+    setPending(on)
     try {
       if (on) {
         const next = await enableWebPush()
         setState(next)
         if (next === 'on') showToast('이 기기 푸시 알림을 켰어요.')
       } else { await disableWebPush(); setState('off') }
-    } catch { showToast('푸시 알림을 켜지 못했어요. 다시 시도해 주세요.'); setState(webPushState()) } finally { setBusy(false) }
+    } catch { showToast('푸시 알림을 켜지 못했어요. 다시 시도해 주세요.'); setState(webPushState()) } finally { setBusy(false); setPending(null) }
   }
   return <div className="menu-group setting-list device-push">
     <label className="setting-toggle">
       <span><strong>이 기기 푸시 알림</strong><small>{pushHelp[state]}</small></span>
-      <input type="checkbox" role="switch" checked={state === 'on'} disabled={busy || state === 'denied' || state === 'needs-install'} onChange={(event) => toggle(event.target.checked)}/>
+      <input type="checkbox" role="switch" checked={pending ?? state === 'on'} aria-busy={busy} disabled={state === 'denied' || state === 'needs-install'} onChange={(event) => { if (!busy) toggle(event.target.checked) }}/>
     </label>
   </div>
 }
@@ -178,3 +181,38 @@ export function NotificationSettingsScreen() {
   </AppShell>
 }
 
+
+// 차단한 사용자: 차단한 순서(최근 먼저)로 닉네임 · 차단한 날, 오른쪽에 차단 해제. 풀면 그 사람 글 · 댓글이 다시 보인다
+const blockedDay = (value?: string) => {
+  const date = value ? new Date(value) : null
+  return date && !Number.isNaN(date.getTime()) ? `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')} 차단` : ''
+}
+
+export function BlockedUsersScreen() {
+  const { go, loadBlockList, unblockUser, showToast } = useApp()
+  const [items, setItems] = useState<{ userId: string; nickname: string; blockedAt?: string }[] | null>(null)
+  const [failed, setFailed] = useState(false)
+  const [busy, setBusy] = useState<string | null>(null)
+  const load = () => {
+    setFailed(false)
+    loadBlockList().then(setItems).catch(() => { setItems(null); setFailed(true) })
+  }
+  useEffect(load, [])
+  const release = (userId: string, nickname: string) => {
+    setBusy(userId)
+    unblockUser(userId)
+      .then(() => { setItems((list) => list?.filter((item) => item.userId !== userId) ?? null); showToast(`${nickname} 님 차단을 풀었어요.`) })
+      .catch(() => showToast('차단을 풀지 못했어요. 다시 시도해 주세요.'))
+      .finally(() => setBusy(null))
+  }
+  return <AppShell contentClassName="blocked-screen"><BackHeader title="차단한 사용자" onBack={() => go('my')}/>
+    {failed ? <EmptyState title="목록을 불러오지 못했어요" action="다시 시도" onAction={load}/>
+      : !items ? <p className="blocked-loading" aria-live="polite"><Loader2 size={18} className="spin"/>불러오는 중</p>
+      : !items.length ? <EmptyState title="차단한 사용자가 없어요"/>
+      : <ul className="blocked-list">{items.map((item) => <li key={item.userId}>
+        <Avatar name={item.nickname} size={40}/>
+        <span><strong>{item.nickname}</strong>{blockedDay(item.blockedAt) && <small>{blockedDay(item.blockedAt)}</small>}</span>
+        <button className="blocked-release" disabled={busy === item.userId} onClick={() => release(item.userId, item.nickname)}>{busy === item.userId ? '해제 중' : '차단 해제'}</button>
+      </li>)}</ul>}
+  </AppShell>
+}

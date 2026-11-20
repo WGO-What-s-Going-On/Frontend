@@ -34,6 +34,6 @@ export const getMyBadges = () => api<{ badges: { badgeId: string; code: string; 
 export const termLabel: Record<string, string> = { SERVICE: '서비스 이용약관', PRIVACY_COLLECTION_USE: '개인정보 수집 · 이용 동의', LOCATION: '위치정보 이용약관' }
 
 // 차단: 차단한 사용자의 글 · 댓글은 프론트에서 숨긴다
-export const getBlocks = (cursor?: string) => api<{ items: { userId: string; nickname: string; createdAt: string }[]; nextCursor: string | null }>('GET', '/api/v1/users/me/blocks', { query: { cursor } })
+export const getBlocks = (cursor?: string) => api<{ items: { userId: string; nickname: string | null; createdAt?: string; blockedAt?: string }[]; nextCursor: string | null }>('GET', '/api/v1/users/me/blocks', { query: { cursor } })
 export const blockUser = (userId: string) => api<void>('PUT', '/api/v1/users/me/blocks', { body: { userId } })
 export const unblockUser = (userId: string) => api<void>('DELETE', '/api/v1/users/me/blocks', { body: { userId } })

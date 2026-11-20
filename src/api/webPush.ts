@@ -43,12 +43,19 @@ export function webPushState(): WebPushState {
   return Notification.permission === 'granted' && !turnedOff() ? 'on' : 'off'
 }
 
+// 서비스 워커(알림 · 사진 캐시)는 푸시를 켜지 않아도 앱을 열면 등록한다. 같은 주소라 푸시를 켤 때 같은 워커를 그대로 쓴다
+const workerUrl = () => `/firebase-messaging-sw.js?${new URLSearchParams(config)}`
+export function registerAppWorker() {
+  if (Capacitor.isNativePlatform() || !configured || typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return
+  navigator.serviceWorker.register(workerUrl(), { scope: '/' }).catch(() => undefined)
+}
+
 // Firebase는 웹 푸시를 쓸 때만 불러온다 (첫 화면 용량을 늘리지 않게)
 let messaging: Promise<{ messaging: Messaging; registration: ServiceWorkerRegistration }> | null = null
 function loadMessaging() {
   messaging ??= (async () => {
     const [{ initializeApp }, { getMessaging }] = await Promise.all([import('firebase/app'), import('firebase/messaging')])
-    const registration = await navigator.serviceWorker.register(`/firebase-messaging-sw.js?${new URLSearchParams(config)}`, { scope: '/' })
+    const registration = await navigator.serviceWorker.register(workerUrl(), { scope: '/' })
     return { messaging: getMessaging(initializeApp(config)), registration }
   })().catch((error) => { messaging = null; throw error })
   return messaging

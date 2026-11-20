@@ -8,9 +8,52 @@ const targetUrl = (notification) => {
   return data.targetId && data.actionPath !== '/notifications' ? `/boards/${encodeURIComponent(data.targetId)}` : '/alerts'
 }
 
-// 이 워커는 알림만 다룬다(fetch 처리 없음). 새 버전이 오면 기다리지 않고 바로 바꾼다
+// 이 워커는 알림과 사진 캐시만 다룬다 (화면 · 스크립트 요청은 건드리지 않는다). 새 버전이 오면 기다리지 않고 바로 바꾼다
 self.addEventListener('install', () => self.skipWaiting())
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()))
+
+// 사진 캐시: 게시물 · 프로필 사진은 볼 때마다 서명이 바뀐 새 주소(몇 분 유효)로 와서 브라우저가 같은 사진으로 알아보지 못하고,
+// 프로필 사진은 저장 금지(no-store)라 매번 처음부터 받았다. 사진 파일 경로는 올릴 때마다 새로 생기고 바뀌지 않으므로
+// 서명(?X-Goog-...)을 뗀 경로로 한 번 받은 사진을 기기에 두고 바로 꺼내 쓴다. 만료된 주소여도 받아 둔 사진이면 보인다.
+// 응답을 읽을 수 있을 때(저장소 CORS 허용 주소)만, 정상 이미지일 때만 저장한다. 오래된 것부터 지워 PHOTO_MAX장까지
+const PHOTO_CACHE = 'wgo-photos-v1'
+const PHOTO_MAX = 400
+const isSignedPhoto = (url) => (url.hostname === 'storage.googleapis.com' || url.hostname.endsWith('.storage.googleapis.com')) && url.searchParams.has('X-Goog-Signature')
+
+async function trimPhotos(cache) {
+  const keys = await cache.keys()
+  for (const key of keys.slice(0, Math.max(0, keys.length - PHOTO_MAX))) await cache.delete(key)
+}
+
+async function photo(request, key) {
+  let cache = null
+  try {
+    cache = await caches.open(PHOTO_CACHE)
+    const hit = await cache.match(key, { ignoreVary: true })
+    if (hit) return hit
+  } catch { /* 캐시를 못 쓰면 받기만 */ }
+  let response
+  try {
+    response = await fetch(request.url, { mode: 'cors', credentials: 'omit' })
+  } catch {
+    // 응답을 읽을 수 없는 주소(CORS 미허용): 예전처럼 그냥 받는다
+    return fetch(request)
+  }
+  if (cache && response.ok && (response.headers.get('content-type') || '').startsWith('image/')) {
+    const saved = response.clone()
+    cache.put(key, saved).then(() => trimPhotos(cache)).catch(() => {})
+  }
+  return response
+}
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event
+  if (request.method !== 'GET') return
+  let url
+  try { url = new URL(request.url) } catch { return }
+  if (!isSignedPhoto(url)) return
+  event.respondWith(photo(request, url.origin + url.pathname))
+})
 
 // 갈 곳 저장: iOS 홈 화면 앱은 백그라운드 앱을 앞으로 가져오는 focus()가 실패하거나(그러면 아래 메시지도 못 보냄),
 // 꺼진 앱을 주소 대신 첫 화면으로 여는 경우가 있다. 앱이 다시 보일 때 여기서 꺼내 간다 (src/api/notificationOpen.ts)

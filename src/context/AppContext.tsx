@@ -133,6 +133,9 @@ interface AppContextValue {
   deleteNotice: (id: string) => void
   reportTarget: (targetType: Report['targetType'], targetId: string, reason: string) => void
   blockUser: (userId: string) => void
+  // 차단한 사용자 화면: 목록(닉네임 · 차단한 날)과 차단 풀기. 풀면 그 사람 글 · 댓글이 다시 보인다
+  loadBlockList: () => Promise<{ userId: string; nickname: string; blockedAt?: string }[]>
+  unblockUser: (userId: string) => Promise<void>
   toggleBoardNotifications: (boardId: string) => void
   updateNotificationSettings: (settings: NotificationSettings) => void
   resolveReport: (id: string, hideTarget: boolean) => void
@@ -468,6 +471,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const deleteNotice = (id: string) => setNotices((items) => items.filter((notice) => notice.id !== id))
   const reportTarget = (targetType: Report['targetType'], targetId: string, reason: string) => { setReports((items) => [...items, { id: `report-${Date.now()}`, targetType, targetId, reason, status: '접수' }]); showToast('신고가 접수되었습니다.') }
   const blockUser = (userId: string) => { setBlockedUsers((items) => [...new Set([...items, userId])]); showToast('사용자를 차단했습니다.') }
+  // 목업: 차단한 사람 이름은 그 사람이 쓴 글 · 댓글에서 찾는다
+  const loadBlockList = async () => blockedUsers.map((userId) => ({ userId, nickname: comments.find((comment) => comment.authorId === userId)?.authorName ?? boards.find((board) => board.authorId === userId)?.authorName ?? '알 수 없음' }))
+  const unblockUser = async (userId: string) => { setBlockedUsers((items) => items.filter((id) => id !== userId)) }
   const toggleBoardNotifications = (boardId: string) => setAlertBoardIds((items) => items.includes(boardId) ? items.filter((id) => id !== boardId) : [...items, boardId])
   const updateNotificationSettings = (settings: NotificationSettings) => setNotificationSettings(settings)
   const resolveReport = (id: string, hideTarget: boolean) => {
@@ -523,6 +529,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         .catch((error) => showToast(error instanceof ApiError && error.status === 503 ? '지금은 신고를 받을 수 없어요. 잠시 후 다시 시도해 주세요.' : '신고하지 못했어요.'))
     },
     blockUser: (userId) => { server.block(userId).then(() => { setServerBlocked((items) => [...new Set([...items, userId])]); showToast('사용자를 차단했습니다.') }).catch(fail('차단하지 못했어요.')) },
+    loadBlockList: server.loadBlockList,
+    unblockUser: async (userId) => { await server.unblock(userId); setServerBlocked((items) => items.filter((id) => id !== userId)) },
     toggleBoardNotifications: (boardId) => {
       const muted = mutedBoardIds.includes(boardId)
       setMutedBoardIds((items) => muted ? items.filter((id) => id !== boardId) : [...items, boardId])
@@ -551,6 +559,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
   }, [server.live])
   useEffect(() => { if (server.live && screen === 'alerts') server.loadNotices().catch(() => undefined) }, [screen])
+  // 칭호 · 진행도: 마이 · 활동 화면을 열 때마다 새로 받는다 (글 · 댓글 · 반응 뒤 바뀐 값이 앱을 다시 켜야 보이던 문제)
+  useEffect(() => { if (server.live && (screen === 'my' || screen === 'level')) { server.loadLevel().catch(() => undefined); server.loadBadges().catch(() => undefined) } }, [screen])
   // 앱 푸시 알림: 로그인 · 온보딩을 마치고 지도 · 게시판에 처음 들어왔을 때 권한을 묻고 이 기기 토큰을 등록한다 (앱에서만)
   const pushStarted = useRef(false)
   const latestServer = useRef(server)
@@ -612,7 +622,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     refreshBoard: (boardId) => server.live ? server.loadBoard(boardId).then(() => undefined) : Promise.resolve(),
     refreshNotices: () => server.live ? Promise.all([server.loadNotices(), server.loadUnread()]).then(() => undefined) : Promise.resolve(),
     createBoard, keepLocationFresh: server.keepLocationFresh, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
-    updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
+    updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, loadBlockList, unblockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
     live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,
   }), [screen, user, boards, comments, notices, reports, missingBoardIds, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])

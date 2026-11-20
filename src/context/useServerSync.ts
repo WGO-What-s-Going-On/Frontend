@@ -6,7 +6,7 @@ import type { Point } from '../features/map/mapWorld'
 import * as posts from '../api/posts'
 import * as notifications from '../api/notifications'
 import { createRealtime, requestRealtimeTicket, type Realtime, type RealtimeEvent } from '../api/realtime'
-import { blockUser as blockUserApi, getBlocks, getMyBadges } from '../api/users'
+import { blockUser as blockUserApi, getBlocks, getMyBadges, unblockUser as unblockUserApi } from '../api/users'
 import { uploadImage } from '../api/media'
 import { ApiError } from '../api/client'
 import { timeAgo } from '../domain/time'
@@ -212,14 +212,21 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const report = (target: { postId: string; commentId?: string }, reason: string) => posts.reportTarget(target, reason)
   const editComment = async (postId: string, commentId: string, body: string) => { await posts.editComment(postId, commentId, body); await loadBoard(postId) }
   // 차단 목록 (프론트가 이 사람들의 글 · 댓글을 숨긴다). 여러 페이지면 끝까지
-  const loadBlocks = async () => {
-    const ids: string[] = []
+  // 차단한 사용자 화면은 닉네임 · 차단한 날까지 쓴다
+  const loadBlockList = async () => {
+    const items: { userId: string; nickname: string; blockedAt?: string }[] = []
     let cursor: string | undefined
-    do { const page = await getBlocks(cursor); ids.push(...page.items.map((item) => item.userId)); cursor = page.nextCursor ?? undefined } while (cursor)
-    return ids
+    do {
+      const page = await getBlocks(cursor)
+      items.push(...page.items.map((item) => ({ userId: item.userId, nickname: item.nickname || '알 수 없음', blockedAt: item.blockedAt ?? item.createdAt })))
+      cursor = page.nextCursor ?? undefined
+    } while (cursor)
+    return items
   }
+  const loadBlocks = async () => (await loadBlockList()).map((item) => item.userId)
   const getBoardAlert = (postId: string) => notifications.getBoardNotification(postId).then((result) => result.enabled)
   const block = (userId: string) => blockUserApi(userId)
+  const unblock = (userId: string) => unblockUserApi(userId)
 
   // 알림 목록 · 설정
   // 알림 아래 줄에 보일 게시물 제목 (알림에는 제목이 없어서 게시물을 따로 읽는다). 삭제된 게시물은 gone
@@ -327,7 +334,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   return {
     live, boardsLoading, boardsError, level, badges, unreadCount, loadUnread,
     locate, keepLocationFresh, loadNearby, searchArea, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
-    editPost, setClosed, deletePost, report, editComment, loadBlocks, getBoardAlert, block, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
+    editPost, setClosed, deletePost, report, editComment, loadBlocks, loadBlockList, getBoardAlert, block, unblock, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
     loadLevel, loadBadges, loadActivity, loadRanking, watchBoard, stopRealtime,
   }
 }

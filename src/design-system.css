@@ -1842,6 +1842,9 @@ button.title-progress-card:active { background: #f7f8fa; }
 }
 .ux-board-header { display: flex; align-items: center; }
 .map-top-overlay header { display: flex; align-items: center; }
+/* 지도 좌상단: 마스코트 로고 + WGO */
+.map-top-overlay h1.map-brand { display: flex; align-items: center; gap: 6px; }
+.map-brand img { flex: none; width: 34px; height: 34px; margin: -2px 0 -2px -2px; filter: drop-shadow(0 1px 2px rgba(17, 19, 24, .18)); }
 .map-screen .map-top-overlay .notice-bell { pointer-events: auto; }
 
 /* ---------- 피드: 카드 테두리 없이 구분선으로 이어 보는 목록 ---------- */
@@ -2211,6 +2214,43 @@ button.title-progress-card:active { background: #f7f8fa; }
 .sheet-slide { grid-area: 1 / 1; min-width: 0; }
 .sheet-slide:not([data-active="true"]) { visibility: hidden; }
 
+/* 요약 시트 손가락 조작 (IncidentBottomSheet)
+   - 시트 전체가 손가락을 받는다 (지도 끌기 · 페이지 스크롤로 새지 않게)
+   - 올라오는 애니메이션은 끝나면 손을 뗀다: 끄는 동안의 위치(transform)를 덮지 않게 */
+.map-bottom-sheet { display: flex; flex-direction: column; touch-action: none; animation-fill-mode: backwards; transition: transform .24s cubic-bezier(.2, .8, .2, 1); }
+.map-bottom-sheet.dragging { transition: none; }
+.map-bottom-sheet > .sheet-detail { flex: none; }
+/* 글 부분: 누르면 상세. 넘기는 글이 시트 양끝까지 밀려 나가도록 시트 안쪽 여백만큼 넓힌다 */
+.map-bottom-sheet .sheet-body { position: relative; min-height: 0; margin: 0 -16px; padding: 0 16px; overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.sheet-slides { transition: transform .22s cubic-bezier(.2, .8, .2, 1); will-change: transform; }
+.map-bottom-sheet:is(.dragging, .turning) .sheet-slides { transition: none; }
+/* 넘기기: 나가는 글은 손을 뗀 자리(--from)에서 이어 밀려 나가고, 다음 글이 반대쪽에서 들어온다 */
+.sheet-slide[data-leave] { visibility: visible; pointer-events: none; animation: sheet-leave-next .3s cubic-bezier(.2, .8, .2, 1) forwards; }
+.sheet-slide[data-leave="prev"] { animation-name: sheet-leave-prev; }
+.sheet-slide[data-enter="next"] { animation: sheet-enter-next .3s cubic-bezier(.2, .8, .2, 1); }
+.sheet-slide[data-enter="prev"] { animation: sheet-enter-prev .3s cubic-bezier(.2, .8, .2, 1); }
+@keyframes sheet-leave-next { from { transform: translateX(var(--from, 0px)); opacity: 1; } to { transform: translateX(-100%); opacity: 0; } }
+@keyframes sheet-leave-prev { from { transform: translateX(var(--from, 0px)); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+@keyframes sheet-enter-next { from { transform: translateX(calc(var(--from, 0px) + 100%)); opacity: .4; } to { transform: none; opacity: 1; } }
+@keyframes sheet-enter-prev { from { transform: translateX(calc(var(--from, 0px) - 100%)); opacity: .4; } to { transform: none; opacity: 1; } }
+/* 펼친 시트: 지도 위 제목 줄 아래까지 커지고, 본문을 전부 보여 준다. 넘치면 글 부분만 스크롤 */
+.map-bottom-sheet.expanded { max-height: calc(100% - 108px - var(--nav-shift) - var(--top-inset) - 64px); }
+.map-bottom-sheet.expanded .sheet-body { flex: 1 1 auto; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; }
+.map-bottom-sheet.expanded .sheet-body.scrolls { touch-action: pan-y; }
+.map-bottom-sheet.expanded p { display: block; overflow: visible; -webkit-line-clamp: unset; white-space: pre-wrap; word-break: keep-all; font-size: 14px; line-height: 1.6; }
+.map-bottom-sheet .board-image-placeholder.sheet-image { transition: height .28s cubic-bezier(.2, .8, .2, 1); }
+.map-bottom-sheet.expanded .board-image-placeholder.sheet-image { height: 200px; }
+.map-bottom-sheet.expanded > .sheet-detail { margin-top: 12px; }
+/* 펼치면 묶음의 다른 글 높이에 맞추지 않고 지금 글만큼만 (넘기는 동안 나가는 글은 겹쳐서 잠깐 보인다) */
+.map-bottom-sheet.expanded .sheet-slide:not([data-active="true"]):not([data-leave]) { display: none; }
+.map-bottom-sheet.expanded .sheet-slide[data-leave] { position: absolute; inset: 0 0 auto; }
+.map-bottom-sheet.expanded .sheet-slides { position: relative; }
+@media (prefers-reduced-motion: reduce) {
+  .map-bottom-sheet, .sheet-slides, .map-bottom-sheet .board-image-placeholder.sheet-image { transition: none; }
+  .sheet-slide[data-leave], .sheet-slide[data-enter] { animation: none; }
+  .sheet-slide[data-leave] { visibility: hidden; }
+}
+
 /* 서버 사진 받는 중: 회색 칸에 옅은 빛이 지나가고, 다 받으면 사진이 부드럽게 나타난다. 못 받으면 작은 아이콘 (PhotoImg) */
 .board-image-placeholder.board-photo,
 .comment-photo { position: relative; }
@@ -2311,3 +2351,16 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comments-section .comment-react-button svg { width: 16px; height: 16px; }
 .board-detail-screen .comments-section .comment-icon-button svg { width: 18px; height: 18px; }
 .board-detail-screen .comments-section .comment-tools > i { height: 11px; }
+
+/* ---------- 차단한 사용자 (마이 > 설정 > 차단한 사용자) ---------- */
+.blocked-list { display: grid; margin: 4px 0 0; padding: 0; list-style: none; }
+.blocked-list li { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--c-line); }
+.blocked-list li:last-child { border-bottom: 0; }
+.blocked-list li > span { display: grid; flex: 1; gap: 2px; min-width: 0; }
+.blocked-list strong { overflow: hidden; color: var(--c-ink); font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.blocked-list small { color: var(--c-mute); font-size: 12px; }
+.blocked-release { flex: none; height: 34px; padding: 0 12px; color: var(--c-ink); font-size: 13px; font-weight: 700; border: 1px solid var(--c-line); border-radius: 10px; background: var(--c-canvas); }
+.blocked-release:active { background: var(--c-surface); }
+.blocked-release:disabled { color: var(--c-mute); }
+.blocked-loading { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 40px 0; color: var(--c-mute); font-size: 14px; }
+.blocked-loading .spin { animation: profile-photo-spin 1s linear infinite; }

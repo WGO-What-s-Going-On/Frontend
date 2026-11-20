@@ -16,6 +16,7 @@ import { GuideTour } from '../guide/GuideTour'
 import { clearTour, pendingTour, takeHomeScreenHint } from '../guide/tourState'
 import { HomeScreenSheet } from '../guide/HomeScreenSteps'
 import { shouldSuggestHomeScreen } from '../guide/homeScreen'
+import mascotHead from '../../assets/mascot/head.webp'
 
 // 지도 필터: 게시판과 같은 카테고리 순서 + HOT. 칸이 넘치면 옆으로 밀어 넘긴다
 type MapFilter = '전체' | Category | 'HOT'
@@ -92,7 +93,7 @@ export function MapScreen() {
       ? <KakaoMapView appKey={KAKAO_MAP_KEY} boards={nearby} selectedId={selectedBoard?.id} focusId={selection?.ids[0]} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} onFail={() => { kakaoMapFailed = true; setRealMap(false) }} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>
       : <MapView boards={nearby} selectedId={selectedBoard?.id} focusId={selection?.ids[0]} hotIds={hotIds} onSelect={setSelectedBoard} onMoved={setViewCenter} focusOffsetY={selectedBoard ? 300 : 0} hideControls={Boolean(selectedBoard)}/>}
     <div className="map-top-overlay">
-      <header><h1>내 주변</h1><NoticeBell/></header>
+      <header><h1 className="map-brand"><img src={mascotHead} alt="" width={34} height={34}/>WGO</h1><NoticeBell/></header>
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
     </div>
     {movedFar && !selectedBoard && <button className="map-search-here" onClick={searchHere}><RotateCw size={15}/>이 지역에서 다시 찾기</button>}

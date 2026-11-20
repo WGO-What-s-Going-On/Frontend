@@ -4,6 +4,7 @@ export type Screen =
   | 'profile-edit' | 'notification-settings' | 'outside'
   | 'terms' | 'nickname' | 'location-permission' | 'kakao-callback'
   | 'guide'
+  | 'blocked'
 
 export type Category = '긴급 사고' | '도움 요청' | '동네 소식' | '일상 불편'
 export type BoardStatus = '실시간' | '종료됨' | '숨김'
@@ -92,6 +93,8 @@ export interface Comment {
   imagePlaceholder?: boolean
   read?: boolean
   createdAt: string
+  // 서버 작성 시각(밀리초). 답글을 오래된 순으로 쌓을 때 쓴다 (목업 댓글은 없음: 배열 순서 그대로)
+  createdAtMs?: number
   verified: boolean
   parentId?: string
   reactions: Record<CommentReaction, number>
