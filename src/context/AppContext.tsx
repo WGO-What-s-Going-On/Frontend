@@ -580,6 +580,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [server.live, screen])
   // 웹 푸시 알림을 눌러 들어왔을 때: 그 알림의 게시글(또는 알림함)로. 로그인한 동안만
   useEffect(() => { if (server.live) return listenNotificationOpen((url) => navigate(url)) }, [server.live])
+  // 앱이 화면에 보이는 동안 2분마다, 그리고 다시 화면에 돌아왔을 때 위치를 보낸다.
+  // 주변 새 글 알림은 서버가 최근 5분 안에 위치를 보낸 사람에게만 보내서, 지도를 켜 둔 채 5분이 지나면 대상에서 빠지던 것을 막는다.
+  // 앱이 닫혀 있거나 화면에 안 보이면 보내지 않는다 (위치 권한을 허용한 경우만)
+  useEffect(() => {
+    if (!server.live || locationPermission !== 'granted') return
+    const send = () => { if (document.visibilityState === 'visible') latestServer.current.locate().catch(() => undefined) }
+    const timer = window.setInterval(send, 120_000)
+    document.addEventListener('visibilitychange', send)
+    return () => { window.clearInterval(timer); document.removeEventListener('visibilitychange', send) }
+  }, [server.live, locationPermission])
   // 서버 연동 배포본: 로그인 없이 /map 같은 주소로 바로 들어오면 목업 데이터가 보이지 않게 로그인 화면으로 보낸다
   useEffect(() => {
     if (apiEnabled && !readSession() && screen !== 'login' && screen !== 'kakao-callback') navigate(pathForScreen('login'), { replace: true })

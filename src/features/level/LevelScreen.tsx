@@ -16,16 +16,6 @@ import type { RankingView } from '../../context/useServerSync'
 // 칭호마다 하나씩: 소식통(확성기) · 리포터(마이크) · 특파원(현장 중계 안테나) · 천리안(멀리 보는 망원경)
 const levelIcons = [Megaphone, Mic, SatelliteDish, Telescope]
 
-// 뱃지 (USR-F12): 칭호와 따로 모으는 활동 뱃지. 실제 획득 기준은 백엔드가 계산한다.
-function earnedBadges({ posts, comments, likes, finished }: { posts: number; comments: number; likes: number; finished: number }) {
-  return [
-    { name: '첫 소식', hint: '게시판 1개 만들기', earned: posts >= 1 },
-    { name: '해결사', hint: '내 게시판 1개 마무리', earned: finished >= 1 },
-    { name: '탐정', hint: '댓글 하트 10개 받기', earned: likes >= 10 },
-    { name: '단골 이웃', hint: '댓글 10개 쓰기', earned: comments >= 10 },
-  ]
-}
-
 function LevelEmblem({ index, size = 'small', locked = false }: { index: number; size?: 'small' | 'large'; locked?: boolean }) {
   // 잠긴 단계도 칭호 아이콘은 회색으로 보여주고, 잠김은 오른쪽 자물쇠로 표시한다
   const Icon = levelIcons[index]
@@ -33,14 +23,8 @@ function LevelEmblem({ index, size = 'small', locked = false }: { index: number;
 }
 
 function BadgePanel({ stats }: { stats: LevelStats }) {
-  const { user, boards, comments, live, serverBadges } = useApp()
   const current = levelIndex(stats)
   const progress = levelProgress(stats)
-  const myBoards = boards.filter((board) => board.authorId === user.id)
-  const myComments = comments.filter((comment) => comment.authorId === user.id)
-  const badges = earnedBadges({ posts: myBoards.length, comments: myComments.length, likes: myComments.reduce((sum, comment) => sum + (comment.likes ?? 0), 0), finished: myBoards.filter((board) => board.status === '종료됨').length })
-  // 서버 연동 중에는 서버가 준 뱃지만 획득으로 (불러오기 전에는 모두 미획득)
-  const shownBadges = live ? badges.map((badge) => ({ ...badge, earned: Boolean(serverBadges?.includes(badge.name)) })) : badges
   return <>
     <section className="level-hero">
       <div className="level-hero-head"><LevelEmblem index={current} size="large"/><div><small>Lv.{current + 1}</small><h2>{levels[current].name}</h2><p>{levels[current].tagline}</p></div></div>
@@ -59,12 +43,16 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
         <em>{state === 'earned' ? '획득' : state === 'current' ? '현재' : <SolidLock size={16} label="잠김"/>}</em>
       </li>
     })}</ol>
-    {/* 뱃지는 화면 아래쪽(작성 버튼 위)에 붙인다: 남는 세로 공간은 칭호 단계와 뱃지 사이로 */}
-    <div className="level-badges">
-      <h4>뱃지</h4>
-      <ul className="badge-list">{shownBadges.map((badge) => <li key={badge.name} className={badge.earned ? 'earned' : ''}><strong>{badge.name}</strong><small>{badge.earned ? '획득' : badge.hint}</small></li>)}</ul>
-    </div>
-    {/* 뱃지와 작성 버튼 사이 여백: 화면이 낮으면 이것부터 줄어든다 */}
+    {/* 내 활동 기록: 칭호를 계산하는 숫자 그대로 (서버 연동 중에는 서버가 센 값). 화면이 길면 아래(작성 버튼 위)로 내려간다 */}
+    <section className="level-stats" aria-label="내 활동 기록">
+      <h4>내 활동 기록</h4>
+      <dl>
+        <div><dt>게시판 참여</dt><dd>{stats.participation}<small>회</small></dd></div>
+        <div><dt>받은 '맞아요'</dt><dd>{stats.agreeReceived}<small>개</small></dd></div>
+        <div><dt>대표 의견</dt><dd>{stats.picks}<small>회</small></dd></div>
+      </dl>
+    </section>
+    {/* 활동 기록과 작성 버튼 사이 여백: 화면이 낮으면 이것부터 줄어든다 */}
     <div className="level-bottom-gap" aria-hidden="true"/>
   </>
 }
@@ -163,7 +151,7 @@ export function LevelScreen() {
   const stats = live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)
   return <AppShell contentClassName="ux-board-screen level-screen">
     <header className="ux-board-header"><h1>활동</h1><NoticeBell/></header>
-    <div className="level-tabs" role="tablist" aria-label="활동 보기">{([['badge', '뱃지'], ['rank', '랭킹']] as const).map(([value, label]) => <button key={value} role="tab" aria-selected={tab === value} className={tab === value ? 'selected' : ''} onClick={() => setSearchParams(value === 'rank' ? { tab: 'rank' } : {}, { replace: true })}>{label}</button>)}</div>
+    <div className="level-tabs" role="tablist" aria-label="활동 보기">{([['badge', '칭호'], ['rank', '랭킹']] as const).map(([value, label]) => <button key={value} role="tab" aria-selected={tab === value} className={tab === value ? 'selected' : ''} onClick={() => setSearchParams(value === 'rank' ? { tab: 'rank' } : {}, { replace: true })}>{label}</button>)}</div>
     {tab === 'badge' ? <BadgePanel stats={stats}/> : live ? <ServerRankPanel stats={stats}/> : <RankPanel stats={stats}/>}
   </AppShell>
 }
