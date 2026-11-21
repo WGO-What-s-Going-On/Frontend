@@ -5,7 +5,7 @@ import { initialBoards, initialComments, initialNotices, initialUser } from '../
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { RADIUS, mapSeedBoards, type Point } from '../features/map/mapWorld'
 import { pickCandidates } from '../features/board/commentVote'
-import { apiEnabled, kakaoEnabled } from '../api/config'
+import { apiEnabled, kakaoEnabled, userTitlesV3 } from '../api/config'
 import { ApiError, SESSION_EXPIRED_EVENT } from '../api/client'
 import { isMovingError } from '../api/posts'
 import { kakaoAuthorizeUrl, loginWithKakao, logout as logoutApi } from '../api/auth'
@@ -146,6 +146,8 @@ interface AppContextValue {
   boardsError: boolean
   reloadBoards: () => void | Promise<unknown>
   serverLevel: LevelStats | null
+  serverLevelError: boolean
+  reloadLevel: () => Promise<void>
   // 서버 연동 중 받은 뱃지 이름 (목업이면 null → 화면에서 계산)
   serverBadges: string[] | null
   // 서버 연동 중 안 읽은 알림 수 (목업이면 null → 목록에서 셈)
@@ -560,7 +562,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, [server.live])
   useEffect(() => { if (server.live && screen === 'alerts') server.loadNotices().catch(() => undefined) }, [screen])
   // 칭호 · 진행도: 마이 · 활동 화면을 열 때마다 새로 받는다 (글 · 댓글 · 반응 뒤 바뀐 값이 앱을 다시 켜야 보이던 문제)
-  useEffect(() => { if (server.live && (screen === 'my' || screen === 'level')) { server.loadLevel().catch(() => undefined); server.loadBadges().catch(() => undefined) } }, [screen])
+  useEffect(() => {
+    if (!server.live || (screen !== 'my' && screen !== 'level')) return
+    const refresh = () => { if (document.visibilityState === 'visible') { server.loadLevel().catch(() => undefined); server.loadBadges().catch(() => undefined) } }
+    refresh()
+    // 비동기 Projection 반영도 화면을 나갔다 오지 않고 확인한다.
+    const timer = userTitlesV3 ? window.setInterval(() => { if (document.visibilityState === 'visible') server.loadLevel().catch(() => undefined) }, 5_000) : undefined
+    document.addEventListener('visibilitychange', refresh)
+    return () => { if (timer !== undefined) window.clearInterval(timer); document.removeEventListener('visibilitychange', refresh) }
+  }, [screen, server.live])
   // 앱 푸시 알림: 로그인 · 온보딩을 마치고 지도 · 게시판에 처음 들어왔을 때 권한을 묻고 이 기기 토큰을 등록한다 (앱에서만)
   const pushStarted = useRef(false)
   const latestServer = useRef(server)
@@ -633,9 +643,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     refreshNotices: () => server.live ? Promise.all([server.loadNotices(), server.loadUnread()]).then(() => undefined) : Promise.resolve(),
     createBoard, keepLocationFresh: server.keepLocationFresh, updateBoard, deleteBoard, finishBoard, reopenBoard, reactToBoard, addComment, deleteComment, markCommentRead, reactToComment, toggleCommentLike, startVote, castVote,
     updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, loadBlockList, unblockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
-    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
+    live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverLevelError: server.levelError, reloadLevel: server.loadLevel, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,
-  }), [screen, user, boards, comments, notices, reports, missingBoardIds, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])
+  }), [screen, user, boards, comments, notices, reports, missingBoardIds, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.levelError, server.badges, server.unreadCount, profileImage])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 

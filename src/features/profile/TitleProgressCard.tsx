@@ -1,10 +1,14 @@
+import { RowSkeleton } from '../../components/ui/Skeleton'
+import { ErrorState } from '../../components/ui/ErrorState'
 import { ChevronRight } from 'lucide-react'
 import { Avatar } from '../../components/ui/Avatar'
 import { levelIndex, levelProgress, levels } from '../level/levels'
 import type { LevelStats } from '../level/levels'
 
 // 마이 위 프로필 카드: 지금 칭호와 다음 칭호까지 남은 양 (단계 전체는 하단 '활동' 탭에서)
-export function TitleProgressCard({ stats, name, photo, onOpen }: { stats: LevelStats; name: string; photo?: string; onOpen?: () => void }) {
+export function TitleProgressCard({ stats, failed, onRetry, name, photo, onOpen }: { stats: LevelStats | null; failed?: boolean; onRetry?: () => void; name: string; photo?: string; onOpen?: () => void }) {
+  if (failed) return <ErrorState onRetry={onRetry ?? (() => undefined)}/>
+  if (!stats) return <RowSkeleton/>
   const current = levels[levelIndex(stats)]
   const progress = levelProgress(stats)
 

@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
+  readonly VITE_USER_TITLES_V3?: string
   // 백엔드 주소. 비워 두면 지금처럼 목업 데이터로만 동작한다
   readonly VITE_API_BASE_URL?: string
   readonly VITE_WS_URL?: string

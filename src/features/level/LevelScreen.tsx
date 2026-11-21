@@ -147,14 +147,14 @@ function RankPanel({ stats }: { stats: LevelStats }) {
 
 // 하단 탭 '활동': 칭호(뱃지)와 지역 랭킹. 위 탭으로 나눠 본다
 export function LevelScreen() {
-  const { user, boards, comments, live, serverLevel } = useApp()
+  const { user, boards, comments, live, serverLevel, serverLevelError, reloadLevel } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
   const tab = searchParams.get('tab') === 'rank' ? 'rank' : 'badge'
   // 서버 연동 중이면 서버가 센 칭호 점수, 아니면 목업 글 · 댓글로 센다
-  const stats = live && serverLevel ? serverLevel : levelStats(boards, comments, user.id)
+  const stats = live ? serverLevel : levelStats(boards, comments, user.id)
   return <AppShell contentClassName="ux-board-screen level-screen">
     <header className="ux-board-header"><h1>활동</h1><NoticeBell/></header>
     <div className="level-tabs" role="tablist" aria-label="활동 보기">{([['badge', '칭호'], ['rank', '랭킹']] as const).map(([value, label]) => <button key={value} role="tab" aria-selected={tab === value} className={tab === value ? 'selected' : ''} onClick={() => setSearchParams(value === 'rank' ? { tab: 'rank' } : {}, { replace: true })}>{label}</button>)}</div>
-    {tab === 'badge' ? <BadgePanel stats={stats}/> : live ? <ServerRankPanel stats={stats}/> : <RankPanel stats={stats}/>}
+    {live && serverLevelError ? <ErrorState onRetry={() => { reloadLevel().catch(() => undefined) }}/> : !stats ? <RowSkeleton/> : tab === 'badge' ? <BadgePanel stats={stats}/> : live ? <ServerRankPanel stats={stats}/> : <RankPanel stats={stats}/>}
   </AppShell>
 }
