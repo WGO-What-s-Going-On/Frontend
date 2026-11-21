@@ -2362,7 +2362,7 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comments-section .comment-icon-button svg { width: 18px; height: 18px; }
 .board-detail-screen .comments-section .comment-tools > i { height: 11px; }
 
-/* ---------- 차단한 사용자 (마이 > 설정 > 차단한 사용자) ---------- */
+/* ---------- 차단한 사용자 (마이 > 설정 > 차단) ---------- */
 .blocked-list { display: grid; margin: 4px 0 0; padding: 0; list-style: none; }
 .blocked-list li { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--c-line); }
 .blocked-list li:last-child { border-bottom: 0; }
