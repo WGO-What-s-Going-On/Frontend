@@ -2115,10 +2115,10 @@ button.title-progress-card:active { background: #f7f8fa; }
 .board-detail-screen .comments-heading { margin-bottom: 2px; }
 /* 마지막 답글 상자 아래도 원댓글과 같은 여백을 두고 다음 댓글 구분선이 온다 (예전 바탕의 -13px 여백을 없앤다) */
 .board-detail-screen .comment-replies { margin-bottom: 0; }
-/* 활동 > 칭호 탭: 화면이 길면 내 활동 기록을 아래(작성 버튼 위)로 내리고, 짧으면 칭호 단계 바로 아래 */
+/* 활동 > 칭호 탭: 화면이 길면 내 활동 기록을 아래(작성 버튼 위)로 내리고, 남는 공간은 칭호 단계 위 · 아래(.level-gap)에 반씩. 짧으면 바로 붙는다 */
 .level-screen { display: flex; flex-direction: column; }
 .level-screen > * { flex-shrink: 0; }
-.level-screen > .level-stats { margin-top: auto; }
+.level-screen > .level-gap { flex: 1 0 0; }
 /* 내 활동 기록: 숫자 세 칸 */
 .level-stats dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
 .level-stats dl > div { display: grid; gap: 4px; min-width: 0; padding: 12px 12px 11px; border: 1px solid var(--c-line); border-radius: 14px; background: var(--c-canvas); }

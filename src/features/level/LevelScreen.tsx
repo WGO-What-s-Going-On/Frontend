@@ -34,6 +34,8 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
         {progress.hint && <p>{progress.hint}</p>}
       </div> : <div className="level-progress"><div className="level-progress-head"><strong>대표 의견 점수 {scoreOf(stats)}점</strong></div><p>점수로 {myRegion} 랭킹에서 겨뤄요</p></div>}
     </section>
+    {/* 남는 세로 공간을 칭호 단계 위 · 아래에 반씩: 칭호 단계가 카드와 활동 기록 사이 가운데쯤에 온다 */}
+    <div className="level-gap" aria-hidden="true"/>
     <h4>칭호 단계</h4>
     <ol className="level-road">{levels.map((level, index) => {
       const state = index < current ? 'earned' : index === current ? 'current' : 'locked'
@@ -43,6 +45,7 @@ function BadgePanel({ stats }: { stats: LevelStats }) {
         <em>{state === 'earned' ? '획득' : state === 'current' ? '현재' : <SolidLock size={16} label="잠김"/>}</em>
       </li>
     })}</ol>
+    <div className="level-gap" aria-hidden="true"/>
     {/* 내 활동 기록: 칭호를 계산하는 숫자 그대로 (서버 연동 중에는 서버가 센 값). 화면이 길면 아래(작성 버튼 위)로 내려간다 */}
     <section className="level-stats" aria-label="내 활동 기록">
       <h4>내 활동 기록</h4>
