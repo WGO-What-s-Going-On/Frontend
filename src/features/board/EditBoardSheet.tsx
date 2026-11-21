@@ -45,7 +45,10 @@ export function EditBoardSheet({ board, canEdit, onClose }: { board: Board; canE
         </div>
         <input ref={fileRef} className="quick-file-input" type="file" accept="image/*" onChange={(event) => setImageName(event.target.files?.[0]?.name ?? imageName)}/>
         <div className="write-author-row"><span>작성자 표시</span><AuthorToggle anonymous={anonymous} onChange={setAnonymous}/></div></>}
-        <Button className="quick-submit" onClick={save} disabled={!changed || !title.trim() || !body.trim()}>수정 완료</Button>
+        {/* 글쓰기 시트와 같이 아래 홈 바 자리를 비운 칸에 둔다 (브라우저 · 홈 화면 앱은 시트 아래 여백이 0이라 버튼이 바닥에 붙어 잘렸다) */}
+        <div className="quick-submit-bar">
+          <Button className="quick-submit" onClick={save} disabled={!changed || !title.trim() || !body.trim()}>수정 완료</Button>
+        </div>
       </>}
     </section>
   </div>
