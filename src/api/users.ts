@@ -1,4 +1,7 @@
 import { api } from './client'
+import type { TitleSnapshot } from '../features/level/levels'
+
+export const getMyTitle = () => api<{ titles: TitleSnapshot }>('GET', '/api/v1/users/me/growth').then((result) => result.titles)
 
 export interface MeResponse {
   userId: string

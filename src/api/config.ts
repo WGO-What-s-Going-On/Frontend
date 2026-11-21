@@ -1,6 +1,8 @@
 // 백엔드 연동 설정. .env.local에 주소가 있으면 실제 서버, 없으면 지금처럼 목업으로 동작한다 (.env.example 참고)
 export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
 export const apiEnabled = API_BASE_URL !== ''
+// User v3 운영 전환 후에만 켠다. 기본값은 기존 Post 집계다.
+export const userTitlesV3 = import.meta.env.VITE_USER_TITLES_V3 === 'true'
 // 실시간(WebSocket) 주소. HTTP와 호스트가 다르다. 비우면 실시간 없이 HTTP만 쓴다
 export const WS_URL = import.meta.env.VITE_WS_URL ?? ''
 

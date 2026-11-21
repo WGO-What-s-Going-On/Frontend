@@ -5,12 +5,36 @@ import { voteWinner } from '../board/commentVote'
 // 칭호 4단계: 소식통 → 리포터 → 특파원 → 천리안. 단계마다 올라가는 조건이 다르다.
 // 실제 집계는 백엔드가 하고, 목업은 지금 저장된 게시판·댓글에서 셈한다.
 export interface LevelStats {
+  title?: TitleSnapshot
   // 게시판 참여: 글쓰기 · 댓글 · 반응 · 투표 (각 1회)
   participation: number
   // 내 댓글이 받은 '맞아요'
   agreeReceived: number
   // 투표로 대표 의견이 된 내 댓글 수
   picks: number
+}
+
+// 칭호와 진행도는 같은 User 응답의 확정된 상태를 사용한다.
+export interface TitleSnapshot {
+  enabled: boolean
+  ready: boolean
+  policyVersion: string
+  currentStage: number
+  stats: { participation: string; agreeReceived: string; picks: string }
+  stages: { stage: number; code: string; progress: string; required: string | null; remaining: string | null }[]
+}
+
+export function fromTitleSnapshot(title: TitleSnapshot): LevelStats {
+  const count = (value: string) => {
+    const number = Number(value)
+    if (!/^\d+$/.test(value) || !Number.isSafeInteger(number)) throw new Error('Invalid title count')
+    return number
+  }
+  if (!title.enabled || !title.ready || title.policyVersion !== 'wgo-titles-v3' || !Number.isInteger(title.currentStage) || title.currentStage < 1 || title.currentStage > 4) throw new Error('Title snapshot is not ready')
+  const stats = { participation: count(title.stats.participation), agreeReceived: count(title.stats.agreeReceived), picks: count(title.stats.picks), title }
+  // 두 화면이 표시하기 전에 다음 목표까지 검증한다.
+  levelProgress(stats)
+  return stats
 }
 
 // 대표 의견 1회 점수
@@ -32,7 +56,7 @@ export const levels: Level[] = [
     goal: { stat: 'agreeReceived', target: 10, unit: '개' } },
   { name: '특파원', tagline: '투표로 인정받는 현장 의견', condition: "내 댓글 '맞아요' 10개",
     goal: { stat: 'score', target: 50, unit: '점', hint: `댓글 투표에서 대표 의견이 되면 +${PICK_SCORE}점` } },
-  { name: '천리안', tagline: '동네를 꿰뚫어 보는 최고 칭호', condition: '대표 의견 점수 50점 · 지역 랭킹 등장' },
+  { name: '천리안', tagline: '동네를 꿰뚫어 보는 최고 칭호', condition: '대표 의견 선정 5회 (50점)' },
 ]
 
 export const scoreOf = (stats: LevelStats) => stats.picks * PICK_SCORE
@@ -43,6 +67,7 @@ function statValue(stats: LevelStats, stat: NonNullable<Level['goal']>['stat']) 
 
 // 단계는 순서대로만 오른다: 앞 단계 목표를 채워야 다음 단계 목표를 센다
 export function levelIndex(stats: LevelStats) {
+  if (stats.title) return stats.title.currentStage - 1
   let index = 0
   while (levels[index].goal && statValue(stats, levels[index].goal!.stat) >= levels[index].goal!.target) index += 1
   return index
@@ -53,6 +78,13 @@ export function levelProgress(stats: LevelStats) {
   const index = levelIndex(stats)
   const goal = levels[index].goal
   if (!goal) return null
+  if (stats.title) {
+    const stage = stats.title.stages.find((item) => item.stage === index + 2)
+    if (!stage || stage.required === null || stage.remaining === null) throw new Error('Missing title goal')
+    const current = Number(stage.progress), target = Number(stage.required), remaining = Number(stage.remaining)
+    if (![current, target, remaining].every((value) => Number.isSafeInteger(value) && value >= 0) || target !== goal.target || remaining !== Math.max(0, target - current)) throw new Error('Invalid title goal')
+    return { next: levels[index + 1], ...goal, current: Math.min(current, target), remaining }
+  }
   const current = Math.min(statValue(stats, goal.stat), goal.target)
   return { next: levels[index + 1], current, ...goal, remaining: goal.target - current }
 }

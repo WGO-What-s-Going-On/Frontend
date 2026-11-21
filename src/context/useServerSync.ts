@@ -1,16 +1,17 @@
-import { useRef, useState } from 'react'
-import { serverFeatures, WS_URL } from '../api/config'
+import { useEffect, useRef, useState } from 'react'
+import { serverFeatures, userTitlesV3, WS_URL } from '../api/config'
 import { readSession } from '../api/session'
 import { currentCoords, distanceMeters, fromWorldPoint, toWorldPoint, type Coords } from '../api/geo'
 import type { Point } from '../features/map/mapWorld'
 import * as posts from '../api/posts'
 import * as notifications from '../api/notifications'
 import { createRealtime, requestRealtimeTicket, type Realtime, type RealtimeEvent } from '../api/realtime'
-import { blockUser as blockUserApi, getBlocks, getMyBadges, unblockUser as unblockUserApi } from '../api/users'
+import { blockUser as blockUserApi, getBlocks, getMyBadges, getMyTitle, unblockUser as unblockUserApi } from '../api/users'
 import { uploadImage } from '../api/media'
 import { ApiError } from '../api/client'
 import { timeAgo } from '../domain/time'
 import type { LevelStats } from '../features/level/levels'
+import { fromTitleSnapshot } from '../features/level/levels'
 import type { Board, Category, Comment, CommentReaction, ImageFocus, Notice, PostReaction, Reach } from '../types/domain'
 import type { NotificationSettings } from './AppContext'
 
@@ -38,6 +39,10 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const [boardsLoading, setBoardsLoading] = useState(false)
   const [boardsError, setBoardsError] = useState(false)
   const [level, setLevel] = useState<LevelStats | null>(null)
+  const [levelError, setLevelError] = useState(false)
+  const levelRequest = useRef(0)
+  const sessionUserId = readSession()?.userId
+  useEffect(() => { ++levelRequest.current; setLevel(null); setLevelError(false) }, [sessionUserId])
   // 서버가 준 뱃지 이름 (뱃지 획득 여부는 서버 기준)
   const [badges, setBadges] = useState<string[] | null>(null)
   // 안 읽은 알림 수 (목록은 20개씩이라 서버 집계를 따로 받는다)
@@ -285,7 +290,23 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
 
   // 활동: 칭호 점수, 내 행정동 랭킹
   const loadBadges = async () => { setBadges((await getMyBadges()).map((badge) => badge.name)) }
-  const loadLevel = async () => { const result = await posts.getMyLevel(); setLevel({ participation: result.participation, agreeReceived: result.agreeReceived, picks: result.picks }) }
+  const loadLevel = async () => {
+    const request = ++levelRequest.current
+    try {
+      let result: LevelStats
+      if (userTitlesV3) result = fromTitleSnapshot(await getMyTitle())
+      else {
+        const legacy = await posts.getMyLevel()
+        result = { participation: legacy.participation, agreeReceived: legacy.agreeReceived, picks: legacy.picks }
+      }
+      if (request !== levelRequest.current) return
+      setLevel(result)
+      setLevelError(false)
+    } catch (error) {
+      if (request === levelRequest.current) setLevelError(true)
+      throw error
+    }
+  }
   const loadRanking = async (): Promise<RankingView> => {
     const region = await posts.getMyRegion(await ensureCoords())
     const ranking = await posts.getRanking(region.code)
@@ -332,7 +353,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const stopRealtime = () => { realtime.current?.dispose(); realtime.current = null }
 
   return {
-    live, boardsLoading, boardsError, level, badges, unreadCount, loadUnread,
+    live, boardsLoading, boardsError, level, levelError, badges, unreadCount, loadUnread,
     locate, keepLocationFresh, loadNearby, searchArea, loadBoard, createPost, findSimilar, reactToPost, reactToComment, addComment, deleteComment, castVote,
     editPost, setClosed, deletePost, report, editComment, loadBlocks, loadBlockList, getBoardAlert, block, unblock, loadNotices, loadSettings, saveSettings, readNotice, readAllNotices, removeNotice, setBoardAlert,
     loadLevel, loadBadges, loadActivity, loadRanking, watchBoard, stopRealtime,
