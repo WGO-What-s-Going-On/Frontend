@@ -113,8 +113,14 @@
 
 .guide-section { margin: 0 0 22px; }
 .guide-section h3 { margin: 0 0 8px; font-size: 16px; }
-/* 자주 묻는 것: Q · A 줄글 (펼치기 없이) */
-.guide-faq { margin: 0; border-top: 1px solid var(--c-line); }
+/* 자주 묻는 것: Q · A 줄글 (펼치기 없이). 답은 문장마다 한 줄.
+   화면이 길면 남는 세로 공간을 질문 칸들이 나눠 가져 '사용법 다시 보기' 버튼까지 빈 곳이 생기지 않게 한다 */
+.guide-screen { display: flex; flex-direction: column; }
+.guide-screen > * { flex-shrink: 0; }
+.guide-screen > .guide-section { display: flex; flex: 1 0 auto; flex-direction: column; margin-bottom: 0; }
+.guide-faq { display: flex; flex: 1 0 auto; flex-direction: column; margin: 0; }
+.guide-faq > div { display: flex; flex: 1 0 auto; flex-direction: column; justify-content: center; }
+.guide-faq dd > span { display: grid; }
 .guide-faq > div { padding: 12px 2px; border-bottom: 1px solid var(--c-line); }
 .guide-faq > div:last-child { padding-bottom: 2px; border-bottom: 0; }
 .guide-faq dt, .guide-faq dd { display: flex; gap: 8px; margin: 0; line-height: 1.5; word-break: keep-all; }
