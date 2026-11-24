@@ -200,6 +200,8 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   const deleteComment = async (postId: string, commentId: string) => { await posts.deleteComment(postId, commentId); await loadBoard(postId) }
   // 한 사람 한 표: 내 후보를 다시 누르면 취소
   const castVote = async (postId: string, commentId: string, current?: string) => {
+    // 이벤트 글(350m)은 고르기 · 옮기기 직전에 위치를 다시 잡는다 (서버가 마지막 위치로 범위를 확인). 취소는 확인 없음
+    if (current !== commentId && isCampusPostId(postId)) await locate()
     const vote = current === commentId ? (await posts.cancelVote(postId), await posts.getVote(postId)) : await posts.castVote(postId, commentId)
     setBoards((items) => items.map((board) => board.id === postId ? { ...board, ...posts.toBoardVote(vote) } : board))
   }
