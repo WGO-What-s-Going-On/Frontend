@@ -10,7 +10,7 @@ import { blockUser as blockUserApi, getBlocks, getMyBadges, unblockUser as unblo
 import { uploadImage } from '../api/media'
 import { ApiError } from '../api/client'
 import { timeAgo } from '../domain/time'
-import { isCampusPostId } from '../domain/participation'
+import { isBalancePostId, isCampusPostId } from '../domain/participation'
 import type { LevelStats } from '../features/level/levels'
 import type { Board, Category, Comment, CommentReaction, ImageFocus, Notice, PostReaction, Reach } from '../types/domain'
 import type { NotificationSettings } from './AppContext'
@@ -328,6 +328,12 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
     let active = true
     if (client) locate().catch(() => undefined).then(() => { if (active) return client.join(postId) }).catch(() => undefined)
     const poll = window.setInterval(() => {
+      // Fixed polls deliberately emit no candidate/winner activity. Refresh their counts
+      // even with a joined socket, without incrementing post views or reloading comments.
+      if (document.visibilityState === 'visible' && isBalancePostId(postId)) {
+        posts.getVote(postId).then((vote) => { if (active) setBoards((items) => items.map((board) => board.id === postId ? { ...board, ...posts.toBoardVote(vote) } : board)) }).catch(() => undefined)
+        return
+      }
       if (document.visibilityState === 'visible' && !client?.isJoined(postId)) loadBoard(postId).catch(() => undefined)
     }, POLL_MS)
     return () => { active = false; window.clearInterval(poll); client?.leave(postId) }
