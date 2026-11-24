@@ -6,7 +6,7 @@ import { categoryLabel, reactionLabel } from '../../domain/labels'
 import { isHotBoard, myReactions } from '../../types/domain'
 import type { Board, Comment, PostReaction } from '../../types/domain'
 import { voteStatus } from './commentVote'
-import { RADIUS } from '../map/mapWorld'
+import { participationRadius } from '../../domain/participation'
 import { BoardImage } from './BoardImage'
 
 // 읽기 전용(150m 밖) 표시: 선 아이콘보다 작고 단단해 보이는 채운 자물쇠
@@ -22,7 +22,7 @@ const pickerLabel: Record<PostReaction, string> = { '저도 궁금해요': '궁�
 export function FeedItem({ board, comments }: { board: Board; comments: Comment[] }) {
   const { inRange, openBoard, reactToBoard, alertBoardIds, toggleBoardNotifications } = useApp()
   const muted = !alertBoardIds.includes(board.id)
-  const canReact = inRange && board.distance <= RADIUS
+  const canReact = inRange && board.distance <= participationRadius(board)
   const voting = voteStatus(board, comments) === 'OPEN'
   const commentCount = board.commentCount ?? comments.length
   const open = () => openBoard(board.id)

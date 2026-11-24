@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { initialBoards, initialComments, initialNotices, initialUser } from '../data/mockData'
 import { boardIdFromPath, pathForScreen, screenFromPath } from '../navigation'
 import { RADIUS, mapSeedBoards, type Point } from '../features/map/mapWorld'
+import { participationRadius } from '../domain/participation'
 import { pickCandidates } from '../features/board/commentVote'
 import { apiEnabled, kakaoEnabled } from '../api/config'
 import { ApiError, SESSION_EXPIRED_EVENT } from '../api/client'
@@ -258,7 +259,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCurrentBoardId(id)
       setRecentBoardIds((items) => [id, ...items.filter((item) => item !== id)])
       // 150m 밖 게시판은 열람 전용으로 (MAP-F05)
-      navigate(pathForScreen(inRange && (target?.distance ?? 0) <= RADIUS ? 'detail' : 'outside', id), { state: { enter: true } })
+      navigate(pathForScreen(inRange && (target?.distance ?? 0) <= (target ? participationRadius(target) : RADIUS) ? 'detail' : 'outside', id), { state: { enter: true } })
     }
     if (canViewTransition()) document.startViewTransition(() => flushSync(open))
     else open()
@@ -490,9 +491,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const liveActions: Partial<AppContextValue> = !server.live ? {} : {
     relocate: (boardId) => {
       server.locate().then(() => server.loadBoard(boardId)).then((board) => {
-        const ok = inRange && board.distance <= RADIUS
+        const ok = inRange && board.distance <= participationRadius(board)
         navigate(pathForScreen(ok ? 'detail' : 'outside', boardId), { replace: true })
-        showToast(ok ? '150m 안이에요. 이제 참여할 수 있어요' : `아직 범위 밖이에요 · ${board.distance}m`)
+        showToast(ok ? `${participationRadius(board)}m 안이에요. 이제 참여할 수 있어요` : `아직 범위 밖이에요 · ${board.distance}m`)
       }).catch(fail('위치를 확인하지 못했어요.'))
     },
     createBoard: (input) => server.createPost(input).then((id) => {

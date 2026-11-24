@@ -14,6 +14,7 @@ type PostReactionCode = 'CURIOUS' | 'STILL_HAPPENING' | 'HELPFUL' | 'ENDED'
 type CommentReactionCode = 'HELPFUL' | 'AGREE' | 'DIFFERENT'
 
 export interface PostResponse {
+  lifecyclePolicy?: string
   postId: string
   // 익명 글을 다른 사람이 보면 null
   authorId: number | null
@@ -128,6 +129,7 @@ export function toBoard(post: PostResponse): Board {
   return {
     id: post.postId, authorId: post.authorId === null ? '' : String(post.authorId), authorName: post.anonymous ? '익명' : post.authorNickname ?? '알 수 없음',
     anonymous: post.anonymous, category: categoryFromCode(post.category), title: post.title, body: post.content,
+    ...(post.lifecyclePolicy ? { lifecyclePolicy: post.lifecyclePolicy } : {}),
     distance: Math.round(post.distanceM ?? 0), createdAt: timeAgo(post.createdAt), status: post.status === 'ACTIVE' && !post.closedAt ? '실시간' : '종료됨', views: post.counters.viewCount, commentCount: post.counters.commentCount,
     reactions: { '저도 궁금해요': counts.CURIOUS, '지금도 그래요': counts.STILL_HAPPENING, '도움 됐어요': counts.HELPFUL, '이제 끝났어요': counts.ENDED },
     myReactions: post.myReaction ? [postReactionFromCode(post.myReaction)] : [],

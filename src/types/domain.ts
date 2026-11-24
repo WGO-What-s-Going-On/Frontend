@@ -28,6 +28,7 @@ export interface User {
 }
 
 export interface Board {
+  lifecyclePolicy?: string
   id: string
   authorId: string
   authorName: string

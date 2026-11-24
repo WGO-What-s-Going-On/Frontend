@@ -18,6 +18,7 @@ import { commentCountOf, isHotBoard, myCommentReactions } from '../../types/doma
 import type { Board, Category, Comment, CommentReaction } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { RADIUS } from '../map/mapWorld'
+import { participationRadius } from '../../domain/participation'
 import { pathForScreen } from '../../navigation'
 import { EditBoardSheet } from './EditBoardSheet'
 import { FeedItem } from './FeedItem'
@@ -67,7 +68,7 @@ export function BoardListScreen() {
   }
   const visibleBoards = useMemo(() => {
     // 종료한 게시판은 게시판 목록에서 빼고, 마이 > 최근 활동에서만 본다
-    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= RADIUS))
+    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= participationRadius(board)))
     return [...filtered].sort((a, b) => sort === '거리' || sort === '참여 가능' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
   }, [boards, category, sort])
   useEffect(() => {
@@ -101,7 +102,7 @@ export function BoardListScreen() {
       : live && boardsLoading && !boards.length ? <div className="ux-board-list"><BoardCardSkeleton/><BoardCardSkeleton/><BoardCardSkeleton/></div>
       : !visibleBoards.length ? <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>
       : view === 'feed' ? <div className="feed-list">{visibleBoards.map((board) => <FeedItem key={board.id} board={board} comments={comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))}/>)}</div>
-      : <div className="album-grid">{visibleBoards.map((board) => <AlbumTile key={board.id} board={board} commentCount={commentCountOf(board, comments)} readOnly={!inRange || board.distance > RADIUS} onOpen={() => openBoard(board.id)}/>)}</div>}
+      : <div className="album-grid">{visibleBoards.map((board) => <AlbumTile key={board.id} board={board} commentCount={commentCountOf(board, comments)} readOnly={!inRange || board.distance > participationRadius(board)} onOpen={() => openBoard(board.id)}/>)}</div>}
   </AppShell>
 }
 
@@ -133,13 +134,13 @@ function matchScore(board: Board, keyword: string) {
 
 function SearchRow({ board, keyword, commentCount, onOpen }: { board: Board; keyword: string; commentCount: number; onOpen: () => void }) {
   const ended = board.status !== '실시간'
-  const outside = board.distance > RADIUS
+  const outside = board.distance > participationRadius(board)
   return <button className={`search-row ${ended ? 'ended' : ''}`} onClick={onOpen}>
     <span className="search-row-text">
       <span className="search-row-tags"><span className="search-row-category" data-category={board.category}>{categoryLabel[board.category]}</span>{isHotBoard(board, commentCount) && <b className="board-tag tag-hot">HOT</b>}{ended && <b className="board-tag tag-ended">종료</b>}</span>
       <strong><Highlight text={board.title} keyword={keyword}/></strong>
     </span>
-    {outside && <Lock className="search-row-lock" size={14} aria-label="150m 밖, 열람만 가능"/>}
+    {outside && <Lock className="search-row-lock" size={14} aria-label={`${participationRadius(board)}m 밖, 열람만 가능`}/>}
   </button>
 }
 
@@ -250,7 +251,7 @@ export function BoardDetailScreen() {
   const commentInputRef = useRef<HTMLInputElement>(null)
   // 범위 밖이면 당겨서 새로고침으로 위치를 다시 잡는다 (걸어와서 범위 안에 들어왔을 때)
   // 당겨서 새로고침: 범위 밖이면 위치를 다시 잡고, 범위 안이면 글 · 댓글을 다시 받는다
-  const pullOutside = Boolean(board) && (!inRange || (board?.distance ?? 0) > RADIUS)
+  const pullOutside = Boolean(board) && (!inRange || (board?.distance ?? 0) > (board ? participationRadius(board) : RADIUS))
   const { pull, refreshing, ready } = usePullToRefresh(Boolean(board), () => { if (!board) return; if (pullOutside) relocate(board.id); else return refreshBoard(board.id) })
   // 오른쪽 새로고침 버튼: 당기기와 같은 위치 다시 잡기 (잠깐 돌다가 결과)
   const [checking, setChecking] = useState(false)
@@ -292,9 +293,10 @@ export function BoardDetailScreen() {
   const shownComments = rootComments.slice(0, visibleComments)
   const remainingComments = rootComments.length - shownComments.length
   // 150m 밖이면 같은 상세 화면을 읽기 전용으로 보여준다 (MAP-F05)
-  const outOfRange = !inRange || board.distance > RADIUS
+  const radius = participationRadius(board)
+  const outOfRange = !inRange || board.distance > radius
   const canParticipate = !outOfRange && board.status === '실시간'
-  const readOnlyBar = outOfRange ? <div className="outside-bottom"><div className="outside-readonly-bar"><Lock size={16}/><span>150m 안에서만 댓글 가능</span></div></div> : null
+  const readOnlyBar = outOfRange ? <div className="outside-bottom"><div className="outside-readonly-bar"><Lock size={16}/><span>{radius}m 안에서만 댓글 가능</span></div></div> : null
   const commentComposer = canParticipate ? <div className="detail-comment-input">{editing ? <div className="replying"><span>댓글 수정 중</span><button onClick={cancelCompose}>취소</button></div> : replyTo && <div className="replying reply-to"><span><b>@{replyTo.authorName}</b> 님에게 답글</span><button onClick={() => { setReplyTo(null); commentInputRef.current?.focus() }}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => { setCommentImageUrl(''); setCommentFile(undefined) }} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><IconButton className="comment-photo-add" label="댓글에 사진 첨부" onClick={() => commentFileRef.current?.click()}><Camera size={20}/></IconButton><span className="composer-input-wrap"><input ref={commentInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder={replyTo && !editing ? '답글을 입력하세요' : '댓글을 입력하세요'} aria-label={replyTo && !editing ? `${replyTo.authorName}님에게 답글` : '댓글'}/></span><IconButton className="comment-submit" label={editing ? '댓글 수정' : '댓글 등록'} onClick={submit} disabled={(!body.trim() && !commentImageUrl) || sending}><Send size={19}/></IconButton></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => { addPhoto(event.target.files?.[0]); event.target.value = '' }}/></div> : null
   return <AppShell nav={false} contentClassName={`board-detail-screen ${entering ? 'detail-enter' : ''}`} shellClassName={entering ? 'detail-enter-shell' : ''} bottomContent={<>{commentComposer ?? readOnlyBar}
     {editOpen && <EditBoardSheet board={board} canEdit={!outOfRange} onClose={closeEdit}/>}
@@ -303,7 +305,7 @@ export function BoardDetailScreen() {
   </>}>
     <PullRefresh pull={pull} refreshing={refreshing} ready={ready} labels={pullOutside ? { idle: '당겨서 위치 새로고침', ready: '놓으면 위치 새로고침', busy: '위치 확인 중' } : undefined}/>
     <header className="detail-nav"><IconButton className="icon" label="뒤로 가기" onClick={() => back('board')}><ArrowLeft size={22}/></IconButton></header>
-    {outOfRange && <div className="outside-notice-row"><p className="outside-notice">{board.distance <= RADIUS && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '읽기 전용 · 범위 밖'}</p><IconButton className={`outside-refresh ${checking ? 'checking' : ''}`} label={checking ? '위치 확인 중' : '위치 새로고침'} onClick={checkLocation}><RotateCw size={16}/></IconButton></div>}
+    {outOfRange && <div className="outside-notice-row"><p className="outside-notice">{board.distance <= radius && locationPermission !== 'granted' ? '위치 권한이 꺼져 있어 읽기만 할 수 있어요' : '읽기 전용 · 범위 밖'}</p><IconButton className={`outside-refresh ${checking ? 'checking' : ''}`} label={checking ? '위치 확인 중' : '위치 새로고침'} onClick={checkLocation}><RotateCw size={16}/></IconButton></div>}
     <article className="detail-article">
       <div className="detail-title-row"><h1 title={board.title}>{board.title}</h1><span className="detail-title-menu-wrap"><IconButton className="detail-title-menu" label="게시글 메뉴" onClick={() => setMenu(!menu)} expanded={menu}><MoreHorizontal size={18}/></IconButton>{menu && <div className="context-menu detail-menu">{board.authorId === user.id ? <><button onClick={() => { setEditOpen(true); setMenu(false) }}>수정</button><button onClick={() => { setConfirm('finish'); setMenu(false) }}>종료</button><button onClick={() => { setConfirm('delete'); setMenu(false) }}>삭제</button></> : <><button onClick={() => { reportTarget('게시글', board.id, '허위 또는 부적절한 정보'); setMenu(false) }}>신고</button><button onClick={() => { blockUser(board.authorId); setMenu(false) }}>차단</button></>}</div>}</span></div>
       <div className="detail-byline"><strong>{board.authorName}</strong><span>{board.createdAt}</span>{board.edited && <span className="detail-edited">수정됨</span>}<span><MapPin size={12}/>{board.distance}m</span><span>조회 {board.views}</span></div>

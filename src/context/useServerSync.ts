@@ -10,6 +10,7 @@ import { blockUser as blockUserApi, getBlocks, getMyBadges, unblockUser as unblo
 import { uploadImage } from '../api/media'
 import { ApiError } from '../api/client'
 import { timeAgo } from '../domain/time'
+import { isCampusPostId } from '../domain/participation'
 import type { LevelStats } from '../features/level/levels'
 import type { Board, Category, Comment, CommentReaction, ImageFocus, Notice, PostReaction, Reach } from '../types/domain'
 import type { NotificationSettings } from './AppContext'
@@ -177,11 +178,13 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
 
   // 반응은 하나만: 같은 걸 누르면 취소, 다른 걸 누르면 기존 것을 지우고 새로 단다
   const reactToPost = async (postId: string, reaction: PostReaction, current?: PostReaction) => {
+    if (current !== reaction && isCampusPostId(postId)) await locate()
     if (current) await posts.cancelPostReaction(postId, current)
     if (current !== reaction) await posts.reactToPost(postId, reaction)
     await loadBoard(postId)
   }
   const reactToComment = async (postId: string, commentId: string, reaction: CommentReaction, current?: CommentReaction) => {
+    if (current !== reaction && isCampusPostId(postId)) await locate()
     if (current) await posts.cancelCommentReaction(postId, commentId, current)
     if (current !== reaction) await posts.reactToComment(postId, commentId, reaction)
     await loadBoard(postId)

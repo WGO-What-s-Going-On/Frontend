@@ -1,6 +1,6 @@
 import { categoryIcon } from '../../domain/categoryIcons'
 import type { Board, Category } from '../../types/domain'
-import { RADIUS } from './mapWorld'
+import { participationRadius } from '../../domain/participation'
 
 // 겹친 핀 묶기: 화면에서 가까운(손가락으로 따로 누르기 어려운) 핀은 하나로 합치고 개수를 붙인다.
 // 같은 건물 · 같은 자리에서 올라온 글은 확대해도 안 떨어져서, 묶음을 누르면 요약 시트에서 넘겨 본다.
@@ -35,7 +35,7 @@ export function PinMarker({ group, selectedId, hotIds, onSelect, style }: {
   const shown = selected ?? group.lead
   const Icon = categoryIcon[shown.category]
   const count = group.boards.length
-  return <button className={`map-marker ${selected ? 'selected' : ''} ${group.boards.some((board) => hotIds.has(board.id)) ? 'hot' : ''} ${group.boards.every((board) => board.distance > RADIUS) ? 'far' : ''}`} data-category={shown.category} style={style}
+  return <button className={`map-marker ${selected ? 'selected' : ''} ${group.boards.some((board) => hotIds.has(board.id)) ? 'hot' : ''} ${group.boards.every((board) => board.distance > participationRadius(board)) ? 'far' : ''}`} data-category={shown.category} style={style}
     onClick={(event) => { event.stopPropagation(); onSelect(shown, group.boards) }}
     aria-label={count > 1 ? `이 자리 게시글 ${count}개, ${shown.title}` : `${shown.title}, ${shown.distance}m`}>
     <span className="marker-dot"><Icon size={15} strokeWidth={2.2}/>{count > 1 && <b className="marker-count">{count}</b>}</span>
