@@ -211,7 +211,7 @@ export function BlockedUsersScreen() {
       : !items.length ? <EmptyState title="차단한 사용자가 없어요"/>
       : <ul className="blocked-list">{items.map((item) => <li key={item.userId}>
         <Avatar name={item.nickname} size={40}/>
-        <span><strong>{item.nickname}</strong>{blockedDay(item.blockedAt) && <small>{blockedDay(item.blockedAt)}</small>}</span>
+        <span className="blocked-name"><strong>{item.nickname}</strong>{blockedDay(item.blockedAt) && <small>{blockedDay(item.blockedAt)}</small>}</span>
         <button className="blocked-release" disabled={busy === item.userId} onClick={() => release(item.userId, item.nickname)}>{busy === item.userId ? '해제 중' : '차단 해제'}</button>
       </li>)}</ul>}
   </AppShell>

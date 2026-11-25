@@ -2366,7 +2366,9 @@ button.title-progress-card:active { background: #f7f8fa; }
 .blocked-list { display: grid; margin: 4px 0 0; padding: 0; list-style: none; }
 .blocked-list li { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--c-line); }
 .blocked-list li:last-child { border-bottom: 0; }
-.blocked-list li > span { display: grid; flex: 1; gap: 2px; min-width: 0; }
+/* 프로필 동그라미는 크기 고정 (이름 칸만 남는 폭을 차지) */
+.blocked-list li > .avatar { flex: none; }
+.blocked-list .blocked-name { display: grid; flex: 1; gap: 2px; min-width: 0; }
 .blocked-list strong { overflow: hidden; color: var(--c-ink); font-size: 15px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
 .blocked-list small { color: var(--c-mute); font-size: 12px; }
 .blocked-release { flex: none; height: 34px; padding: 0 12px; color: var(--c-ink); font-size: 13px; font-weight: 700; border: 1px solid var(--c-line); border-radius: 10px; background: var(--c-canvas); }
