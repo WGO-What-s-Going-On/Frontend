@@ -40,7 +40,7 @@ function readBoardView(): BoardView {
 }
 
 export function BoardListScreen() {
-  const { boards, comments, blockedUsers, inRange, go, openBoard, live, boardsLoading, boardsError, reloadBoards } = useApp()
+  const { boards, comments, blockedUsers, inRange, go, openBoard, live, boardsLoading, boardsError, reloadBoards, locationOff } = useApp()
   const [searchParams, setSearchParams] = useSearchParams()
   // 맨 위에서 당겨서 주변 글 새로 받기
   const { pull, refreshing, ready } = usePullToRefresh(true, () => live ? reloadBoards() : undefined)
@@ -68,9 +68,10 @@ export function BoardListScreen() {
   }
   const visibleBoards = useMemo(() => {
     // 종료한 게시판은 게시판 목록에서 빼고, 마이 > 최근 활동에서만 본다
-    const filtered = boards.filter((board) => board.status === '실시간' && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= participationRadius(board)))
+    // 차단한 사용자의 글은 빼고 (익명 글은 작성자를 몰라 거를 수 없다)
+    const filtered = boards.filter((board) => board.status === '실시간' && !blockedUsers.includes(board.authorId) && (category === '전체' || board.category === category) && (sort !== '참여 가능' || board.distance <= participationRadius(board)))
     return [...filtered].sort((a, b) => sort === '거리' || sort === '참여 가능' ? a.distance - b.distance : sort === '활발' ? Object.values(b.reactions).reduce((x, y) => x + y, 0) - Object.values(a.reactions).reduce((x, y) => x + y, 0) : b.id.localeCompare(a.id))
-  }, [boards, category, sort])
+  }, [boards, category, sort, blockedUsers])
   useEffect(() => {
     if (sortMenuLeft === null) return
     const closeMenu = (event: PointerEvent) => {
@@ -98,7 +99,9 @@ export function BoardListScreen() {
       {sortMenuLeft !== null && <div className="ux-sort-menu" role="menu" style={{ left: sortMenuLeft }}>{sortOptions.map((item) => <button key={item} role="menuitemradio" aria-checked={sort === item} onClick={() => { updateFilter('sort', item); setSortMenuLeft(null) }}>{sortLabel[item]}</button>)}</div>}
     </div>
     {/* 서버 연동 중: 처음 불러오는 동안 자리 표시, 실패하면 다시 시도 */}
-    {live && boardsError ? <ErrorState onRetry={reloadBoards}/>
+    {/* 휴대폰 설정에서 위치가 꺼져 있으면 서버 오류와 구분해 안내 */}
+    {live && locationOff ? <ErrorState title="위치 권한이 꺼져 있어요" description="휴대폰 설정에서 위치 권한을 켜면 주변 글이 보여요." onRetry={reloadBoards}/>
+      : live && boardsError ? <ErrorState onRetry={reloadBoards}/>
       : live && boardsLoading && !boards.length ? <div className="ux-board-list"><BoardCardSkeleton/><BoardCardSkeleton/><BoardCardSkeleton/></div>
       : !visibleBoards.length ? <EmptyState title="조건에 맞는 게시판이 없습니다." action="전체 게시글 보기" onAction={() => setSearchParams(new URLSearchParams())}/>
       : view === 'feed' ? <div className="feed-list">{visibleBoards.map((board) => <FeedItem key={board.id} board={board} comments={comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))}/>)}</div>
@@ -145,11 +148,11 @@ function SearchRow({ board, keyword, commentCount, onOpen }: { board: Board; key
 }
 
 export function SearchScreen() {
-  const { boards, comments, openBoard } = useApp()
+  const { boards, comments, openBoard, blockedUsers } = useApp()
   const [query, setQuery] = useState('')
   const [recent, setRecent] = useState(readRecentSearches)
   const keyword = query.trim()
-  const visible = boards.filter((board) => board.status !== '숨김')
+  const visible = boards.filter((board) => board.status !== '숨김' && !blockedUsers.includes(board.authorId))
   const results = keyword ? visible
     .map((board) => ({ board, score: matchScore(board, keyword) }))
     .filter((item) => item.score > 0)

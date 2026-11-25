@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { RotateCw } from 'lucide-react'
+import { MapPinOff, RotateCw } from 'lucide-react'
 import { AppShell } from '../../components/layout/AppShell'
 import { FilterChips } from '../../components/ui/FilterChips'
 import { NoticeBell } from '../../components/ui/NoticeBell'
@@ -41,7 +41,9 @@ const mapMemory: { filter: MapFilter; selection?: { ids: string[]; index: number
 let kakaoMapFailed = false
 
 export function MapScreen() {
-  const { boards, comments, openBoard, showToast, live, searchArea } = useApp()
+  const { boards: allBoards, comments, openBoard, showToast, live, searchArea, blockedUsers, locationOff, reloadBoards } = useApp()
+  // 차단한 사용자의 글은 지도에 찍지 않는다 (익명 글은 작성자를 몰라 거를 수 없다)
+  const boards = useMemo(() => allBoards.filter((board) => !blockedUsers.includes(board.authorId)), [allBoards, blockedUsers])
   const [realMap, setRealMap] = useState(KAKAO_MAP_KEY !== '' && !kakaoMapFailed)
   const [filter, setFilter] = useState<MapFilter>(filters.some((item) => item.value === mapMemory.filter) ? mapMemory.filter : '전체')
   // 고른 핀: 겹친 핀 묶음이면 그 자리 글들(ids)과 지금 보는 글(index). 요약 시트에서 넘겨 본다
@@ -96,7 +98,10 @@ export function MapScreen() {
       <header><h1 className="map-brand"><img src={mascotHead} alt="" width={34} height={34}/>WGO</h1><NoticeBell/></header>
       <FilterChips className="map-filters" options={filters} selected={filter} onSelect={selectFilter}/>
     </div>
-    {movedFar && !selectedBoard && <button className="map-search-here" onClick={searchHere}><RotateCw size={15}/>이 지역에서 다시 찾기</button>}
+    {/* 휴대폰 설정에서 위치가 꺼져 있으면 주변 글을 못 받는다: 같은 자리에 안내, 누르면 위치 다시 확인 */}
+    {live && locationOff && !selectedBoard
+      ? <button className="map-search-here map-location-off" onClick={() => { reloadBoards() }}><MapPinOff size={15}/>위치 권한을 켜면 주변 글이 보여요</button>
+      : movedFar && !selectedBoard && <button className="map-search-here" onClick={searchHere}><RotateCw size={15}/>이 지역에서 다시 찾기</button>}
     {selectedBoard && <IncidentBottomSheet board={selectedBoard} position={group.length > 1 ? { boards: group, index: group.indexOf(selectedBoard), go: (index) => setSelection({ ids: group.map((item) => item.id), index }) } : undefined} onClose={() => setSelectedBoard(undefined)} onOpen={() => openBoard(selectedBoard.id)}/>}
   </AppShell>
 }

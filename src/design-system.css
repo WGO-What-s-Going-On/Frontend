@@ -1098,6 +1098,9 @@ html { -webkit-tap-highlight-color: transparent; }
   animation: map-search-in .2s ease-out;
 }
 @keyframes map-search-in { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translateX(-50%); } }
+/* 휴대폰 설정에서 위치가 꺼졌을 때 같은 자리 안내: 글자는 기본색, 아이콘만 빨강 */
+.map-search-here.map-location-off { color: var(--c-ink); white-space: nowrap; }
+.map-location-off svg { color: var(--c-urgent); }
 @media (prefers-reduced-motion: reduce) {
   .map-me::before, .map-marker.hot .marker-dot::after { animation: none; }
 }

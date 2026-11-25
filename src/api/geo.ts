@@ -14,6 +14,13 @@ const devCoords = (() => {
 // 동시에 들어온 요청(지도 · 서버 동기화가 화면을 열 때 함께 부른다)은 한 번만 묻고, 3초 안의 위치는 다시 쓴다.
 // (글쓰기 · 이동 중 안내는 5~7초마다 새 위치가 필요해서 더 길게 두지 않는다)
 type Fix = Coords & { accuracy?: number }
+
+// 휴대폰 설정에서 위치를 거부한 상태 알림. 앱 안 '위치 권한 허용'을 눌러도 휴대폰이 거부하면 위치를 못 받는다
+// (GeolocationPositionError.PERMISSION_DENIED = 1). 위치를 다시 받으면 LOCATION_OK_EVENT로 풀린다
+export const LOCATION_DENIED_EVENT = 'wgo:location-denied'
+export const LOCATION_OK_EVENT = 'wgo:location-ok'
+export const isLocationDenied = (error: unknown) => typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 1
+
 let pending: Promise<Fix> | null = null
 let recent: { fix: Fix; at: number } | null = null
 const REUSE_MS = 3_000
@@ -26,9 +33,13 @@ export function currentCoords(): Promise<Fix> {
       ({ coords }) => {
         const fix = { latitude: coords.latitude, longitude: coords.longitude, accuracy: coords.accuracy }
         recent = { fix, at: Date.now() }
+        window.dispatchEvent(new Event(LOCATION_OK_EVENT))
         resolve(fix)
       },
-      (error) => { if (devCoords) resolve(devCoords); else reject(error) },
+      (error) => {
+        if (isLocationDenied(error)) window.dispatchEvent(new Event(LOCATION_DENIED_EVENT))
+        if (devCoords) resolve(devCoords); else reject(error)
+      },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 },
     )
   }).finally(() => { pending = null })

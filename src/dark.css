@@ -149,6 +149,7 @@
 :root[data-theme="dark"] .map-shell .status-bar { text-shadow: 0 0 2px #2c3038, 0 0 6px #2c3038, 0 0 12px rgba(44, 48, 56, .9); }
 :root[data-theme="dark"] .map-shell .status-bar { color: var(--c-ink); background: transparent; }
 :root[data-theme="dark"] .map-search-here { color: var(--c-accent); background: var(--c-raised); box-shadow: 0 2px 10px rgba(0, 0, 0, .4); }
+:root[data-theme="dark"] .map-search-here.map-location-off { color: var(--c-ink); }
 
 /* 토스트 */
 :root[data-theme="dark"] .toast { color: var(--c-page); background: var(--c-ink); }

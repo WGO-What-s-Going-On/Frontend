@@ -14,6 +14,7 @@ import { clearSession, readSession } from '../api/session'
 import { startPush, stopPush } from '../api/push'
 import { startWebPush, unregisterWebPush } from '../api/webPush'
 import { listenNotificationOpen } from '../api/notificationOpen'
+import { LOCATION_DENIED_EVENT, LOCATION_OK_EVENT } from '../api/geo'
 import { getMyProfileImage, removeProfileImage as removeProfileImageApi, shrinkImage, uploadProfileImage } from '../api/profileImage'
 import { consentTerms, getMe, getTerms, requestWithdrawal, updateMe } from '../api/users'
 import type { MeResponse } from '../api/users'
@@ -90,6 +91,8 @@ interface AppContextValue {
   setThemeMode: (mode: ThemeMode) => void
   toggleTheme: () => void
   locationPermission: LocationPermission
+  // 휴대폰 설정에서 위치가 꺼져 있음 (앱 안에서 허용했어도). 주변 글을 못 받고 참여도 막힌다
+  locationOff: boolean
   toast: string
   go: (screen: Screen) => void
   back: (fallback?: Screen) => void
@@ -606,6 +609,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     window.addEventListener(SESSION_EXPIRED_EVENT, expired)
     return () => window.removeEventListener(SESSION_EXPIRED_EVENT, expired)
   })
+  // 휴대폰 설정에서 위치를 거부하면 위치 요청이 실패한다 → 참여를 막고 위치 안내를 띄운다. 설정에서 켜고 돌아와 위치를 받으면 풀린다
+  const [locationOff, setLocationOff] = useState(false)
+  useEffect(() => {
+    const off = () => setLocationOff(true)
+    const on = () => setLocationOff(false)
+    window.addEventListener(LOCATION_DENIED_EVENT, off)
+    window.addEventListener(LOCATION_OK_EVENT, on)
+    return () => { window.removeEventListener(LOCATION_DENIED_EVENT, off); window.removeEventListener(LOCATION_OK_EVENT, on) }
+  }, [])
   // 지도 · 게시판으로 돌아오면 주변 글을 다시 받는다
   useEffect(() => { if (server.live && (screen === 'home' || screen === 'board')) server.loadNearby() }, [screen])
   // 게시글 상세는 목록에서 열든 주소로 바로 들어오든(새로고침 포함) 상세 · 댓글 · 투표를 새로 받는다
@@ -625,10 +637,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return server.watchBoard(currentBoardId)
   }, [screen, currentBoardId, server.live])
   const value = useMemo<AppContextValue>(() => ({
-    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), currentBoardMissing: missingBoardIds.has(currentBoardId), inRange,
+    screen, user, boards, comments, notices, reports, currentBoard: boards.find((board) => board.id === currentBoardId), currentBoardMissing: missingBoardIds.has(currentBoardId), inRange: inRange && !locationOff, locationOff,
     blockedUsers: server.live ? serverBlocked : blockedUsers,
     alertBoardIds: server.live ? boards.filter((board) => !mutedBoardIds.includes(board.id)).map((board) => board.id) : alertBoardIds,
-    recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission, toast,
+    recentBoardIds, notificationSettings, themeMode, setThemeMode, toggleTheme, locationPermission: locationOff ? 'denied' : locationPermission, toast,
     go, back, withBackTransition, openBoard, startLogin, finishKakaoLogin, agreeTerms, completeNickname, logout, withdraw, setLocationPermission, updateComment, setInRange, relocate,
     refreshBoard: (boardId) => server.live ? server.loadBoard(boardId).then(() => undefined) : Promise.resolve(),
     refreshNotices: () => server.live ? Promise.all([server.loadNotices(), server.loadUnread()]).then(() => undefined) : Promise.resolve(),
@@ -636,7 +648,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     updateUser, profileImageUrl: profileImage?.url ?? null, changeProfileImage, removeProfileImage, markNoticeRead, markAllNoticesRead, deleteNotice, reportTarget, blockUser, loadBlockList, unblockUser, toggleBoardNotifications, updateNotificationSettings, resolveReport, showToast,
     live: server.live, boardsLoading: server.boardsLoading, boardsError: server.boardsError, reloadBoards: server.loadNearby, serverLevel: server.level, serverBadges: server.badges, serverUnread: server.unreadCount, loadRanking: server.loadRanking, findSimilar: server.findSimilar, searchArea: server.searchArea, loadActivity: server.loadActivity,
     ...liveActions,
-  }), [screen, user, boards, comments, notices, reports, missingBoardIds, currentBoardId, inRange, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])
+  }), [screen, user, boards, comments, notices, reports, missingBoardIds, currentBoardId, inRange, locationOff, blockedUsers, alertBoardIds, recentBoardIds, notificationSettings, themeMode, locationPermission, toast, mutedBoardIds, serverBlocked, server.live, server.boardsLoading, server.boardsError, server.level, server.badges, server.unreadCount, profileImage])
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }
 
