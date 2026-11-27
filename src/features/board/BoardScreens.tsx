@@ -18,7 +18,7 @@ import { commentCountOf, isHotBoard, myCommentReactions } from '../../types/doma
 import type { Board, Category, Comment, CommentReaction } from '../../types/domain'
 import { categoryLabel } from '../../domain/labels'
 import { RADIUS } from '../map/mapWorld'
-import { participationRadius } from '../../domain/participation'
+import { isCatContest, participationRadius } from '../../domain/participation'
 import { pathForScreen } from '../../navigation'
 import { EditBoardSheet } from './EditBoardSheet'
 import { FeedItem } from './FeedItem'
@@ -267,9 +267,12 @@ export function BoardDetailScreen() {
       : <div className="detail-loading"><Skeleton width="70%" height={24}/><Skeleton width="40%"/><Skeleton height={80} radius={14}/></div>}
   </AppShell>
   const boardComments = comments.filter((comment) => comment.boardId === board.id && !blockedUsers.includes(comment.authorId))
+  const photoRequired = isCatContest(board) && !editing
   const submit = () => {
     if ((!body.trim() && !commentImageUrl) || sending) return
     if (editing) { updateComment(editing.id, body.trim()); setEditing(null); setBody(''); return }
+    // 기존 댓글 API의 설명 필수 조건과 콘테스트의 사진 한 장 조건을 함께 안내한다.
+    if (photoRequired && (!commentFile || !body.trim())) { showToast('중냥이 사진 1장과 짧은 설명을 남겨주세요.'); return }
     const draft = { text: body.trim(), imageUrl: commentImageUrl, file: commentFile, replyTo }
     const sent = addComment(draft.text, replyTo?.parentId || replyTo?.id, commentImageUrl || undefined, commentFile)
     setReplyTo(null); setVisibleComments(boardComments.length + 1)
@@ -300,7 +303,7 @@ export function BoardDetailScreen() {
   const outOfRange = !inRange || board.distance > radius
   const canParticipate = !outOfRange && board.status === '실시간'
   const readOnlyBar = outOfRange ? <div className="outside-bottom"><div className="outside-readonly-bar"><Lock size={16}/><span>{radius}m 안에서만 댓글 가능</span></div></div> : null
-  const commentComposer = canParticipate ? <div className="detail-comment-input">{editing ? <div className="replying"><span>댓글 수정 중</span><button onClick={cancelCompose}>취소</button></div> : replyTo && <div className="replying reply-to"><span><b>@{replyTo.authorName}</b> 님에게 답글</span><button onClick={() => { setReplyTo(null); commentInputRef.current?.focus() }}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => { setCommentImageUrl(''); setCommentFile(undefined) }} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><IconButton className="comment-photo-add" label="댓글에 사진 첨부" onClick={() => commentFileRef.current?.click()}><Camera size={20}/></IconButton><span className="composer-input-wrap"><input ref={commentInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder={replyTo && !editing ? '답글을 입력하세요' : '댓글을 입력하세요'} aria-label={replyTo && !editing ? `${replyTo.authorName}님에게 답글` : '댓글'}/></span><IconButton className="comment-submit" label={editing ? '댓글 수정' : '댓글 등록'} onClick={submit} disabled={(!body.trim() && !commentImageUrl) || sending}><Send size={19}/></IconButton></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => { addPhoto(event.target.files?.[0]); event.target.value = '' }}/></div> : null
+  const commentComposer = canParticipate ? <div className="detail-comment-input">{editing ? <div className="replying"><span>댓글 수정 중</span><button onClick={cancelCompose}>취소</button></div> : replyTo && <div className="replying reply-to"><span><b>@{replyTo.authorName}</b> 님에게 답글</span><button onClick={() => { setReplyTo(null); commentInputRef.current?.focus() }}>취소</button></div>}{commentImageUrl && <div className="comment-upload-preview"><img src={commentImageUrl} alt="첨부할 사진 미리보기"/><button onClick={() => { setCommentImageUrl(''); setCommentFile(undefined) }} aria-label="첨부 사진 삭제"><X size={16}/></button></div>}<div className="comment-composer-row"><IconButton className="comment-photo-add" label="댓글에 사진 첨부" onClick={() => commentFileRef.current?.click()}><Camera size={20}/></IconButton><span className="composer-input-wrap"><input ref={commentInputRef} value={body} onChange={(event) => setBody(event.target.value)} placeholder={photoRequired ? '사진 1장과 짧은 설명을 남겨주세요' : replyTo && !editing ? '답글을 입력하세요' : '댓글을 입력하세요'} aria-label={replyTo && !editing ? `${replyTo.authorName}님에게 답글` : '댓글'}/></span><IconButton className="comment-submit" label={editing ? '댓글 수정' : '댓글 등록'} onClick={submit} disabled={(!body.trim() && !commentImageUrl) || (photoRequired && (!commentFile || !body.trim())) || sending}><Send size={19}/></IconButton></div><input ref={commentFileRef} className="comment-file-input" type="file" accept="image/*" onChange={(event) => { addPhoto(event.target.files?.[0]); event.target.value = '' }}/></div> : null
   return <AppShell nav={false} contentClassName={`board-detail-screen ${entering ? 'detail-enter' : ''}`} shellClassName={entering ? 'detail-enter-shell' : ''} bottomContent={<>{commentComposer ?? readOnlyBar}
     {editOpen && <EditBoardSheet board={board} canEdit={!outOfRange} onClose={closeEdit}/>}
     {confirm === 'delete' && <ConfirmDialog title="게시글을 삭제할까요?" description="삭제한 게시글은 다시 볼 수 없어요." confirmLabel="삭제" danger onClose={() => setConfirm(null)} onConfirm={() => deleteBoard(board.id)}/>} 
