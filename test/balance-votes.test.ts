@@ -12,11 +12,12 @@ const id = 'post_3b16ea1a-4de6-4a2c-85be-56a64ada2033'
 const response = { status: 'OPEN', candidates: [{ commentId: 'option_A', content: '송강', votes: 2 }, { commentId: 'option_B', content: '종강', votes: 3 }], mySelection: 'option_A' } as VoteResponse
 const board = { id, lifecyclePolicy: 'CAU_CAMPUS_2026_30D', reach: 350, status: '실시간', ...toBoardVote(response) } as Board
 describe('fixed balance polls reuse the existing vote UI', () => {
-  it.each([3, 4, 5])('uses 350m for reserved board %s while retaining ordinary 150m', (suffix) => {
+  it.each([3, 4, 5])('uses 350m for balance board %s and 150m without the campus policy or 350m reach', (suffix) => {
     const fixed = { ...board, id: `post_3b16ea1a-4de6-4a2c-85be-56a64ada203${suffix}` }
     expect(isBalancePost(fixed)).toBe(true)
     for (const distance of [150, 151, 349.99, 350, 350.01]) expect(distance <= participationRadius(fixed)).toBe(distance <= 350)
-    expect(participationRadius({ ...fixed, id: 'ordinary' })).toBe(150)
+    expect(participationRadius({ ...fixed, reach: 150 })).toBe(150)
+    expect(isBalancePost({ ...fixed, id: 'ordinary' })).toBe(false)
     expect(participationRadius({ ...fixed, lifecyclePolicy: undefined })).toBe(150)
   })
   it('renders both options, selection and results with no candidate comments', () => {

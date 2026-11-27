@@ -8,8 +8,10 @@ describe('two reserved CAU campaign posts', () => {
     const radius = participationRadius({ id, lifecyclePolicy: 'CAU_CAMPUS_2026_30D', reach: 350 })
     expect(distance <= radius).toBe(distance <= 350)
   })
+  it('opens 350m for a new administrator event post without a frontend ID list', () => {
+    expect(participationRadius({ id: 'post_new-event', reach: 350, lifecyclePolicy: 'CAU_CAMPUS_2026_30D' })).toBe(350)
+  })
   it.each([
-    { id: 'ordinary', reach: 350 as const, lifecyclePolicy: 'CAU_CAMPUS_2026_30D' },
     { id, reach: 350 as const }, { id, reach: 150 as const, lifecyclePolicy: 'CAU_CAMPUS_2026_30D' },
     { id: 'ordinary', reach: 250 as const },
   ])('retains 150m for ordinary or unverified metadata: %j', (board) => expect(participationRadius(board)).toBe(150))

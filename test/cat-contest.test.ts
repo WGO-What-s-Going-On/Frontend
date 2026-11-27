@@ -38,11 +38,14 @@ describe('one reserved cat photo contest', () => {
     expect(html).not.toContain('aria-label="댓글 투표"')
   })
   it('keeps ordinary posts and mismatched metadata at 150m', () => {
-    for (const post of [{ ...board, id: 'ordinary' }, { ...board, lifecyclePolicy: undefined }, { ...board, reach: 150 as const }]) {
+    for (const post of [{ ...board, lifecyclePolicy: undefined }, { ...board, reach: 150 as const }]) {
       expect(participationRadius(post)).toBe(150)
       expect(detail(post)).toContain('150m 안에서만 댓글 가능')
     }
     expect(isCatContest({ ...board, lifecyclePolicy: undefined })).toBe(false)
+    // 다른 이벤트 글은 350m 참여만 같고 사진 필수 조건은 없다
+    expect(isCatContest({ ...board, id: 'post_other-event' })).toBe(false)
+    expect(detail({ ...board, id: 'post_other-event' })).not.toContain('사진 1장과 짧은 설명을 남겨주세요')
     expect(isCampusPostId(board.id)).toBe(true)
     expect(isBalancePost(board)).toBe(false)
   })

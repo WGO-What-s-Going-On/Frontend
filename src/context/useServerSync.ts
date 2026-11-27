@@ -10,7 +10,7 @@ import { blockUser as blockUserApi, getBlocks, getMyBadges, unblockUser as unblo
 import { uploadImage } from '../api/media'
 import { ApiError } from '../api/client'
 import { timeAgo } from '../domain/time'
-import { isBalancePostId, isCampusPostId } from '../domain/participation'
+import { isBalancePostId, isCampusEvent } from '../domain/participation'
 import type { LevelStats } from '../features/level/levels'
 import type { Board, Category, Comment, CommentReaction, ImageFocus, Notice, PostReaction, Reach } from '../types/domain'
 import type { NotificationSettings } from './AppContext'
@@ -52,8 +52,11 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
 
   // 내 글 · 댓글은 화면에서 작성자 비교에 쓰는 'me'로 바꿔 둔다 (목업과 같은 비교 코드를 그대로 쓰기 위해)
   const mine = (authorId: string) => authorId !== '' && authorId === readSession()?.userId ? 'me' : authorId
+  // 350m 이벤트 글 ID: 반응 · 투표 직전에 위치를 다시 잡을 글 (서버 정책으로 판단)
+  const campusEvents = useRef(new Set<string>())
   const placeBoard = (post: posts.PostResponse): Board => {
     const board = posts.toBoard(post)
+    if (isCampusEvent(board)) campusEvents.current.add(board.id)
     return { ...board, authorId: mine(board.authorId), location: post.locationSnapshot, position: coords.current ? toWorldPoint(coords.current, post.locationSnapshot) : undefined }
   }
   const placeComment = (comment: posts.CommentResponse): Comment => { const mapped = posts.toComment(comment); return { ...mapped, authorId: mine(mapped.authorId) } }
@@ -178,13 +181,13 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
 
   // 반응은 하나만: 같은 걸 누르면 취소, 다른 걸 누르면 기존 것을 지우고 새로 단다
   const reactToPost = async (postId: string, reaction: PostReaction, current?: PostReaction) => {
-    if (current !== reaction && isCampusPostId(postId)) await locate()
+    if (current !== reaction && campusEvents.current.has(postId)) await locate()
     if (current) await posts.cancelPostReaction(postId, current)
     if (current !== reaction) await posts.reactToPost(postId, reaction)
     await loadBoard(postId)
   }
   const reactToComment = async (postId: string, commentId: string, reaction: CommentReaction, current?: CommentReaction) => {
-    if (current !== reaction && isCampusPostId(postId)) await locate()
+    if (current !== reaction && campusEvents.current.has(postId)) await locate()
     if (current) await posts.cancelCommentReaction(postId, commentId, current)
     if (current !== reaction) await posts.reactToComment(postId, commentId, reaction)
     await loadBoard(postId)
@@ -201,7 +204,7 @@ export function useServerSync({ setBoards, setComments, setNotices, setNotificat
   // 한 사람 한 표: 내 후보를 다시 누르면 취소
   const castVote = async (postId: string, commentId: string, current?: string) => {
     // 이벤트 글(350m)은 고르기 · 옮기기 직전에 위치를 다시 잡는다 (서버가 마지막 위치로 범위를 확인). 취소는 확인 없음
-    if (current !== commentId && isCampusPostId(postId)) await locate()
+    if (current !== commentId && campusEvents.current.has(postId)) await locate()
     const vote = current === commentId ? (await posts.cancelVote(postId), await posts.getVote(postId)) : await posts.castVote(postId, commentId)
     setBoards((items) => items.map((board) => board.id === postId ? { ...board, ...posts.toBoardVote(vote) } : board))
   }
